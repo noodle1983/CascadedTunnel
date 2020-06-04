@@ -1,0 +1,11 @@
+#########################################
+#      header and lib dependancy        #
+#########################################
+INC_DIR+= -I$(PROJBASE)/3PP/boost/include 
+STATIC_LIB+= $(PROJBASE)/3PP/boost/lib/libboost_log_setup.a \
+			 $(PROJBASE)/3PP/boost/lib/libboost_log.a \
+			 $(PROJBASE)/3PP/boost/lib/libboost_system.a \
+			 $(PROJBASE)/3PP/boost/lib/libboost_filesystem.a
+SHARED_LIB_DIR+=
+SHARED_LIB+=
+

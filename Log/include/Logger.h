@@ -3,8 +3,25 @@
 
 #include "Singleton.hpp"
 
-#include <log4cplus/logger.h>
-#include <boost/thread.hpp>
+#include <boost/log/core.hpp>
+#include <boost/log/trivial.hpp>
+#include <boost/log/expressions.hpp>
+#include <boost/log/sinks/text_file_backend.hpp>
+#include <boost/log/utility/setup/file.hpp>
+#include <boost/log/utility/setup/common_attributes.hpp>
+#include <boost/log/sources/severity_logger.hpp>
+#include <boost/log/sources/record_ostream.hpp>
+
+namespace logging = boost::log;
+namespace src = boost::log::sources;
+namespace sinks = boost::log::sinks;
+namespace keywords = boost::log::keywords;
+
+namespace logging=boost::log;
+namespace src = boost::log::sources;
+namespace sinks = boost::log::sinks;
+namespace keywords = boost::log::keywords;
+using namespace logging::trivial;
 
 namespace Log
 {
@@ -14,20 +31,15 @@ namespace Log
         Logger();
         ~Logger();
 
-        log4cplus::Logger& trafficLogger();
-        log4cplus::Logger& configLogger();
-        inline void setLogLevel(log4cplus::LogLevel theLogLevel){trafficLoggerM.setLogLevel(theLogLevel);}
+        void init();
 
+        src::severity_logger<severity_level> lg;
     private:
-        bool isTrafficLoggerInited;
-        log4cplus::Logger trafficLoggerM;
-        boost::mutex trafficLoggerMutexM;
-        bool isConfigLoggerInited;
-        log4cplus::Logger configLoggerM;
-        boost::mutex configLoggerMutexM;
     };
     typedef DesignPattern::Singleton<Logger> LoggerSingleton;
 }
+
+#define g_logger Log::LoggerSingleton::instance()
 
 #endif /* LOGGER_H */
 
