@@ -4,8 +4,6 @@
 #include "BoostProcessor.h"
 #include "Singleton.hpp"
 
-#include <client/linux/handler/exception_handler.h>
-
 namespace Utility
 {
     class App 

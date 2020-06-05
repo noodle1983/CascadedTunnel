@@ -7,8 +7,6 @@
 #include <stdint.h>
 #include <unistd.h>
 
-struct event;
-
 namespace Utility
 {
     class FileWriter
@@ -30,7 +28,7 @@ namespace Utility
         void _write(const std::string* theContent, const time_t theTime);
     private:
         void startTimer(const time_t &theTime);
-        static void onTimeout(int theFd, short theEvt, void *theArg);
+        static void onTimeout(void *theArg);
         void closeFile();
         void switchFile(const time_t &theTime);
 
@@ -51,7 +49,7 @@ namespace Utility
         std::string outDirM;
 
         Processor::BoostProcessor* processorM;
-        struct event* timerHandlerM;
+        min_heap_item_t* timerHandlerM;
 
     };
 

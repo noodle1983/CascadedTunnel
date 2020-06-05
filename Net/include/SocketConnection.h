@@ -2,6 +2,7 @@
 #define SOCKETCONNECTION_H
 
 #include "KfifoBuffer.h"
+#include "min_heap.h"
 
 #include <boost/thread.hpp>
 #include <boost/function.hpp>
@@ -62,7 +63,7 @@ namespace Connection
 
         //interface for upper protocol
         void addClientTimer(unsigned theSec);
-        static void onClientTimeout(int theFd, short theEvt, void *theArg);
+        static void onClientTimeout(void *theArg);
 
         void rmClient();
         SocketConnectionPtr self(){return selfM;}
@@ -103,7 +104,7 @@ namespace Connection
         void _addClientTimer(unsigned theSec);
 
         void startHeartbeatTimer();
-        static void onHeartbeat(int theFd, short theEvt, void *theArg);
+        static void onHeartbeat(void *theArg);
 
         void _close();
         void _release();
@@ -120,8 +121,8 @@ namespace Connection
 
         struct event* readEvtM;
         struct event* writeEvtM;
-        struct event* heartbeatTimerEvtM;
-        struct event* clientTimerEvtM;
+        min_heap_item_t* heartbeatTimerEvtM;
+        min_heap_item_t* clientTimerEvtM;
         int heartbeatTimeoutCounterM;
 
         IProtocol* protocolM;

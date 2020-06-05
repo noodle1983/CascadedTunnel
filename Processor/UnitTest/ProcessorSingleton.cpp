@@ -1,8 +1,9 @@
 #include <iostream>
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 #include <BoostProcessor.h>
 
+using namespace boost::placeholders;
 
 void say(const char* theWords)
 {

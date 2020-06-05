@@ -46,16 +46,16 @@ namespace Protocol
         void send(const char* const theStr, unsigned theLen);
         void sendPrompt(); 
 
-		struct event* addLocalTimer(
+		min_heap_item_t* addLocalTimer(
 				const struct timeval& theInterval, 
-				event_callback_fn theCallback,
+				TimerCallback theCallback,
 				void* theArg)
         {
 			return protocolM->addLocalTimer(fdM, 
 					theInterval, theCallback, theArg);
         }
 		void cancelLocalTimer(
-                struct event*& theEvent)
+                min_heap_item_t*& theEvent)
         {
 			return protocolM->cancelLocalTimer(fdM,theEvent);
 		}

@@ -1,13 +1,14 @@
 #include "BoostWorker.h"
 #include "Log.h"
 
+#include <event2/util.h>
 #include <assert.h>
 #include <boost/date_time/posix_time/posix_time.hpp>
 
-using namespace Processor;
-
 boost::thread_specific_ptr<unsigned> g_threadGroupTotal;
 boost::thread_specific_ptr<unsigned> g_threadGroupIndex;
+
+using namespace Processor;
 
 #ifdef DEBUG
 #include <assert.h>
@@ -19,7 +20,6 @@ BoostWorker::BoostWorker()
     : groupTotalM(0)
     , groupIndexM(-1)
     , bufferJobQueueM(25) //(32M/8) jobs Max
-	, eventPoolM(1000)
     , isToStopM(false)
 {
     min_heap_ctor(&timerHeapM);	
@@ -69,14 +69,12 @@ int BoostWorker::process(IJob* theJob)
 
 //-----------------------------------------------------------------------------
 
-struct event* BoostWorker::addLocalTimer(
+min_heap_item_t* BoostWorker::addLocalTimer(
         const struct timeval& theInterval, 
-		event_callback_fn theCallback,
+		TimerCallback theCallback,
 		void* theArg)
 {
 #ifdef DEBUG
-    extern boost::thread_specific_ptr<unsigned> g_threadGroupTotal;
-    extern boost::thread_specific_ptr<unsigned> g_threadGroupIndex;
     unsigned threadCount = *g_threadGroupTotal.get();
     unsigned threadIndex = *g_threadGroupIndex.get();
     if (threadIndex != groupIndexM || threadCount != threadCount)
@@ -112,12 +110,14 @@ struct event* BoostWorker::addLocalTimer(
         min_heap_reserve(&timerHeapM, 1000000);
     }
 
-	struct event* timeoutEvt = eventPoolM.newEvent(NULL, -1, 0, theCallback, theArg);
-    timeoutEvt->ev_timeout.tv_usec = timeNowM.tv_usec + theInterval.tv_usec;
-    timeoutEvt->ev_timeout.tv_sec = timeNowM.tv_sec 
+	min_heap_item_t* timeoutEvt = new min_heap_item_t();
+    timeoutEvt->callback = theCallback;
+    timeoutEvt->arg = theArg;
+    timeoutEvt->timeout.tv_usec = timeNowM.tv_usec + theInterval.tv_usec;
+    timeoutEvt->timeout.tv_sec = timeNowM.tv_sec 
         + theInterval.tv_sec 
-        + timeoutEvt->ev_timeout.tv_usec/1000000;
-    timeoutEvt->ev_timeout.tv_usec %= 1000000;
+        + timeoutEvt->timeout.tv_usec/1000000;
+    timeoutEvt->timeout.tv_usec %= 1000000;
 
     if (-1 == min_heap_push(&timerHeapM, timeoutEvt))
     {
@@ -133,10 +133,10 @@ struct event* BoostWorker::addLocalTimer(
 
 //-----------------------------------------------------------------------------
 
-void BoostWorker::cancelLocalTimer(struct event*& theEvent)
+void BoostWorker::cancelLocalTimer(min_heap_item_t*& theEvent)
 {
     min_heap_erase(&timerHeapM, theEvent);
-	eventPoolM.freeEvent(theEvent);
+    delete theEvent;
 	theEvent = NULL;
 }
 
@@ -157,12 +157,12 @@ void BoostWorker::handleLocalTimer()
         evutil_gettimeofday(&timeNowM, NULL);
         while(!min_heap_empty(&timerHeapM)) 
         {
-            struct event* topEvent = min_heap_top(&timerHeapM);
-            if (evutil_timercmp(&topEvent->ev_timeout, &timeNowM, <=))
+            min_heap_item_t* topEvent = min_heap_top(&timerHeapM);
+            if (item_cmp(&topEvent->timeout, &timeNowM, <=))
             {
                 min_heap_pop(&timerHeapM);
-                (topEvent->ev_callback)(-1, 0, topEvent->ev_arg);
-                eventPoolM.freeEvent(topEvent);
+                (topEvent->callback)(topEvent->arg);
+                delete topEvent;
             }
             else
             {

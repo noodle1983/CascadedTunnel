@@ -14,6 +14,7 @@ SUBDIR=src
 INC_DIR=-I. \
      -I./include \
      -I./src \
+	 -I$(PROJBASE)/DesignPattern/include \
 	 -I$(PROJBASE)/Net/include \
 	 -I$(PROJBASE)/Data/include \
 	 -I$(PROJBASE)/Utility/include \

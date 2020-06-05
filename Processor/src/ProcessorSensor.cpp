@@ -105,7 +105,7 @@ void ProcessorSensor::stat(ProcessorSensorData* theData)
 
 //-----------------------------------------------------------------------------
 
-static void onProcessorSensorTimeOut(int theFd, short theEvt, void *theArg)
+static void onProcessorSensorTimeOut(void *theArg)
 {
     ProcessorSensorData* data = (ProcessorSensorData*)theArg;
 	data->timeoutEvtM = NULL;

@@ -38,10 +38,10 @@ namespace Processor
         void waitStop();
         void stop();
 
-		struct event* addLocalTimer(
+		min_heap_item_t* addLocalTimer(
                 const unsigned long long theId, 
 				const struct timeval& theInterval, 
-				event_callback_fn theCallback,
+				TimerCallback theCallback,
 				void* theArg)
         {
             unsigned workerId = theId % threadCountM;
@@ -49,7 +49,7 @@ namespace Processor
         }
 		inline void cancelLocalTimer(
                 const unsigned long long theId, 
-                struct event*& theEvent)
+                min_heap_item_t*& theEvent)
         {
             unsigned workerId = theId % threadCountM;
             return workersM[workerId].cancelLocalTimer(theEvent);

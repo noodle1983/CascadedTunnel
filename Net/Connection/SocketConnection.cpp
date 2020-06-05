@@ -400,7 +400,7 @@ void SocketConnection::startHeartbeatTimer()
 
 //-----------------------------------------------------------------------------
 
-void SocketConnection::onHeartbeat(int theFd, short theEvt, void *theArg)
+void SocketConnection::onHeartbeat(void *theArg)
 {
     SocketConnection* connection = (SocketConnection*) theArg;
     connection->heartbeatTimerEvtM = NULL;
@@ -444,7 +444,7 @@ void SocketConnection::_addClientTimer(unsigned theSec)
 
 //-----------------------------------------------------------------------------
 
-void SocketConnection::onClientTimeout(int theFd, short theEvt, void *theArg)
+void SocketConnection::onClientTimeout(void *theArg)
 {
     SocketConnection* connection = (SocketConnection*) theArg;
     boost::lock_guard<boost::mutex> lock(connection->clientMutexM);

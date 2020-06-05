@@ -1,5 +1,6 @@
 #include <iostream>
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
+using namespace boost::placeholders;
 
 #include "BoostProcessor.h"
 #include "Log.h"
@@ -16,7 +17,7 @@ void sig_stop(int sig)
 }
 
 
-void on_timeout(int theFd, short theEvt, void *theArg)
+void on_timeout(void *theArg)
 {
     LOG_WARN("time end");
     sig_stop(2);

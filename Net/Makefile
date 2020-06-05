@@ -11,13 +11,13 @@ SUBDIR=Connection \
         Protocol \
         TelnetProtocol \
         Buffer \
-        Pcap \
 
 #########################################
 #      header and lib dependancy        #
 #########################################
 INC_DIR= -I. \
      -I./include \
+     -I$(PROJBASE)/DesignPattern/include \
      -I$(PROJBASE)/Processor/include \
      -I$(PROJBASE)/Log/include \
      -I$(PROJBASE)/Data/include \
@@ -30,7 +30,7 @@ STATIC_LIB= \
     $(PROJBASE)/.lib/libUtility.a \
 
 SHARED_LIB_DIR=
-SHARED_LIB=-lrt -lpcap
+SHARED_LIB=-lrt
 
 include $(PROJBASE)/build/makefile.staticlib.configAndLog.linux
 include $(PROJBASE)/build/makefile.staticlib.libevent.linux

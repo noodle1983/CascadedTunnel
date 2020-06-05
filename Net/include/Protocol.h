@@ -2,9 +2,9 @@
 #define PROTOCOL_H
 
 #include "BoostProcessor.h"
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
-struct event;
+using namespace boost::placeholders;
 
 namespace Net
 {
@@ -57,10 +57,10 @@ namespace Net
             return processorM->process(theFd + 1,
                     &IProtocol::handleHeartbeat, this, theConnection);
         }
-		inline struct event* addLocalTimer(
+		inline min_heap_item_t* addLocalTimer(
 				const int theFd,
 				const struct timeval& theInterval, 
-				event_callback_fn theCallback,
+				TimerCallback theCallback,
 				void* theArg)
         {
 			return processorM->addLocalTimer(theFd + 1, 
@@ -68,7 +68,7 @@ namespace Net
         }
 		inline void cancelLocalTimer(
                 const int theFd, 
-                struct event*& theEvent)
+                min_heap_item_t*& theEvent)
         {
 			return processorM->cancelLocalTimer(theFd + 1,theEvent);
 		}

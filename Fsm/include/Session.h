@@ -68,7 +68,7 @@ namespace Fsm
         unsigned timerIdM;
         FiniteStateMachine* fsmM;
 
-        struct event* fsmTimeoutEvtM;
+        min_heap_item_t* fsmTimeoutEvtM;
         uint64_t sessionIdM;
 
 #ifdef DEBUG

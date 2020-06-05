@@ -115,7 +115,7 @@ void FileWriter::startTimer(const time_t &theTime)
 
 //-----------------------------------------------------------------------------
 
-void FileWriter::onTimeout(int theFd, short theEvt, void *theArg)
+void FileWriter::onTimeout(void *theArg)
 {
     FileWriter* writer = (FileWriter*) theArg;
     writer->timerHandlerM = NULL;

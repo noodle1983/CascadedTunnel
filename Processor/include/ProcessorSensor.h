@@ -9,8 +9,6 @@
 #include <string>
 #include <boost/thread.hpp>
 
-struct event;
-
 namespace Net
 {
 namespace Protocol
@@ -20,7 +18,7 @@ namespace Protocol
     {
         ProcessorSensorData();
         ~ProcessorSensorData();
-		struct event* timeoutEvtM;
+		min_heap_item_t* timeoutEvtM;
 		TelnetCmdManager* telnetManagerM;
 		int statCountM;
 		int intervalM;
