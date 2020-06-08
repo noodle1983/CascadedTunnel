@@ -12,6 +12,7 @@ SUBDIR=src
 #      header and lib dependancy        #
 #########################################
 INC_DIR= -I. -Iinclude \
+		-I../DesignPattern/include \
 		-I../Net/include \
 		-I../Log/include \
 		-I../Data/include \
@@ -30,8 +31,8 @@ SHARED_LIB=-pthread -lrt
 
 include $(PROJBASE)/build/makefile.boost.header
 include $(PROJBASE)/build/makefile.staticlib.boost.thread.linux
+include $(PROJBASE)/build/makefile.staticlib.boost.log.linux
 include $(PROJBASE)/build/makefile.staticlib.libevent.linux
-include $(PROJBASE)/build/makefile.staticlib.log4cplus.linux
 #########################################
 #              compiler                 #
 #########################################

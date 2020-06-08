@@ -47,30 +47,30 @@ namespace Msg
             si.init();
         }
 
-        void setMNC(const guint16 theMNC)
+        void setMNC(const uint16_t theMNC)
         {
             flag.valueM |= MNC_MASK_E;
             mnc.valueM = theMNC;
         }
 
-        guint16 getMNC()
+        uint16_t getMNC()
         {
             return (flag.valueM & MNC_MASK_E) ? mnc.valueM : 0;
         }
 
 
-        void setMCC(const guint16 theMCC)
+        void setMCC(const uint16_t theMCC)
         {
             flag.valueM |= MCC_MASK_E;
             mcc.valueM = theMCC;
         }
 
-        guint16 getMCC()
+        uint16_t getMCC()
         {
             return (flag.valueM & MCC_MASK_E) ? mcc.valueM : 0;
         }
 
-        void setLAC(const guint16 theLAC)
+        void setLAC(const uint16_t theLAC)
         {
             flag.valueM |= LAC_MASK_E;
             lac.valueM = theLAC;
@@ -81,12 +81,12 @@ namespace Msg
             return (flag.valueM & LAC_MASK_E);
         }
 
-        guint16 getLAC() const
+        uint16_t getLAC() const
         {
             return lac.valueM;
         }
 
-        void setRAC(const guint16 theRAC)
+        void setRAC(const uint16_t theRAC)
         {
             flag.valueM |= RAC_MASK_E;
             rac.valueM = theRAC;
@@ -97,12 +97,12 @@ namespace Msg
             return (flag.valueM & RAC_MASK_E) ;
         }
 
-        guint16 getRAC() const 
+        uint16_t getRAC() const 
         {
             return rac.valueM;
         }
 
-        void setCI(const guint16 theCI)
+        void setCI(const uint16_t theCI)
         {
             flag.valueM |= CI_MASK_E;
             ci.valueM = theCI;
@@ -113,12 +113,12 @@ namespace Msg
             return (flag.valueM & CI_MASK_E) ;
         }
 
-        guint16 getCI() const
+        uint16_t getCI() const
         {
             return ci.valueM;
         }
 
-        void setSI(const guint16 theSI)
+        void setSI(const uint16_t theSI)
         {
             flag.valueM |= SI_MASK_E;
             si.valueM = theSI;
@@ -129,7 +129,7 @@ namespace Msg
             return (flag.valueM & SI_MASK_E);
         }
 
-        guint16 getSI() const
+        uint16_t getSI() const
         {
             return si.valueM;
         }

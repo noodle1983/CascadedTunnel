@@ -15,7 +15,7 @@ namespace Msg
     class TlvBcdString
     {
     public:
-        TlvBcdString(const gint64 theValue)
+        TlvBcdString(const uint64_t theValue)
             : valueM(theValue)
         {}
         TlvBcdString()
@@ -30,7 +30,7 @@ namespace Msg
         {
         }
 
-        operator guint64()
+        operator uint64_t()
         { return valueM; }
         const Uint64& operator =(const unsigned long long theValue)
         { valueM = theValue; return *this;}
@@ -140,9 +140,9 @@ namespace Msg
             return len;
         }
 
-        guint64 str2bcdnumber(char *str)
+        uint64_t str2bcdnumber(char *str)
         {
-            guint64 ull;
+            uint64_t ull;
 
             if (str && *str)
             {
@@ -181,7 +181,7 @@ namespace Msg
         }
 
     public:
-        guint64 valueM;
+        uint64_t valueM;
     };
     typedef TlvBcdString<0x15, Uint8> PhoneNumberIEI;
 

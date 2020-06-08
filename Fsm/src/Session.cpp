@@ -5,15 +5,17 @@
 
 #include <utility>
 
-using namespace Fsm;
-
 #ifdef DEBUG
+extern boost::thread_specific_ptr<unsigned> g_threadGroupTotal;
+extern boost::thread_specific_ptr<unsigned> g_threadGroupIndex;
 #include <assert.h>
 #include <sys/syscall.h>
 #define gettid() syscall(__NR_gettid)
 #endif
 
+using namespace Fsm;
 typedef std::pair<Session*, unsigned char> TimerPair;
+
 //-----------------------------------------------------------------------------
 
 Session::Session(
@@ -64,7 +66,8 @@ void Session::init(
     timerIdM = 0;
     if (fsmTimeoutEvtM)
     {
-        Net::Reactor::Reactor::instance()->delEvent(fsmTimeoutEvtM);
+        Processor::BoostProcessor::fsmInstance()->cancelLocalTimer(
+                sessionIdM, fsmTimeoutEvtM);
     }
     fsmTimeoutEvtM = NULL;
 #ifdef DEBUG 
@@ -92,8 +95,6 @@ int Session::asynHandleEvent(const int theEventId)
 void Session::handleEvent(const int theEventId)
 {
 #ifdef DEBUG
-    extern boost::thread_specific_ptr<unsigned> g_threadGroupTotal;
-    extern boost::thread_specific_ptr<unsigned> g_threadGroupIndex;
     unsigned threadCount = *g_threadGroupTotal.get();
     unsigned threadIndex = *g_threadGroupIndex.get();
     if ((sessionIdM%threadCount) != threadIndex)
@@ -187,7 +188,7 @@ State& Session::toNextState(const int theNextStateId)
 
 //-----------------------------------------------------------------------------
 
-void onFsmTimeOut(int theFd, short theEvt, void *theArg)
+void onFsmTimeOut(void *theArg)
 {
     Session* session = (Session*)theArg;
     session->handleTimeout();
@@ -198,8 +199,6 @@ void onFsmTimeOut(int theFd, short theEvt, void *theArg)
 void Session::handleTimeout()
 {
 #ifdef DEBUG
-    extern boost::thread_specific_ptr<unsigned> g_threadGroupTotal;
-    extern boost::thread_specific_ptr<unsigned> g_threadGroupIndex;
     unsigned threadCount = *g_threadGroupTotal.get();
     unsigned threadIndex = *g_threadGroupIndex.get();
     if ((sessionIdM%threadCount) != threadIndex)

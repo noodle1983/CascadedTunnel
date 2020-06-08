@@ -3,6 +3,7 @@
 
 #include "Fsm.h"
 #include "State.h"
+#include "min_heap.h"
 
 #include <event.h>
 #include <stdint.h>

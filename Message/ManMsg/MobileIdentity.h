@@ -214,9 +214,9 @@ namespace Msg
             return len;
         }
 
-        guint64 str2bcdnumber(char *str)
+        uint64_t str2bcdnumber(char *str)
         {
-            guint64 ull;
+            uint64_t ull;
 
             if (str && *str)
             {
@@ -287,7 +287,7 @@ namespace Msg
 
     public:
         unsigned char typeM;
-        guint64 valueM;
+        uint64_t valueM;
     };
 
 }

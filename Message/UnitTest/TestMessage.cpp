@@ -1,6 +1,5 @@
 #include "AutoMsg/Message.h"
 #include <iostream>
-#include <glib.h>
 #include <assert.h>
 using namespace std;
 using namespace Msg;
@@ -9,7 +8,7 @@ int main()
 {
     {
         char buffer[12];
-        int length = GINT32_TO_BE(12);
+        int length = 12;
         memcpy(buffer, &length, 4);
         memset(buffer+4, 1, 12);
         MsgHeader header;

@@ -1,8 +1,8 @@
 #ifndef INTMSG_H
 #define INTMSG_H
 
+#include <stdint.h>
 #include <string.h>
-#include <glib.h>
 #include "MsgErrorCode.h"
 
 namespace Msg
@@ -27,21 +27,21 @@ namespace Msg
 
         int decode(const char* theBuffer, const unsigned theLen, unsigned& theIndex)
         {
-            if (theIndex + sizeof(guint8) > theLen)
+            if (theIndex + sizeof(uint8_t) > theLen)
                 return NOT_ENOUGH_BUFFER_E;
 
             valueM = theBuffer[theIndex];
-            theIndex += sizeof(guint8);
+            theIndex += sizeof(uint8_t);
             return SUCCESS_E;
         }
 
         int encode(char* theBuffer, const unsigned theLen, unsigned& theIndex)
         {
-            if (theIndex + sizeof(guint8) > theLen)
+            if (theIndex + sizeof(uint8_t) > theLen)
                 return NOT_ENOUGH_BUFFER_E;
 
             theBuffer[theIndex] = valueM;
-            theIndex += sizeof(guint8);
+            theIndex += sizeof(uint8_t);
 
             return SUCCESS_E;
         }
@@ -72,30 +72,28 @@ namespace Msg
             valueM = 0;
         }
 
-        operator guint16()
+        operator uint16_t()
         { return valueM; }
         const Uint16& operator =(const unsigned short theValue)
         { valueM = theValue; return *this;}
 
         int decode(const char* theBuffer, const unsigned theLen, unsigned& theIndex)
         {
-            if (theIndex + sizeof(guint16) > theLen)
+            if (theIndex + sizeof(uint16_t) > theLen)
                 return NOT_ENOUGH_BUFFER_E;
 
-            memcpy(&valueM, theBuffer + theIndex, sizeof(guint16));
-            valueM = GUINT16_FROM_BE(valueM);
-            theIndex += sizeof(guint16);
+            memcpy(&valueM, theBuffer + theIndex, sizeof(uint16_t));
+            theIndex += sizeof(uint16_t);
             return SUCCESS_E;
         }
 
         int encode(char* theBuffer, const unsigned theLen, unsigned& theIndex)
         {
-            if (theIndex + sizeof(guint16) > theLen)
+            if (theIndex + sizeof(uint16_t) > theLen)
                 return NOT_ENOUGH_BUFFER_E;
 
-            guint16 netInt = GUINT16_TO_BE(valueM);
-            memcpy(theBuffer + theIndex, &netInt, sizeof(guint16));
-            theIndex += sizeof(guint16);
+            memcpy(theBuffer + theIndex, &valueM, sizeof(uint16_t));
+            theIndex += sizeof(uint16_t);
 
             return SUCCESS_E;
         }
@@ -108,7 +106,7 @@ namespace Msg
         }
 
     public:
-        guint16 valueM;
+        uint16_t valueM;
     };
     /* for the length of the Message, it is reset again at last.*/
     typedef Uint16 Length16;
@@ -126,30 +124,28 @@ namespace Msg
             valueM = 0;
         }
 
-        operator guint32()
+        operator uint32_t()
         { return valueM; }
         const Uint32& operator =(const unsigned theValue)
         { valueM = theValue; return *this;}
 
         int decode(const char* theBuffer, const unsigned theLen, unsigned& theIndex)
         {
-            if (theIndex + sizeof(guint32) > theLen)
+            if (theIndex + sizeof(uint32_t) > theLen)
                 return NOT_ENOUGH_BUFFER_E;
 
-            memcpy(&valueM, theBuffer + theIndex, sizeof(guint32));
-            valueM = GUINT32_FROM_BE(valueM);
-            theIndex += sizeof(guint32);
+            memcpy(&valueM, theBuffer + theIndex, sizeof(uint32_t));
+            theIndex += sizeof(uint32_t);
             return SUCCESS_E;
         }
 
         int encode(char* theBuffer, const unsigned theLen, unsigned& theIndex)
         {
-            if (theIndex + sizeof(guint32) > theLen)
+            if (theIndex + sizeof(uint32_t) > theLen)
                 return NOT_ENOUGH_BUFFER_E;
 
-            guint32 netInt = GUINT32_TO_BE(valueM);
-            memcpy(theBuffer + theIndex, &netInt, sizeof(guint32));
-            theIndex += sizeof(guint32);
+            memcpy(theBuffer + theIndex, &valueM, sizeof(uint32_t));
+            theIndex += sizeof(uint32_t);
 
             return SUCCESS_E;
         }
@@ -162,7 +158,7 @@ namespace Msg
         }
 
     public:
-        guint32 valueM;
+        uint32_t valueM;
     };
     /* for the length of the Message, it is reset again at last.*/
     typedef Uint32 Length32;
@@ -181,29 +177,29 @@ namespace Msg
             valueM = 0;
         }
 
-        operator guint32()
+        operator uint32_t()
         { return valueM; }
         const PlainInt32& operator =(const unsigned theValue)
         { valueM = theValue; return *this;}
 
         int decode(const char* theBuffer, const unsigned theLen, unsigned& theIndex)
         {
-            if (theIndex + sizeof(guint32) > theLen)
+            if (theIndex + sizeof(uint32_t) > theLen)
                 return NOT_ENOUGH_BUFFER_E;
 
-            memcpy(&valueM, theBuffer + theIndex, sizeof(guint32));
-            theIndex += sizeof(guint32);
+            memcpy(&valueM, theBuffer + theIndex, sizeof(uint32_t));
+            theIndex += sizeof(uint32_t);
             return SUCCESS_E;
         }
 
         int encode(char* theBuffer, const unsigned theLen, unsigned& theIndex)
         {
-            if (theIndex + sizeof(guint32) > theLen)
+            if (theIndex + sizeof(uint32_t) > theLen)
                 return NOT_ENOUGH_BUFFER_E;
 
-            guint32 netInt = valueM;
-            memcpy(theBuffer + theIndex, &netInt, sizeof(guint32));
-            theIndex += sizeof(guint32);
+            uint32_t netInt = valueM;
+            memcpy(theBuffer + theIndex, &netInt, sizeof(uint32_t));
+            theIndex += sizeof(uint32_t);
 
             return SUCCESS_E;
         }
@@ -216,60 +212,7 @@ namespace Msg
         }
 
     public:
-        guint32 valueM;
-    };
-
-    class Uint48
-    {
-    public:
-        Uint48(){}
-        ~Uint48(){}
-
-        enum {MIN_BYTES = 6};
-
-        void init()
-        {
-            valueM = 0;
-        }
-
-        operator guint64()
-        { return valueM; }
-        const Uint48& operator =(const unsigned long long theValue)
-        { valueM = theValue; return *this;}
-
-        int decode(const char* theBuffer, const unsigned theLen, unsigned& theIndex)
-        {
-            if (theIndex + MIN_BYTES > theLen)
-                return NOT_ENOUGH_BUFFER_E;
-
-            memset(&valueM, 0, 2);
-            memcpy((char*)(&valueM) + 2, theBuffer + theIndex, MIN_BYTES);
-            valueM = GUINT64_FROM_BE(valueM);
-            theIndex += MIN_BYTES;
-            return SUCCESS_E;
-        }
-
-        int encode(char* theBuffer, const unsigned theLen, unsigned& theIndex)
-        {
-            if (theIndex + MIN_BYTES > theLen)
-                return NOT_ENOUGH_BUFFER_E;
-
-            guint64 netInt = GUINT64_TO_BE(valueM);
-            memcpy(theBuffer + theIndex, (char*)(&netInt) + 2, MIN_BYTES);
-            theIndex += MIN_BYTES;
-
-            return SUCCESS_E;
-        }
-
-        template<typename StreamType>
-        StreamType& dump(StreamType& theOut, unsigned theLayer = 0)
-        {
-            theOut << valueM;
-            return theOut;
-        }
-
-    public:
-        guint64 valueM;
+        uint32_t valueM;
     };
 
     class Uint64
@@ -285,30 +228,28 @@ namespace Msg
             valueM = 0;
         }
 
-        operator guint64()
+        operator uint64_t()
         { return valueM; }
         const Uint64& operator =(const unsigned long long theValue)
         { valueM = theValue; return *this;}
 
         int decode(const char* theBuffer, const unsigned theLen, unsigned& theIndex)
         {
-            if (theIndex + sizeof(guint64) > theLen)
+            if (theIndex + sizeof(uint64_t) > theLen)
                 return NOT_ENOUGH_BUFFER_E;
 
-            memcpy(&valueM, theBuffer + theIndex, sizeof(guint64));
-            valueM = GUINT64_FROM_BE(valueM);
-            theIndex += sizeof(guint64);
+            memcpy(&valueM, theBuffer + theIndex, sizeof(uint64_t));
+            theIndex += sizeof(uint64_t);
             return SUCCESS_E;
         }
 
         int encode(char* theBuffer, const unsigned theLen, unsigned& theIndex)
         {
-            if (theIndex + sizeof(guint64) > theLen)
+            if (theIndex + sizeof(uint64_t) > theLen)
                 return NOT_ENOUGH_BUFFER_E;
 
-            guint64 netInt = GUINT64_TO_BE(valueM);
-            memcpy(theBuffer + theIndex, &netInt, sizeof(guint64));
-            theIndex += sizeof(guint64);
+            memcpy(theBuffer + theIndex, &valueM, sizeof(uint64_t));
+            theIndex += sizeof(uint64_t);
 
             return SUCCESS_E;
         }
@@ -321,7 +262,7 @@ namespace Msg
         }
 
     public:
-        guint64 valueM;
+        uint64_t valueM;
     };
     /* for the length of the Message, it is reset again at last.*/
     typedef Uint64 Length64;

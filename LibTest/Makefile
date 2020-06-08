@@ -23,9 +23,8 @@ SHARED_LIB= -pthread -lrt
 include $(PROJBASE)/build/makefile.boost.header
 include $(PROJBASE)/build/makefile.rapidxml.header
 include $(PROJBASE)/build/makefile.staticlib.boost.thread.linux
-include $(PROJBASE)/build/makefile.staticlib.log4cplus.linux
+include $(PROJBASE)/build/makefile.staticlib.boost.log.linux
 include $(PROJBASE)/build/makefile.staticlib.libevent.linux
-include $(PROJBASE)/build/makefile.staticlib.google_breakpad.linux
 
 #########################################
 #              compiler                 #

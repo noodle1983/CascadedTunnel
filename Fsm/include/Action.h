@@ -2,7 +2,8 @@
 #define ACTION_H
 
 #include <boost/function.hpp>
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
+using namespace boost::placeholders;
 
 #define CHANGE_STATE(theStateId)  boost::bind(Fsm::changeState,   _1, (theStateId))
 #define GEN_EVT(theEventId)       boost::bind(Fsm::generateEvent, _1, (theEventId))
