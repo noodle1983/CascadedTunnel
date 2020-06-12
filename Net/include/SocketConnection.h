@@ -73,6 +73,7 @@ namespace Connection
         inline bool isWBufferHealthy(){return outputQueueM.isHealthy();};
         unsigned getRBufferSize(){return inputQueueM.size();};
         unsigned getWBufferSize(){return outputQueueM.size();};
+        unsigned getWBufferSpace(){return outputQueueM.unusedSize();};
 
         unsigned getInput(char* const theBuffer, const unsigned theLen);
         unsigned getnInput(char* const theBuffer, const unsigned theLen);
