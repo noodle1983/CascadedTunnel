@@ -4,14 +4,15 @@
 #include <boost/thread.hpp>
 #include <boost/shared_ptr.hpp>
 
+
 using namespace Log;
 using namespace Config;
+src::severity_logger<severity_level> Logger::lg;
 
 //-----------------------------------------------------------------------------
 
 Logger::Logger()
 {
-    init();
 }
 
 //-----------------------------------------------------------------------------

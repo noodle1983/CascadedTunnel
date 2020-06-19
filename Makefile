@@ -14,7 +14,7 @@ SUBDIR= Log \
 		Message \
 		Fsm \
 		Utility \
-		Tunnel \
+		TunnelServer \
 
 RELEASE_DIR = $(PROJBASE)/release
 #########################################

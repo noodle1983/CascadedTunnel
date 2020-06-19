@@ -33,13 +33,15 @@ namespace Log
 
         void init();
 
-        src::severity_logger<severity_level> lg;
+        static src::severity_logger<severity_level> lg;
     private:
     };
-    typedef DesignPattern::Singleton<Logger> LoggerSingleton;
+    typedef DesignPattern::Singleton<Logger> CfgLoggerSingleton;
+    typedef DesignPattern::InitDataSingleton<Logger> LoggerSingleton;
 }
 
 #define g_logger Log::LoggerSingleton::instance()
+#define g_cfg_logger Log::CfgLoggerSingleton::instance()
 
 #endif /* LOGGER_H */
 

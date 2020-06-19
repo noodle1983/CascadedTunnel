@@ -50,14 +50,14 @@ void TunnelProxyProtocol::handleConnected(Connection::SocketConnectionPtr theCon
 
 const std::string TunnelProxyProtocol::getAddr()
 {
-    return ConfigCenter::instance()->get("cmd.s.addr", "127.0.0.1");
+    return ConfigCenter::instance()->get("proxy.s.addr", "127.0.0.1");
 }
 
 //-----------------------------------------------------------------------------
 
 int TunnelProxyProtocol::getPort()
 {
-    return ConfigCenter::instance()->get("cmd.s.port", 17510);
+    return ConfigCenter::instance()->get("proxy.s.port", 5460);
 }
 
 //-----------------------------------------------------------------------------

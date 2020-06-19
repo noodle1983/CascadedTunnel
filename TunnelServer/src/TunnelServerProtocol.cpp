@@ -177,14 +177,14 @@ void TunnelServerProtocol::handleProxyConnected(Connection::SocketConnectionPtr 
 
 const std::string TunnelServerProtocol::getAddr()
 {
-    return ConfigCenter::instance()->get("cmd.s.addr", "127.0.0.1");
+    return ConfigCenter::instance()->get("inner.s.addr", "127.0.0.1");
 }
 
 //-----------------------------------------------------------------------------
 
 int TunnelServerProtocol::getPort()
 {
-    return ConfigCenter::instance()->get("cmd.s.port", 7510);
+    return ConfigCenter::instance()->get("inner.s.port", 5461);
 }
 
 //-----------------------------------------------------------------------------

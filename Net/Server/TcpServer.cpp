@@ -141,7 +141,8 @@ int TcpServer::start()
         sizeof(listenAddr)) < 0)
     {
         LOG_FATAL("bind failed on " << protocolM->getAddr() 
-                << ":" << protocolM->getPort());
+                << ":" << protocolM->getPort()
+                << ", errno:" << errno);
         exit(-1);
     }
 

@@ -26,20 +26,20 @@ BOOST_LOG_SEV(g_logger->lg, fatal)<<msg
 //-----------------------------------------------------------------------------
 //configLogger
 #define CFG_TRACE(msg) \
-BOOST_LOG_SEV(g_logger->lg, trace)<<msg
+BOOST_LOG_SEV(g_cfg_logger->lg, trace)<<msg
 
 #define CFG_DEBUG(msg) \
-BOOST_LOG_SEV(g_logger->lg, debug)<<msg
+BOOST_LOG_SEV(g_cfg_logger->lg, debug)<<msg
 
 #define CFG_INFO(msg) \
-BOOST_LOG_SEV(g_logger->lg, info)<<msg
+BOOST_LOG_SEV(g_cfg_logger->lg, info)<<msg
 
 #define CFG_WARN(msg) \
-BOOST_LOG_SEV(g_logger->lg, warning)<<msg
+BOOST_LOG_SEV(g_cfg_logger->lg, warning)<<msg
 
 #define CFG_ERROR(msg) \
-BOOST_LOG_SEV(g_logger->lg, error)<<msg
+BOOST_LOG_SEV(g_cfg_logger->lg, error)<<msg
 
 #define CFG_FATAL(msg) \
-BOOST_LOG_SEV(g_logger->lg, fatal)<<msg
+BOOST_LOG_SEV(g_cfg_logger->lg, fatal)<<msg
 #endif /* LOG_H */

@@ -84,6 +84,7 @@ namespace Connection
 
 		//attribute
 		int getFd(){return fdM;}
+        Client::TcpClient* getClient(){return clientM;}
 		void setPeerAddr(const struct sockaddr_in* theAddr){peerAddrM = *theAddr;}
 		const struct sockaddr_in& getPeerAddr(){return peerAddrM;}
 
