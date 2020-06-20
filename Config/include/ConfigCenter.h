@@ -84,5 +84,7 @@ namespace Config
     };
 }
 
+#define g_cfg Config::ConfigCenter::instance()
+
 #endif /* CONFIGCENTER_H */
 

@@ -25,23 +25,27 @@ Logger::~Logger()
 
 void Logger::init()
 {
-    //int logLevel = ConfigCenter::instance()->get("log.level", 3);
-    std::string logFilename = ConfigCenter::instance()->get("log.filename", "trouble_shooting_%N.log");
-    int fileSize = ConfigCenter::instance()->get("log.fileSize", 10);
-    //int fileNum = ConfigCenter::instance()->get("log.fileNum", 10);
-    std::string logPattern = ConfigCenter::instance()->get("log.pattern", "%D{%y-%m-%d %H:%M:%S.%q} %-5p [%l] %m%n");
+    //int logLevel = g_cfg->get("log.level", 3);
+    bool runInBackground = g_cfg->get("process.background", 1);
+    std::string logFilename = g_cfg->get("log.filename", "trouble_shooting_%N.log");
+    int fileSize = g_cfg->get("log.fileSize", 10);
+    //int fileNum = g_cfg->get("log.fileNum", 10);
+    std::string logPattern = g_cfg->get("log.pattern", "%D{%y-%m-%d %H:%M:%S.%q} %-5p [%l] %m%n");
 
-    logging::add_file_log
-    (
-        keywords::file_name = logFilename,
-        keywords::rotation_size = fileSize * 1024 * 1024,
-        keywords::time_based_rotation = sinks::file::rotation_at_time_point(0, 0, 0),
-        keywords::format = "[%TimeStamp%] %Severity% %Message%"
-    );
+    if (runInBackground)
+    {
+        logging::add_file_log
+        (
+            keywords::file_name = logFilename,
+            keywords::rotation_size = fileSize * 1024 * 1024,
+            keywords::time_based_rotation = sinks::file::rotation_at_time_point(0, 0, 0),
+            keywords::format = "[%TimeStamp%] %Severity% %Message%"
+        );
+    }
 
     logging::core::get()->set_filter
     (
-        logging::trivial::severity >= logging::trivial::info
+        logging::trivial::severity >= logging::trivial::debug
     );
 
     logging::add_common_attributes();

@@ -1,5 +1,13 @@
 <?xml version='1.0' encoding='utf-8' ?>
 <Configuration>
+    <Group name="Process Group">
+		<Parameter name="Should the process be running background" id="process.background">
+            <Description>0:not run in background; 1: run in background;</Description>
+			<ValueType>Int</ValueType>
+			<DefaultValue>1</DefaultValue>
+			<Value>0</Value>
+		</Parameter>
+	</Group>
 
     <Group name="Inner Server Protocol Group">
 		<Parameter name="Inner Server Listen Address" id="inner.s.addr">
