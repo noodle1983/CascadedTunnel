@@ -10,6 +10,7 @@ SUBDIR=src \
 #      header and lib dependancy        #
 #########################################
 INC_DIR= -I. \
+     -I$(PROJBASE)/TunnelClient/src \
      -I$(PROJBASE)/Net/include \
      -I$(PROJBASE)/Message/include \
      -I$(PROJBASE)/DesignPattern/include \
@@ -19,6 +20,7 @@ INC_DIR= -I. \
      -I$(PROJBASE)/Utility/include \
 
 STATIC_LIB= \
+    $(PROJBASE)/.lib/libTunnelClient.a \
     $(PROJBASE)/.lib/libProcessor.a \
     $(PROJBASE)/.lib/libLog.a \
     $(PROJBASE)/.lib/libNet.a \

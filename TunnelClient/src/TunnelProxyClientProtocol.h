@@ -19,9 +19,7 @@ namespace Net
 {
 namespace Protocol
 {
-
-	typedef std::set<Connection::SocketConnectionPtr> ConnectionSet;
-	typedef std::map<int, ConnectionPair> ConnectionMap;
+    class TunnelClientProtocol;
     class TunnelProxyClientProtocol : public Net::IClientProtocol
     {
     public:

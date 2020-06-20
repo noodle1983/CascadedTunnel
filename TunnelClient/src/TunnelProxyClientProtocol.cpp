@@ -1,4 +1,5 @@
 #include "TunnelProxyClientProtocol.h"
+#include "TunnelClientProtocol.h"
 #include "ConfigCenter.h"
 #include "SocketConnection.h"
 #include "Message.h"
@@ -13,7 +14,7 @@ using namespace Msg;
 //-----------------------------------------------------------------------------
 
 TunnelProxyClientProtocol::TunnelProxyClientProtocol(Processor::BoostProcessor* theProcessor, TunnelClientProtocol* clientProtocol)
-	: IProtocol(theProcessor)
+	: IClientProtocol(theProcessor)
     , clientProtocolM(clientProtocol)
 {
 }

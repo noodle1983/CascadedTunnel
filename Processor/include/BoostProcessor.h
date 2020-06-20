@@ -226,6 +226,9 @@ namespace Processor
     }
 
 }
+#define g_net_processor Processor::BoostProcessor::netInstance()
+#define g_fsm_processor Processor::BoostProcessor::fsmInstance()
+#define g_io_processor Processor::BoostProcessor::ioInstance()
 
 #endif /* BOOSTPROCESSOR_H */
 

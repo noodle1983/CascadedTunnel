@@ -83,6 +83,7 @@ struct event* Reactor::newPersistTimer(
 }
 
 
+#define g_reactor Net::Reactor::Reactor::instance()
 
 
 #endif /* REACTOR_H */

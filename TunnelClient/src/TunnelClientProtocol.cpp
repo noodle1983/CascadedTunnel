@@ -5,19 +5,24 @@
 #include "BoostProcessor.h"
 #include "TcpClient.h"
 #include "Reactor.h"
+#include "Message.h"
 
+using namespace std;
 using namespace Net;
 using namespace Net::Protocol;
 using namespace Config;
+using namespace Msg;
+using namespace Processor;
 
 
 //-----------------------------------------------------------------------------
 
 TunnelClientProtocol::TunnelClientProtocol(Processor::BoostProcessor* theProcessor)
 	: IClientProtocol(theProcessor)
-    , proxyProtocolM(theProtocol)
+    , client2ServerM(this, g_reactor, theProcessor)
     , proxyClientProtocolM(theProcessor, this)
 {
+    client2ServerM.connect();
 }
 
 //-----------------------------------------------------------------------------
@@ -58,8 +63,8 @@ void TunnelClientProtocol::handleInput(Connection::SocketConnectionPtr theConnec
         theConnection->getnInput(buffer, length);
 
         int proxyFd = header.proxyFd;
-        ConnectionMap::iterator it = proxyFd2InfoMapM.find(proxyFd);
-        if (it == proxyFd2InfoMapM.end()){
+        ProxyToConnectionMap::iterator it = proxyToConnectionM.find(proxyFd);
+        if (it == proxyToConnectionM.end()){
             LOG_WARN("no proxy connection found. ignore");
             continue;
         }
@@ -72,7 +77,7 @@ void TunnelClientProtocol::handleInput(Connection::SocketConnectionPtr theConnec
                 return;
             }
 
-            TcpClient* client = new TcpClient(&proxyClientProtocolM, Reactor::instance(), BoostProcessor::netInstance()); 
+            TcpClient* client = new TcpClient(&proxyClientProtocolM, g_reactor, BoostProcessor::netInstance()); 
             client->connect();    
 
             ProxyToConnectionMap::iterator it = proxyToConnectionM.find(msg.proxyFd);
@@ -85,7 +90,7 @@ void TunnelClientProtocol::handleInput(Connection::SocketConnectionPtr theConnec
             proxyToConnectionM[msg.proxyFd] = client;
             connectionToProxyM[client] = msg.proxyFd; 
         }
-        else if (ProxyReq:ID == header.messageType) {
+        else if (ProxyReq::ID == header.messageType) {
             ProxyReq msg;
             if (msg.decode(buffer, 0, decodeLength) != SUCCESS_E) {
                 LOG_ERROR("decode ProxyRsp error");
@@ -96,15 +101,16 @@ void TunnelClientProtocol::handleInput(Connection::SocketConnectionPtr theConnec
             ProxyToConnectionMap::iterator it = proxyToConnectionM.find(msg.proxyFd);
             if (it == proxyToConnectionM.end()){
                 LOG_WARN("dup client connection found. del");
-                continue
+                continue;
             }
 
             TcpClient* client = it->second;
-            unsigned sent = client->sendn(msg.payload.c_str(), msg.payload.length());
-            if(sent != msg.payload.length())
+            string& payload = msg.payload.valueM;
+            unsigned sent = client->sendn(payload.c_str(), payload.length());
+            if(sent != payload.length())
             {
                 LOG_WARN("data dropped! fd:" << msg.proxyFd << ", sent:" << sent);
-                continue
+                continue;
             }
         }
         else{
@@ -127,7 +133,7 @@ void TunnelClientProtocol::handleClose(Net::Connection::SocketConnectionPtr theC
     for(; it != proxyToConnectionM.end(); it++)
     {
         TcpClient* client = it->second;
-        delete client();
+        delete client;
     }
     proxyToConnectionM.clear();
     connectionToProxyM.clear();
@@ -145,10 +151,10 @@ void TunnelClientProtocol::handleConnected(Connection::SocketConnectionPtr theCo
 void TunnelClientProtocol::handleProxyInput(Connection::SocketConnectionPtr theConnection)
 {
     TcpClient* client = theConnection->getClient();
-    ConnectionToProxyFdMap::iterator it = connectionToProxyM->find(client)
-    if (it == connectionToProxyM->end())
+    ConnectionToProxyFdMap::iterator it = connectionToProxyM.find(client);
+    if (it == connectionToProxyM.end())
     {
-        client->close()
+        client->close();
         LOG_DEBUG("handle proxy input. client to server lost! fd:" << theConnection->getFd());
         return;
     }
@@ -172,7 +178,7 @@ void TunnelClientProtocol::handleProxyInput(Connection::SocketConnectionPtr theC
         msg.payload.valueM.assign(buffer, len);
         unsigned encodeIndex = 0;
         msg.encode(buffer, 0, encodeIndex);
-        it->second.peerConnectionM->sendn(buffer, encodeIndex);
+        client2ServerM.sendn(buffer, encodeIndex);
     }
 }
 
@@ -181,15 +187,15 @@ void TunnelClientProtocol::handleProxyInput(Connection::SocketConnectionPtr theC
 void TunnelClientProtocol::handleProxyClose(Net::Connection::SocketConnectionPtr theConnection)
 {
     TcpClient* client = theConnection->getClient();
-    ConnectionToProxyFdMap::iterator it = connectionToProxyM->find(client)
-    if (it == connectionToProxyM->end())
+    ConnectionToProxyFdMap::iterator it = connectionToProxyM.find(client);
+    if (it == connectionToProxyM.end())
     {
         LOG_DEBUG("client deleted. fd:" << theConnection->getFd());
         return;
     }
     int fd = it->second;
-    proxyToConnectionM->erase(fd);
-    connectionToProxyM->erase(it);
+    proxyToConnectionM.erase(fd);
+    connectionToProxyM.erase(it);
 }
 
 //-----------------------------------------------------------------------------
@@ -197,8 +203,8 @@ void TunnelClientProtocol::handleProxyClose(Net::Connection::SocketConnectionPtr
 void TunnelClientProtocol::handleProxyConnected(Connection::SocketConnectionPtr theConnection)
 {
     TcpClient* client = theConnection->getClient();
-    ConnectionToProxyFdMap::iterator it = connectionToProxyM->find(client)
-    if (it == connectionToProxyM->end())
+    ConnectionToProxyFdMap::iterator it = connectionToProxyM.find(client);
+    if (it == connectionToProxyM.end())
     {
         LOG_ERROR("client should be deleted. fd:" << theConnection->getFd());
         return;
@@ -211,14 +217,14 @@ void TunnelClientProtocol::handleProxyConnected(Connection::SocketConnectionPtr 
 
 const std::string TunnelClientProtocol::getAddr()
 {
-    return ConfigCenter::instance()->get("cmd.s.addr", "127.0.0.1");
+    return ConfigCenter::instance()->get("cmd.c.addr", "127.0.0.1");
 }
 
 //-----------------------------------------------------------------------------
 
 int TunnelClientProtocol::getPort()
 {
-    return ConfigCenter::instance()->get("cmd.s.port", 17510);
+    return ConfigCenter::instance()->get("cmd.c.port", 5461);
 }
 
 //-----------------------------------------------------------------------------

@@ -3,6 +3,7 @@
 
 #include "Protocol.h"
 #include "SocketConnection.h"
+#include "TcpClient.h"
 #include "TunnelProxyClientProtocol.h"
 
 #include <list>
@@ -11,6 +12,7 @@
 #include <boost/thread.hpp>
 #include <boost/shared_ptr.hpp>
 
+using namespace Net::Client;
 namespace Processor
 {
 	class BoostProcessor;

@@ -45,7 +45,7 @@ namespace Client
             boost::lock_guard<boost::mutex> lock(connectionMutexM);
             return connectionM.get() && isConnectedM;
         }
-        unsigned sendn(char* const theBuffer, const unsigned theLen);
+        unsigned sendn(const char* theBuffer, const unsigned theLen);
 
 
         /**
@@ -74,7 +74,7 @@ namespace Client
     };
 
     inline unsigned
-    TcpClient::sendn(char* const theBuffer, const unsigned theLen)
+    TcpClient::sendn(const char* theBuffer, const unsigned theLen)
     {
         boost::lock_guard<boost::mutex> lock(connectionMutexM);
         if (isConnectedM && connectionM.get())
