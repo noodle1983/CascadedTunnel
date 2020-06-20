@@ -9,15 +9,15 @@
 		</Parameter>
 	</Group>
 
-    <Group name="Inner Server Protocol Group">
-		<Parameter name="Inner Server Listen Address" id="inner.s.addr">
-            <Description>specify the address which the protocol will listen to</Description>
+    <Group name="Inner Client Protocol Group">
+		<Parameter name="Inner Client Connect Address" id="inner.s.addr">
+            <Description>specify the address which the client will connect to</Description>
 			<ValueType>String</ValueType>
 			<DefaultValue>0.0.0.0</DefaultValue>
 			<Value>0.0.0.0</Value>
 		</Parameter>
-		<Parameter name="Inner Server Listen Port" id="inner.s.port">
-            <Description>specify the port which the protocol will listen to</Description>
+		<Parameter name="Inner Client Connect Port" id="inner.s.port">
+            <Description>specify the port which the client will connect to</Description>
 			<ValueType>Int</ValueType>
 			<ValueRange>1-65535</ValueRange>
 			<DefaultValue>5461</DefaultValue>
@@ -25,21 +25,22 @@
 		</Parameter>
 	</Group>
 
-    <Group name="Proxy Server Protocol Group">
-		<Parameter name="Proxy Server Listen Address" id="proxy.s.addr">
-            <Description>specify the address which the protocol will listen to</Description>
+    <Group name="Proxy Client Protocol Group">
+		<Parameter name="Proxy Client Connect Address" id="proxy.c.addr">
+            <Description>specify the address which the client will connect to</Description>
 			<ValueType>String</ValueType>
 			<DefaultValue>0.0.0.0</DefaultValue>
 			<Value>0.0.0.0</Value>
 		</Parameter>
-		<Parameter name="Proxy Server Listen Port" id="proxy.s.port">
-            <Description>specify the port which the protocol will listen to</Description>
+		<Parameter name="Proxy Client Listen Port" id="proxy.c.port">
+            <Description>specify the port which the client will connect to</Description>
 			<ValueType>Int</ValueType>
 			<ValueRange>1-65535</ValueRange>
-			<DefaultValue>5460</DefaultValue>
-			<Value>5460</Value>
+			<DefaultValue>5466</DefaultValue>
+			<Value>5466</Value>
 		</Parameter>
 	</Group>
+
 
     <Group name="Processor/ThreadPool Group">
 		<Parameter name="Net Processor Thread Number" id="prc.netTno">

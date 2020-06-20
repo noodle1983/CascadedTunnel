@@ -5,6 +5,7 @@
 #include "TunnelProxyClientProtocol.h"
 #include "ProcessorSensor.h"
 #include "Log.h"
+#include "ConfigCenter.h"
 
 #include <event.h>
 #include <event2/thread.h>
@@ -28,18 +29,22 @@ void sig_stop(int sig)
 
 int main()
 {
-    //pid_t pid = fork();
-    //if (pid < 0)
-    //{
-    //    printf("failed to fork!\n");
-    //    return -1;
-    //}
-    //else if (pid > 0)
-    //{
-    //    printf("server start with pid %d.\n", pid);
-    //    return 0;
-    //}
-    //setsid();
+    bool runInBackground = g_cfg->get("process.background", 1);
+    if (runInBackground)
+    {
+        pid_t pid = fork();
+        if (pid < 0)
+        {
+            printf("failed to fork!\n");
+            return -1;
+        }
+        else if (pid > 0)
+        {
+            printf("server start with pid %d.\n", pid);
+            return 0;
+        }
+        setsid();
+    }
 
     signal(SIGPIPE, SIG_IGN);
     signal(SIGALRM, SIG_IGN);

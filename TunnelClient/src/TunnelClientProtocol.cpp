@@ -217,14 +217,14 @@ void TunnelClientProtocol::handleProxyConnected(Connection::SocketConnectionPtr 
 
 const std::string TunnelClientProtocol::getAddr()
 {
-    return ConfigCenter::instance()->get("cmd.c.addr", "127.0.0.1");
+    return ConfigCenter::instance()->get("inner.c.addr", "127.0.0.1");
 }
 
 //-----------------------------------------------------------------------------
 
 int TunnelClientProtocol::getPort()
 {
-    return ConfigCenter::instance()->get("cmd.c.port", 5461);
+    return ConfigCenter::instance()->get("inner.c.port", 5461);
 }
 
 //-----------------------------------------------------------------------------

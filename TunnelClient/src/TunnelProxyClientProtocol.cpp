@@ -37,7 +37,7 @@ void TunnelProxyClientProtocol::handleInput(Connection::SocketConnectionPtr theC
 
 void TunnelProxyClientProtocol::handleClose(Net::Connection::SocketConnectionPtr theConnection)
 {
-    LOG_DEBUG("tunnel client close. fd: " << theConnection->getFd());
+    LOG_DEBUG("proxy client close. fd: " << theConnection->getFd());
     clientProtocolM->handleProxyClose(theConnection);
 }
 
@@ -45,7 +45,7 @@ void TunnelProxyClientProtocol::handleClose(Net::Connection::SocketConnectionPtr
 
 void TunnelProxyClientProtocol::handleConnected(Connection::SocketConnectionPtr theConnection)
 {
-    LOG_DEBUG("tunnel client connected. fd: " << theConnection->getFd());
+    LOG_DEBUG("proxy client connected. fd: " << theConnection->getFd());
     clientProtocolM->handleConnected(theConnection);
 }
 
@@ -55,14 +55,14 @@ void TunnelProxyClientProtocol::handleConnected(Connection::SocketConnectionPtr 
 
 const std::string TunnelProxyClientProtocol::getAddr()
 {
-    return ConfigCenter::instance()->get("cmd.s.addr", "127.0.0.1");
+    return ConfigCenter::instance()->get("proxy.c.addr", "127.0.0.1");
 }
 
 //-----------------------------------------------------------------------------
 
 int TunnelProxyClientProtocol::getPort()
 {
-    return ConfigCenter::instance()->get("cmd.s.port", 7510);
+    return ConfigCenter::instance()->get("proxy.c.port", 5466);
 }
 
 //-----------------------------------------------------------------------------
