@@ -37,7 +37,7 @@ void TunnelServerProtocol::handleInput(Connection::SocketConnectionPtr theConnec
 
         MsgHeader header;
         unsigned decodeLength = 0;
-        if (header.decode(buffer, 0, decodeLength) != SUCCESS_E){
+        if (header.decode(buffer, Msg::MsgHeader::MIN_BYTES, decodeLength) != SUCCESS_E){
             LOG_ERROR("failed to decode header.");
             theConnection->close();
             return;
@@ -54,17 +54,25 @@ void TunnelServerProtocol::handleInput(Connection::SocketConnectionPtr theConnec
         if (length > theConnection->getRBufferSize()) { return ; }
         theConnection->getnInput(buffer, length);
 
+        //inner msg
+        theConnection->resetHeartbeatTimeoutCounter();
+        if (HeartbeatReq::ID == header.messageType) {
+            LOG_DEBUG("heartbeat recved");
+            HeartbeatRsp msg(0);
+            theConnection->sendMsg(msg);
+            continue;
+        }
+
+        //proxy msg
         int proxyFd = header.proxyFd;
         ConnectionMap::iterator it = proxyFd2InfoMapM.find(proxyFd);
         if (it == proxyFd2InfoMapM.end()){
             LOG_WARN("no proxy connection found. ignore");
             continue;
         }
-
-        theConnection->resetHeartbeatTimeoutCounter();
-        if (ProxyRsp::ID == header.messageType) {
+        else if (ProxyRsp::ID == header.messageType) {
             ProxyRsp msg;
-            if (msg.decode(buffer, 0, decodeLength) != SUCCESS_E) {
+            if (msg.decode(buffer, ProxyRsp::MIN_BYTES, decodeLength) != SUCCESS_E) {
                 LOG_ERROR("decode ProxyRsp error");
                 theConnection->close();
                 return;
@@ -76,11 +84,6 @@ void TunnelServerProtocol::handleInput(Connection::SocketConnectionPtr theConnec
                 continue;
             }
 
-        }
-        else if (HeartbeatReq::ID == header.messageType) {
-            LOG_DEBUG("heartbeat recved");
-            HeartbeatRsp msg(0);
-            theConnection->sendMsg(msg);
         }
         else{
             LOG_ERROR("unknow msg type:" << header.messageType);
@@ -112,7 +115,6 @@ void TunnelServerProtocol::handleConnected(Connection::SocketConnectionPtr theCo
 
 void TunnelServerProtocol::handleHeartbeat(Connection::SocketConnectionPtr theConnection)
 {
-    LOG_DEBUG("inner server heartbeat. fd: " << theConnection->getFd());
     if (theConnection->getHeartbeatTimeoutCounter() > 3){
         theConnection->close();
         LOG_DEBUG("connection to Tunnel server reach max heartbeat:" << theConnection->getHeartbeatTimeoutCounter()
@@ -120,7 +122,8 @@ void TunnelServerProtocol::handleHeartbeat(Connection::SocketConnectionPtr theCo
         return;
     }
 
-    LOG_DEBUG("heartbeat dida. fd: " << theConnection->getFd());
+    LOG_DEBUG("heartbeat dida. fd: " << theConnection->getFd()
+            << ", counter:" << theConnection->getHeartbeatTimeoutCounter());
     theConnection->incHeartbeatTimeoutCounter();
 }
 

@@ -100,7 +100,7 @@ namespace Connection
         unsigned sendMsg(Msg& msg){
             unsigned encodeIndex = 0;
             char buffer[4096] = {0};
-            msg.encode(buffer, 0, encodeIndex);
+            msg.encode(buffer, sizeof(buffer), encodeIndex);
             if (getWBufferSpace() < encodeIndex){return 0;}
             return sendn(buffer, encodeIndex);
         }

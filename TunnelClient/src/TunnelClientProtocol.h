@@ -44,6 +44,7 @@ namespace Protocol
         virtual int getPort();
         virtual int getRBufferSizePower();
         virtual int getWBufferSizePower();
+        virtual int getHeartbeatInterval(){ return 5; }
     private:
         TcpClientPtr client2ServerM;
         ProxyToConnectionMap proxyToConnectionM;
