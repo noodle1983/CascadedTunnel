@@ -55,7 +55,7 @@ TcpClient::~TcpClient()
 void TcpClient::deleteSelf()
 {
     close();
-    processorM->process(protocolM->getPort(), &TcpClient::_deleteSelf, selfM); 
+    processorM->process(protocolM->getPort(), &TcpClient::_deleteSelf, this); 
 }
 
 //-----------------------------------------------------------------------------
@@ -196,7 +196,7 @@ void TcpClient::onError()
     }
     if (isClosedM) { return; }
 
-    processorM->process(protocolM->getPort(), &TcpClient::reconnectLater, selfM); 
+    processorM->process(protocolM->getPort(), &TcpClient::reconnectLater, this); 
 
 }
 

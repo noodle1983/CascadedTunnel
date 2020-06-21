@@ -45,7 +45,7 @@ namespace Protocol
         virtual int getRBufferSizePower();
         virtual int getWBufferSizePower();
     private:
-        TcpClient client2ServerM;
+        TcpClientPtr client2ServerM;
         ProxyToConnectionMap proxyToConnectionM;
         ConnectionToProxyFdMap connectionToProxyM;
         TunnelProxyClientProtocol proxyClientProtocolM;

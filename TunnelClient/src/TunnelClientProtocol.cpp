@@ -19,16 +19,19 @@ using namespace Processor;
 
 TunnelClientProtocol::TunnelClientProtocol(Processor::BoostProcessor* theProcessor)
 	: IClientProtocol(theProcessor)
-    , client2ServerM(this, g_reactor, theProcessor)
     , proxyClientProtocolM(theProcessor, this)
 {
-    client2ServerM.connect();
+    TcpClient* client = new TcpClient(this, g_reactor, theProcessor);
+    client2ServerM = client->self();
+    client2ServerM->connect();
 }
 
 //-----------------------------------------------------------------------------
 
 TunnelClientProtocol::~TunnelClientProtocol()
 {
+    client2ServerM->deleteSelf();
+    client2ServerM.reset();
 }
 
 //-----------------------------------------------------------------------------
@@ -85,7 +88,7 @@ void TunnelClientProtocol::handleInput(Connection::SocketConnectionPtr theConnec
             if (it != proxyToConnectionM.end()){
                 LOG_WARN("dup client connection found. del");
                 connectionToProxyM.erase(it->second);
-                delete it->second;
+                it->second->deleteSelf();
             }
 
             proxyToConnectionM[msg.proxyFd] = client;
@@ -137,7 +140,7 @@ void TunnelClientProtocol::handleClose(Net::Connection::SocketConnectionPtr theC
     for(; it != proxyToConnectionM.end(); it++)
     {
         TcpClient* client = it->second;
-        delete client;
+        client->deleteSelf();
     }
     proxyToConnectionM.clear();
     connectionToProxyM.clear();
@@ -175,12 +178,11 @@ void TunnelClientProtocol::handleProxyInput(Connection::SocketConnectionPtr theC
     ConnectionToProxyFdMap::iterator it = connectionToProxyM.find(client);
     if (it == connectionToProxyM.end())
     {
-        client->close();
-        LOG_DEBUG("handle proxy input. client to server lost! fd:" << theConnection->getFd());
+        LOG_WARN("handle proxy input. client to server lost! fd:" << theConnection->getFd());
         return;
     }
 
-    if (!client2ServerM.isConnected()){
+    if (!client2ServerM->isConnected()){
         client->close();
         LOG_WARN("peer connection closed. close proxy: " << theConnection->getFd());
         return;
@@ -199,7 +201,7 @@ void TunnelClientProtocol::handleProxyInput(Connection::SocketConnectionPtr theC
         msg.payload.valueM.assign(buffer, len);
         unsigned encodeIndex = 0;
         msg.encode(buffer, 0, encodeIndex);
-        client2ServerM.sendn(buffer, encodeIndex);
+        client2ServerM->sendn(buffer, encodeIndex);
     }
 }
 
@@ -208,6 +210,7 @@ void TunnelClientProtocol::handleProxyInput(Connection::SocketConnectionPtr theC
 void TunnelClientProtocol::handleProxyClose(Net::Connection::SocketConnectionPtr theConnection)
 {
     TcpClient* client = theConnection->getClient();
+    client->deleteSelf();
     ConnectionToProxyFdMap::iterator it = connectionToProxyM.find(client);
     if (it == connectionToProxyM.end())
     {
@@ -231,7 +234,6 @@ void TunnelClientProtocol::handleProxyConnected(Connection::SocketConnectionPtr 
         return;
     }
     int fd = it->second;
-    
 }
 
 //-----------------------------------------------------------------------------

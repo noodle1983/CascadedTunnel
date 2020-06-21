@@ -26,6 +26,7 @@ namespace Client
             Processor::BoostProcessor* theProcessor);
         ~TcpClient();
         void deleteSelf();
+        TcpClientPtr self(){return selfM;}
 
         /**
          * connect in a async way.
