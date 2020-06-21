@@ -333,7 +333,7 @@ void SocketConnection::setLowWaterMarkWatcher(Watcher* theWatcher)
 
 void SocketConnection::onWrite(int theFd, short theEvt)
 {
-    if (!isConnectedNotified && clientM)
+    if (!isConnectedNotified && clientM && CloseE != statusM)
     {
         boost::lock_guard<boost::mutex> lock(clientMutexM);
         if (clientM)
@@ -427,6 +427,7 @@ void SocketConnection::_addClientTimer(unsigned theSec)
 {
     if (NULL == clientM || 0 == theSec)
     {
+        LOG_DEBUG("client is null or timeout = 0, ignore, fd:" << fdM);
         return;
     }
     if (clientTimerEvtM)
