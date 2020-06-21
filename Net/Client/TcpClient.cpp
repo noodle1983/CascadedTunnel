@@ -38,6 +38,8 @@ TcpClient::TcpClient(
     , processorM(theProcessor)
     , isClosedM(0)
     , isConnectedM(0)
+    , selfM(this)
+    , reconnectTimerEvtM(NULL)
 {
 }
 
@@ -46,6 +48,23 @@ TcpClient::TcpClient(
 TcpClient::~TcpClient()
 {
     close();
+}
+
+//-----------------------------------------------------------------------------
+
+void TcpClient::deleteSelf()
+{
+    close();
+    processorM->process(protocolM->getPort(), &TcpClient::_deleteSelf, selfM); 
+}
+
+//-----------------------------------------------------------------------------
+
+void TcpClient::_deleteSelf()
+{
+    if (reconnectTimerEvtM){processorM->cancelLocalTimer(protocolM->getPort(), reconnectTimerEvtM);}
+    reconnectTimerEvtM = NULL;
+    selfM.reset();
 }
 
 //-----------------------------------------------------------------------------
@@ -147,6 +166,23 @@ void TcpClient::onConnected(int theFd, Connection::SocketConnectionPtr theConnec
 }
 
 //-----------------------------------------------------------------------------
+static void reconnect(void* client)
+{
+    TcpClient* self = (TcpClient*)client;
+    self->resetTimer();
+    self->connect();
+}
+
+void TcpClient::reconnectLater()
+{
+    struct timeval tv;
+    tv.tv_sec = protocolM->getReConnectInterval(); 
+    tv.tv_usec = 0;
+    if (reconnectTimerEvtM){processorM->cancelLocalTimer(protocolM->getPort(), reconnectTimerEvtM);}
+    reconnectTimerEvtM = processorM->addLocalTimer(protocolM->getPort(), tv, reconnect, this); 
+}
+
+//-----------------------------------------------------------------------------
 
 void TcpClient::onError()
 {
@@ -158,10 +194,10 @@ void TcpClient::onError()
         //reconnect
         isConnectedM = false;
     }
-    if (!isClosedM)
-    {
-        connect();
-    }
+    if (isClosedM) { return; }
+
+    processorM->process(protocolM->getPort(), &TcpClient::reconnectLater, selfM); 
+
 }
 
 //-----------------------------------------------------------------------------
@@ -174,7 +210,7 @@ void TcpClient::onClientTimeout()
     }
     if (!isConnectedM)
     {
-        connect();
+        processorM->process(protocolM->getPort(), &reconnect, (void*)this); 
     }
 }
 

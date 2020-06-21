@@ -14,6 +14,9 @@ namespace Net
 class IClientProtocol;
 namespace Client
 {
+    class TcpClient;
+    typedef boost::shared_ptr<TcpClient> TcpClientPtr;
+    typedef boost::weak_ptr<TcpClient> TcpClientWPtr;
     class TcpClient
     {
     public:
@@ -22,6 +25,7 @@ namespace Client
             Reactor::Reactor* theReactor,
             Processor::BoostProcessor* theProcessor);
         ~TcpClient();
+        void deleteSelf();
 
         /**
          * connect in a async way.
@@ -57,7 +61,11 @@ namespace Client
         void onConnected(int theFd, Connection::SocketConnectionPtr theConnection);
         void onError();
 
+        void resetTimer(){reconnectTimerEvtM = NULL;}
+
     private:
+        void _deleteSelf();
+        void reconnectLater();
 
         IClientProtocol* protocolM;
         Reactor::Reactor* reactorM;
@@ -71,6 +79,8 @@ namespace Client
         boost::mutex connectionMutexM;
         bool isConnectedM;
         Net::Connection::SocketConnectionPtr connectionM;
+        TcpClientPtr selfM;
+        min_heap_item_t* reconnectTimerEvtM;
     };
 
     inline unsigned
