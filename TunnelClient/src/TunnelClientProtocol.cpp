@@ -69,6 +69,7 @@ void TunnelClientProtocol::handleInput(Connection::SocketConnectionPtr theConnec
             continue;
         }
 
+        theConnection->resetHeartbeatTimeoutCounter();
         if (NewConnection::ID == header.messageType) {
             NewConnection msg;
             if (msg.decode(buffer, 0, decodeLength) != SUCCESS_E) {
@@ -113,6 +114,9 @@ void TunnelClientProtocol::handleInput(Connection::SocketConnectionPtr theConnec
                 continue;
             }
         }
+        else if (HeartbeatRsp::ID == header.messageType) {
+            LOG_DEBUG("heartbeat recved");
+        }
         else{
             LOG_ERROR("unknow msg type:" << header.messageType);
             theConnection->close();
@@ -144,6 +148,23 @@ void TunnelClientProtocol::handleClose(Net::Connection::SocketConnectionPtr theC
 void TunnelClientProtocol::handleConnected(Connection::SocketConnectionPtr theConnection)
 {
     LOG_DEBUG("connected to Tunnel server. fd: " << theConnection->getFd());
+}
+
+//-----------------------------------------------------------------------------
+
+void TunnelClientProtocol::handleHeartbeat(Connection::SocketConnectionPtr theConnection)
+{
+    if (theConnection->getHeartbeatTimeoutCounter() > 3){
+        theConnection->close();
+        LOG_DEBUG("connection to Tunnel server reach max heartbeat:" << theConnection->getHeartbeatTimeoutCounter()
+                << ", fd: " << theConnection->getFd());
+        return;
+    }
+
+    LOG_DEBUG("heartbeat to Tunnel server. fd: " << theConnection->getFd());
+    theConnection->incHeartbeatTimeoutCounter();
+    HeartbeatReq msg(0);
+    theConnection->sendMsg(msg);
 }
 
 //-----------------------------------------------------------------------------

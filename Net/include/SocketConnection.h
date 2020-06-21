@@ -90,12 +90,20 @@ namespace Connection
 
         //heartbeatTimeoutCounterM
         void resetHeartbeatTimeoutCounter(){heartbeatTimeoutCounterM = 0;}
-        int incHeartbeatTimeoutCounter(){return heartbeatTimeoutCounterM++;}
+        int incHeartbeatTimeoutCounter(){return ++heartbeatTimeoutCounterM;}
         int getHeartbeatTimeoutCounter(){return heartbeatTimeoutCounterM;}
 
         void* getUpperData(){return uppperDataM;}
         void setUpperData(void* theUpperData){uppperDataM = theUpperData;}
 
+        template<typename Msg>
+        unsigned sendMsg(Msg& msg){
+            unsigned encodeIndex = 0;
+            char buffer[4096] = {0};
+            msg.encode(buffer, 0, encodeIndex);
+            if (getWBufferSpace() < encodeIndex){return 0;}
+            return sendn(buffer, encodeIndex);
+        }
     private:
         friend class boost::function<void ()>;
         void addReadEvent();

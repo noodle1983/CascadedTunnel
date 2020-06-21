@@ -123,6 +123,7 @@ print CMSG_HANDLE<<END_OF_MSGDEF_CLASS_B;
     {
     public:
         ${msgName}(){}
+        ${msgName}(int){init();}
         ~${msgName}(){}
 
 END_OF_MSGDEF_CLASS_B
