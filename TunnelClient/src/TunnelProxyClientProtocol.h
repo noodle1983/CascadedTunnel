@@ -35,6 +35,7 @@ namespace Protocol
         virtual int getPort();
         virtual int getRBufferSizePower();
         virtual int getWBufferSizePower();
+        virtual unsigned getReConnectInterval(){ return 0; }
     private:
         TunnelClientProtocol* clientProtocolM;
     };

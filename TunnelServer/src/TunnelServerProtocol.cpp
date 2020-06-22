@@ -72,6 +72,11 @@ void TunnelServerProtocol::handleInput(Connection::SocketConnectionPtr theConnec
             LOG_WARN("no proxy connection found. ignore");
             continue;
         }
+        else if (RProxyConClose::ID == header.messageType) {
+            LOG_DEBUG("RProxyConClose:" << proxyFd);
+            it->second.proxyConnectionM->close();
+            continue;
+        }
         else if (ProxyRsp::ID == header.messageType) {
             ProxyRsp msg;
             decodeLength = 0;

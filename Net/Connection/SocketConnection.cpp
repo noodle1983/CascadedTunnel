@@ -418,6 +418,7 @@ void SocketConnection::onHeartbeat(void *theArg)
 
 void SocketConnection::addClientTimer(unsigned theSec)
 {
+    if(theSec == 0) { return; }
     processorM->process(fdM, &SocketConnection::_addClientTimer, this, theSec);
 }
 
@@ -495,8 +496,7 @@ void SocketConnection::_close()
         boost::lock_guard<boost::mutex> lock(clientMutexM);
         if (clientM)
         {
-            clientM->onError();
-            clientM = NULL;
+            clientM->onError(selfM);
         }
     }
     reactorM->delEvent(readEvtM);

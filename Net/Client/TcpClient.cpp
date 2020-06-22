@@ -135,7 +135,7 @@ int TcpClient::connect()
                     << ":" << peerPortM
                     << ", errstr:" << evutil_socket_error_to_string(e));
             evutil_closesocket(sock);
-            onError();
+            onError(connectionM);
             return -1;
         }
     }
@@ -186,8 +186,9 @@ void TcpClient::reconnectLater()
 
 //-----------------------------------------------------------------------------
 
-void TcpClient::onError()
+void TcpClient::onError(Connection::SocketConnectionPtr theConnection)
 {
+    if (connectionM.get() != theConnection.get()) { return; }
     LOG_WARN("connection lost from " << peerAddrM
             << ":" << peerPortM);
     {
@@ -198,7 +199,10 @@ void TcpClient::onError()
     }
     if (isClosedM) { return; }
 
-    processorM->process(protocolM->getPort(), &TcpClient::reconnectLater, this); 
+    if (protocolM->getReConnectInterval() > 0)
+    {
+        processorM->process(protocolM->getPort(), &TcpClient::reconnectLater, this); 
+    }
 
 }
 

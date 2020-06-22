@@ -27,6 +27,7 @@ namespace Client
         ~TcpClient();
         void deleteSelf();
         TcpClientPtr self(){return selfM;}
+        Connection::SocketConnectionPtr getConnection(){return connectionM;}
 
         /**
          * connect in a async way.
@@ -51,6 +52,8 @@ namespace Client
             return connectionM.get() && isConnectedM;
         }
         unsigned sendn(const char* theBuffer, const unsigned theLen);
+        template<typename Msg>
+        unsigned sendMsg(Msg& msg);
 
 
         /**
@@ -60,7 +63,7 @@ namespace Client
          */
         void onClientTimeout();
         void onConnected(int theFd, Connection::SocketConnectionPtr theConnection);
-        void onError();
+        void onError(Connection::SocketConnectionPtr theConnection);
 
         void resetTimer(){reconnectTimerEvtM = NULL;}
 
@@ -100,6 +103,20 @@ namespace Client
             return 0;
         }
 
+    }
+    template<typename Msg>
+    unsigned TcpClient::sendMsg(Msg& msg)
+    {
+        if (isClosedM) {return 0;}
+        boost::lock_guard<boost::mutex> lock(connectionMutexM);
+        if (connectionM.get() && (isConnectedM || connectTimesM == 1))
+        {
+            return connectionM->sendMsg(msg);
+        }
+        else
+        {
+            return 0;
+        }
     }
 }
 }

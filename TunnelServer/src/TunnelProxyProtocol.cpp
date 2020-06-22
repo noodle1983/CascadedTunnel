@@ -33,7 +33,6 @@ void TunnelProxyProtocol::handleInput(Connection::SocketConnectionPtr theConnect
 
 void TunnelProxyProtocol::handleClose(Net::Connection::SocketConnectionPtr theConnection)
 {
-    LOG_DEBUG("proxy close. fd: " << theConnection->getFd());
     serverProtocolM->handleProxyClose(theConnection);
 }
 

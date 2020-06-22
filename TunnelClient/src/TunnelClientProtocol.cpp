@@ -82,7 +82,13 @@ void TunnelClientProtocol::handleInput(Connection::SocketConnectionPtr theConnec
             }
 
             TcpClient* client = new TcpClient(&proxyClientProtocolM, g_reactor, BoostProcessor::netInstance()); 
-            client->connect();    
+            if (client->connect() < 0)
+            {
+                RProxyConClose rsp(0);
+                rsp.proxyFd = msg.proxyFd;
+                client2ServerM->sendMsg(rsp);
+                continue;
+            }
 
             ProxyToConnectionMap::iterator it = proxyToConnectionM.find(msg.proxyFd);
             if (it != proxyToConnectionM.end()){
@@ -234,6 +240,10 @@ void TunnelClientProtocol::handleProxyClose(Net::Connection::SocketConnectionPtr
     proxyToConnectionM.erase(fd);
     connectionToProxyM.erase(it);
 
+    RProxyConClose msg(0);
+    msg.proxyFd = fd;
+    client2ServerM->sendMsg(msg);
+
 }
 
 //-----------------------------------------------------------------------------
@@ -249,7 +259,6 @@ void TunnelClientProtocol::handleProxyConnected(Connection::SocketConnectionPtr 
         LOG_ERROR("client should be deleted. fd:" << theConnection->getFd());
         return;
     }
-    int fd = it->second;
 }
 
 //-----------------------------------------------------------------------------
