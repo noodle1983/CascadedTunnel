@@ -40,6 +40,7 @@ TcpClient::TcpClient(
     , isConnectedM(0)
     , selfM(this)
     , reconnectTimerEvtM(NULL)
+    , connectTimesM(0)
 {
 }
 
@@ -124,6 +125,7 @@ int TcpClient::connect()
         evutil_closesocket(sock);
         return -1;
     }
+    connectTimesM++;
     if (::connect(sock, (struct sockaddr*)&sin, sizeof(sin)) < 0)
     {
         int e = errno;

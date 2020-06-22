@@ -37,7 +37,6 @@ void TunnelProxyClientProtocol::handleInput(Connection::SocketConnectionPtr theC
 
 void TunnelProxyClientProtocol::handleClose(Net::Connection::SocketConnectionPtr theConnection)
 {
-    LOG_DEBUG("proxy client close. fd: " << theConnection->getFd());
     clientProtocolM->handleProxyClose(theConnection);
 }
 
@@ -45,8 +44,7 @@ void TunnelProxyClientProtocol::handleClose(Net::Connection::SocketConnectionPtr
 
 void TunnelProxyClientProtocol::handleConnected(Connection::SocketConnectionPtr theConnection)
 {
-    LOG_DEBUG("proxy client connected. fd: " << theConnection->getFd());
-    clientProtocolM->handleConnected(theConnection);
+    clientProtocolM->handleProxyConnected(theConnection);
 }
 
 //-----------------------------------------------------------------------------

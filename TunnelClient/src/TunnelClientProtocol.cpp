@@ -68,19 +68,13 @@ void TunnelClientProtocol::handleInput(Connection::SocketConnectionPtr theConnec
         //inner msg
         theConnection->resetHeartbeatTimeoutCounter();
         if (HeartbeatRsp::ID == header.messageType) {
-            LOG_DEBUG("heartbeat recved");
             continue;
         }
 
         //proxy msg
-        int proxyFd = header.proxyFd;
-        ProxyToConnectionMap::iterator it = proxyToConnectionM.find(proxyFd);
-        if (it == proxyToConnectionM.end()){
-            LOG_WARN("no proxy connection found. ignore");
-            continue;
-        }
-        else if (NewConnection::ID == header.messageType) {
+        if (NewConnection::ID == header.messageType) {
             NewConnection msg;
+            decodeLength = 0;
             if (msg.decode(buffer, length, decodeLength) != SUCCESS_E) {
                 LOG_ERROR("decode ProxyRsp error");
                 theConnection->close();
@@ -99,9 +93,18 @@ void TunnelClientProtocol::handleInput(Connection::SocketConnectionPtr theConnec
 
             proxyToConnectionM[msg.proxyFd] = client;
             connectionToProxyM[client] = msg.proxyFd; 
+            continue;
+        }
+
+        int proxyFd = header.proxyFd;
+        ProxyToConnectionMap::iterator it = proxyToConnectionM.find(proxyFd);
+        if (it == proxyToConnectionM.end()){
+            LOG_WARN("no proxy connection found. ignore");
+            continue;
         }
         else if (ProxyReq::ID == header.messageType) {
             ProxyReq msg;
+            decodeLength = 0;
             if (msg.decode(buffer, length, decodeLength) != SUCCESS_E) {
                 LOG_ERROR("decode ProxyRsp error");
                 theConnection->close();
@@ -160,15 +163,18 @@ void TunnelClientProtocol::handleConnected(Connection::SocketConnectionPtr theCo
 
 void TunnelClientProtocol::handleHeartbeat(Connection::SocketConnectionPtr theConnection)
 {
-    if (theConnection->getHeartbeatTimeoutCounter() > 3){
+    int hbcounter = theConnection->getHeartbeatTimeoutCounter();
+    if (hbcounter > 3){
         theConnection->close();
-        LOG_DEBUG("connection to Tunnel server reach max heartbeat:" << theConnection->getHeartbeatTimeoutCounter()
+        LOG_DEBUG("connection to Tunnel server reach max heartbeat:" << hbcounter
                 << ", fd: " << theConnection->getFd());
         return;
     }
 
-    LOG_DEBUG("heartbeat to Tunnel server. fd: " << theConnection->getFd()
-            << ", counter:" << theConnection->getHeartbeatTimeoutCounter());
+    if (hbcounter > 0)
+    {
+        LOG_DEBUG("heartbeat to Tunnel server. fd: " << theConnection->getFd() << ", counter:" << hbcounter);
+    }
     theConnection->incHeartbeatTimeoutCounter();
     HeartbeatReq msg(0);
     theConnection->sendMsg(msg);
@@ -213,7 +219,10 @@ void TunnelClientProtocol::handleProxyInput(Connection::SocketConnectionPtr theC
 
 void TunnelClientProtocol::handleProxyClose(Net::Connection::SocketConnectionPtr theConnection)
 {
+    LOG_DEBUG("proxy client close. fd: " << theConnection->getFd());
     TcpClient* client = theConnection->getClient();
+    if (client == NULL) {return;}
+
     client->deleteSelf();
     ConnectionToProxyFdMap::iterator it = connectionToProxyM.find(client);
     if (it == connectionToProxyM.end())
@@ -224,16 +233,19 @@ void TunnelClientProtocol::handleProxyClose(Net::Connection::SocketConnectionPtr
     int fd = it->second;
     proxyToConnectionM.erase(fd);
     connectionToProxyM.erase(it);
+
 }
 
 //-----------------------------------------------------------------------------
 
 void TunnelClientProtocol::handleProxyConnected(Connection::SocketConnectionPtr theConnection)
 {
+    LOG_DEBUG("proxy client connected. fd: " << theConnection->getFd());
     TcpClient* client = theConnection->getClient();
     ConnectionToProxyFdMap::iterator it = connectionToProxyM.find(client);
     if (it == connectionToProxyM.end())
     {
+        theConnection->close();
         LOG_ERROR("client should be deleted. fd:" << theConnection->getFd());
         return;
     }

@@ -82,13 +82,16 @@ namespace Client
         Net::Connection::SocketConnectionPtr connectionM;
         TcpClientPtr selfM;
         min_heap_item_t* reconnectTimerEvtM;
+
+        size_t connectTimesM;
     };
 
     inline unsigned
     TcpClient::sendn(const char* theBuffer, const unsigned theLen)
     {
+        if (isClosedM) {return 0;}
         boost::lock_guard<boost::mutex> lock(connectionMutexM);
-        if (isConnectedM && connectionM.get())
+        if (connectionM.get() && (isConnectedM || connectTimesM == 1))
         {
             return connectionM->sendn(theBuffer, theLen);
         }

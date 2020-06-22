@@ -4,6 +4,9 @@
 #include "Message.h"
 #include "Log.h"
 
+#include <vector>
+
+using namespace std;
 using namespace Net;
 using namespace Net::Protocol;
 using namespace Config;
@@ -57,7 +60,6 @@ void TunnelServerProtocol::handleInput(Connection::SocketConnectionPtr theConnec
         //inner msg
         theConnection->resetHeartbeatTimeoutCounter();
         if (HeartbeatReq::ID == header.messageType) {
-            LOG_DEBUG("heartbeat recved");
             HeartbeatRsp msg(0);
             theConnection->sendMsg(msg);
             continue;
@@ -72,6 +74,7 @@ void TunnelServerProtocol::handleInput(Connection::SocketConnectionPtr theConnec
         }
         else if (ProxyRsp::ID == header.messageType) {
             ProxyRsp msg;
+            decodeLength = 0;
             if (msg.decode(buffer, ProxyRsp::MIN_BYTES, decodeLength) != SUCCESS_E) {
                 LOG_ERROR("decode ProxyRsp error");
                 theConnection->close();
@@ -101,6 +104,22 @@ void TunnelServerProtocol::handleClose(Net::Connection::SocketConnectionPtr theC
 {
     LOG_DEBUG("tunnel client close. fd: " << theConnection->getFd());
     peerConnectionSetM.erase(theConnection);
+
+    vector<int> invalidFds;
+    ConnectionMap::iterator it = proxyFd2InfoMapM.begin();
+    for(; it != proxyFd2InfoMapM.end(); it++)
+    {
+        if (it->second.peerConnectionM.get() == theConnection.get())
+        {
+            invalidFds.push_back(it->first);
+            it->second.proxyConnectionM->close();
+        }
+    }
+
+    for(unsigned i = 0; i < invalidFds.size(); i++)
+    {
+        proxyFd2InfoMapM.erase(invalidFds[i]);
+    }
 }
 
 //-----------------------------------------------------------------------------
@@ -115,15 +134,18 @@ void TunnelServerProtocol::handleConnected(Connection::SocketConnectionPtr theCo
 
 void TunnelServerProtocol::handleHeartbeat(Connection::SocketConnectionPtr theConnection)
 {
-    if (theConnection->getHeartbeatTimeoutCounter() > 3){
+    int hbcounter = theConnection->getHeartbeatTimeoutCounter();
+    if (hbcounter > 3){
         theConnection->close();
-        LOG_DEBUG("connection to Tunnel server reach max heartbeat:" << theConnection->getHeartbeatTimeoutCounter()
+        LOG_DEBUG("connection to Tunnel server reach max heartbeat:" << hbcounter
                 << ", fd: " << theConnection->getFd());
         return;
     }
 
-    LOG_DEBUG("heartbeat dida. fd: " << theConnection->getFd()
-            << ", counter:" << theConnection->getHeartbeatTimeoutCounter());
+    if (hbcounter > 0)
+    {
+        LOG_DEBUG("heartbeat dida. fd: " << theConnection->getFd() << ", counter:" << hbcounter);
+    }
     theConnection->incHeartbeatTimeoutCounter();
 }
 

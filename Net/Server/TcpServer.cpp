@@ -92,7 +92,8 @@ void TcpServer::onAccept(int theFd, short theEvt)
         SocketConnection* connection = new SocketConnection(protocolM, reactorM, processorM, clientFd);
 		connection->setPeerAddr(&clientAddr);
         char addrBuffer[16] = {0};
-        LOG_DEBUG("Accepted connection from "<< inet_ntop(AF_INET, &clientAddr.sin_addr, addrBuffer, sizeof(addrBuffer))
+        LOG_DEBUG("Accepted connection on " << portM
+                << " from "<< inet_ntop(AF_INET, &clientAddr.sin_addr, addrBuffer, sizeof(addrBuffer)) << ":" << clientAddr.sin_port
                 << ", fd:" << clientFd
                 << ", con addr:" << std::hex << (size_t)connection);
 
