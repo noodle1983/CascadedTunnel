@@ -108,6 +108,14 @@ void TunnelClientProtocol::handleInput(Connection::SocketConnectionPtr theConnec
             LOG_WARN("no proxy connection found. ignore");
             continue;
         }
+        else if (ConnectionClosed::ID == header.messageType) {
+            LOG_DEBUG("ConnectionClosed, clear client, proxyFd:" << proxyFd);
+            TcpClient* client = it->second;
+            client->deleteSelf();
+            proxyToConnectionM.erase(proxyFd);
+            connectionToProxyM.erase(client);
+            continue;
+        }
         else if (ProxyReq::ID == header.messageType) {
             ProxyReq msg;
             decodeLength = 0;

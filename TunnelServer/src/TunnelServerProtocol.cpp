@@ -194,7 +194,17 @@ void TunnelServerProtocol::handleProxyInput(Connection::SocketConnectionPtr theC
 void TunnelServerProtocol::handleProxyClose(Net::Connection::SocketConnectionPtr theConnection)
 {
     LOG_DEBUG("proxy client closed. fd: " << theConnection->getFd());
-    proxyFd2InfoMapM.erase(theConnection->getFd());
+    ConnectionMap::iterator it = proxyFd2InfoMapM.find(theConnection->getFd());
+    if (it == proxyFd2InfoMapM.end()) {
+        return;
+    }
+    ConnectionPair& conPair = it->second;
+
+    ConnectionClosed msg(0);
+    msg.proxyFd = theConnection->getFd();
+    conPair.peerConnectionM->sendMsg(msg);
+
+    proxyFd2InfoMapM.erase(it);
 }
 
 //-----------------------------------------------------------------------------

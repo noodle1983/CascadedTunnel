@@ -11,9 +11,10 @@ MessageList
     HeartbeatReq                0x01
     HeartbeatRsp                0x02
     NewConnection               0x03
-    RProxyConClose              0x04
-    ProxyReq                    0x05
-    ProxyRsp                    0x06
+    ConnectionClosed            0x04
+    RProxyConClose              0x05
+    ProxyReq                    0x06
+    ProxyRsp                    0x07
 
 ##############################################
 #MessageList
@@ -46,6 +47,9 @@ Message  HeartbeatRsp
     include Header
 
 Message NewConnection 
+    include Header
+
+Message ConnectionClosed
     include Header
 
 Message RProxyConClose
