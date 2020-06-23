@@ -40,7 +40,7 @@ void TunnelServerProtocol::handleInput(Connection::SocketConnectionPtr theConnec
 
         MsgHeader header;
         unsigned decodeLength = 0;
-        if (header.decode(buffer, Msg::MsgHeader::MIN_BYTES, decodeLength) != SUCCESS_E){
+        if (header.decodeHeader(buffer, Msg::MsgHeader::MIN_BYTES, decodeLength) != SUCCESS_E){
             LOG_ERROR("failed to decode header.");
             theConnection->close();
             return;
@@ -78,9 +78,10 @@ void TunnelServerProtocol::handleInput(Connection::SocketConnectionPtr theConnec
             continue;
         }
         else if (ProxyRsp::ID == header.messageType) {
+            LOG_DEBUG("ProxyRsp, proxyFd:" << proxyFd);
             ProxyRsp msg;
             decodeLength = 0;
-            if (msg.decode(buffer, ProxyRsp::MIN_BYTES, decodeLength) != SUCCESS_E) {
+            if (msg.decode(buffer, length, decodeLength) != SUCCESS_E) {
                 LOG_ERROR("decode ProxyRsp error");
                 theConnection->close();
                 return;
@@ -178,14 +179,12 @@ void TunnelServerProtocol::handleProxyInput(Connection::SocketConnectionPtr theC
         if (len == 0) {return;}
         if (len > 1024){len = 1024;}
         
-        ProxyReq msg;
-        msg.init();
+        ProxyReq msg(0);
         msg.proxyFd = theConnection->getFd();
         theConnection->getnInput(buffer, len);
         msg.payload.valueM.assign(buffer, len);
-        unsigned encodeIndex = 0;
-        msg.encode(buffer, 0, encodeIndex);
-        it->second.peerConnectionM->sendn(buffer, encodeIndex);
+        it->second.peerConnectionM->sendMsg(msg);
+        LOG_DEBUG("ProxyReq len:" << msg.length << ". fd: " << theConnection->getFd());
     }
 }
 

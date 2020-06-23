@@ -139,7 +139,8 @@ END_OF_MSGDEF_ENUM
     genMinSize($msgName, $msgDef);
 
     genInitFunction($msgName, $msgDef);
-    genDecodeFunction($msgName, $msgDef);
+    genDecodeFunction($msgName, $msgDef, 1);
+    genDecodeFunction($msgName, $msgDef, 0);
     genEncodeFunction($msgName, $msgDef);
     genDumpFunction($msgName, $msgDef);
     genFieldDef($msgName, $msgDef);
@@ -315,12 +316,14 @@ sub genDecodeFunction
 {
     my $msgName = shift;
     my $msgDef = shift;
+    my $isHeader = shift;
     my $theMsg = "the$msgName";
     my $optianlExisted = 0;
     my $msgLengthVar = "theLen";
+    my $methodName = $isHeader ? "decodeHeader" : "decode";
 
 print CMSG_HANDLE<<END_OF_DECODE_BEG;
-        int decode(const char* theBuffer, const unsigned theLen, unsigned& theIndex)
+        int ${methodName}(const char* theBuffer, const unsigned theLen, unsigned& theIndex)
         {
             int ret = SUCCESS_E;
 END_OF_DECODE_BEG
@@ -328,6 +331,7 @@ END_OF_DECODE_BEG
     foreach(@$msgDef)
     {
         ($fieldName, $fieldType, $fieldOption) = @$_;
+        my $maxLengthStr =  $isHeader ? "${msgName}::MIN_BYTES" : "${fieldName}.valueM";
         if ($fieldOption eq "M")
         {
 print  CMSG_HANDLE<<END_OF_DECODE_BODY;
@@ -345,7 +349,7 @@ END_OF_DECODE_BODY
             if ($fieldType =~ /^Length/)
             {
 print  CMSG_HANDLE<<END_OF_DECODE_LENGTH;
-            unsigned endIndex = theIndex - ${fieldType}::MIN_BYTES + ${fieldName}.valueM;
+            unsigned endIndex = theIndex - ${fieldType}::MIN_BYTES + ${maxLengthStr};
             if (theLen < endIndex)
             {
                 LOG_ERROR("${msgName}.${fieldName} not enough buffer");
