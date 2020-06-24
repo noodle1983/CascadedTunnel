@@ -35,7 +35,8 @@ namespace Connection
     class SocketConnection;
     typedef boost::shared_ptr<SocketConnection> SocketConnectionPtr;
     typedef boost::weak_ptr<SocketConnection> SocketConnectionWPtr;
-    typedef boost::function<void (int, SocketConnectionPtr)> Watcher;
+    typedef boost::function<void ()> Watcher;
+    typedef std::map<int, Watcher*> WatcherMap;
 
     class SocketConnection
     {
@@ -80,7 +81,9 @@ namespace Connection
         unsigned peeknInput(char* const theBuffer, const unsigned theLen);
         unsigned sendn(const char* const theBuffer, const unsigned theLen);
 
-        void setLowWaterMarkWatcher(Watcher* theWatcher);
+        void setLowWaterMarkWatcher(int theFd, Watcher* theWatcher);
+        void rmLowWaterMarkWatcher(int theFd);
+        bool hasWatcher(int theFd);
 
 		//attribute
 		int getFd(){return fdM;}
@@ -119,6 +122,7 @@ namespace Connection
         void _close();
         void _release();
 
+        void clearAllWatchers();
 
     private:
         //for reactor:
@@ -153,7 +157,7 @@ namespace Connection
         boost::mutex stopReadingMutexM;
         bool stopReadingM;
         boost::mutex watcherMutexM;
-        Watcher* watcherM;
+        WatcherMap watcherMapM;
 
         Client::TcpClient* clientM;
         boost::mutex clientMutexM;

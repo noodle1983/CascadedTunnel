@@ -116,6 +116,20 @@ void TunnelClientProtocol::handleInput(Connection::SocketConnectionPtr theConnec
             connectionToProxyM.erase(client);
             continue;
         }
+        else if (RProxySlowDown::ID == header.messageType) {
+            LOG_DEBUG("RProxySlowDown, proxyFd:" << proxyFd);
+            TcpClient* client = it->second;
+            client->getConnection()->setUpperData((void*)1);
+            continue;
+        }
+        else if (RProxySpeedUp::ID == header.messageType) {
+            LOG_DEBUG("RProxySpeedUp, proxyFd:" << proxyFd);
+            TcpClient* client = it->second;
+            SocketConnectionPtr con = client->getConnection();
+            con->setUpperData((void*)0);
+            client->getProtocol()->asynHandleInput(con->getFd(), con);
+            continue;
+        }
         else if (ProxyReq::ID == header.messageType) {
             LOG_DEBUG("ProxyReq, proxyFd:" << proxyFd);
             ProxyReq msg;
@@ -199,6 +213,10 @@ void TunnelClientProtocol::handleHeartbeat(Connection::SocketConnectionPtr theCo
 
 void TunnelClientProtocol::handleProxyInput(Connection::SocketConnectionPtr theConnection)
 {
+    if (theConnection->getUpperData() != NULL){
+        LOG_DEBUG("Connection throttled, fd:" << theConnection->getFd());
+        return;
+    }
     TcpClient* client = theConnection->getClient();
     ConnectionToProxyFdMap::iterator it = connectionToProxyM.find(client);
     if (it == connectionToProxyM.end())
@@ -232,6 +250,7 @@ void TunnelClientProtocol::handleProxyInput(Connection::SocketConnectionPtr theC
 void TunnelClientProtocol::handleProxyClose(Net::Connection::SocketConnectionPtr theConnection)
 {
     LOG_DEBUG("proxy client close. fd: " << theConnection->getFd());
+    con->setUpperData((void*)0);
     TcpClient* client = theConnection->getClient();
     if (client == NULL) {return;}
 

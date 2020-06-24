@@ -25,6 +25,7 @@ namespace Protocol
         Connection::SocketConnectionPtr peerConnectionM;
     };
 
+    class TunnelProxyProtocol;
 	typedef std::set<Connection::SocketConnectionPtr> ConnectionSet;
 	typedef std::map<int, ConnectionPair> ConnectionMap;
     class TunnelServerProtocol : public Net::IProtocol
@@ -39,6 +40,7 @@ namespace Protocol
         void handleConnected(Connection::SocketConnectionPtr theConnection);
         void handleHeartbeat(Connection::SocketConnectionPtr theConnection);
 
+        void setProxyProtocol(TunnelProxyProtocol* theProtocol){proxyProtocolM = theProtocol;}
         void handleProxyInput(Connection::SocketConnectionPtr theConnection);
         void handleProxyClose(Net::Connection::SocketConnectionPtr theConnection); 
         void handleProxyConnected(Connection::SocketConnectionPtr theConnection);
@@ -51,6 +53,7 @@ namespace Protocol
     private:
         ConnectionSet peerConnectionSetM; 
         ConnectionMap proxyFd2InfoMapM; 
+        TunnelProxyProtocol* proxyProtocolM;
     };
 
 }

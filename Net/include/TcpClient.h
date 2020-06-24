@@ -28,6 +28,7 @@ namespace Client
         void deleteSelf();
         TcpClientPtr self(){return selfM;}
         Connection::SocketConnectionPtr getConnection(){return connectionM;}
+        IClientProtocol* getProtocol(){return theProtocol;}
 
         /**
          * connect in a async way.

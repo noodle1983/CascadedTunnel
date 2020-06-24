@@ -13,8 +13,10 @@ MessageList
     NewConnection               0x03
     ConnectionClosed            0x04
     RProxyConClose              0x05
-    ProxyReq                    0x06
-    ProxyRsp                    0x07
+    RProxySlowDown              0x06
+    RProxySpeedUp               0x07
+    ProxyReq                    0x08
+    ProxyRsp                    0x09
 
 ##############################################
 #MessageList
@@ -53,6 +55,12 @@ Message ConnectionClosed
     include Header
 
 Message RProxyConClose
+    include Header
+
+Message RProxySlowDown
+    include Header
+
+Message RProxySpeedUp
     include Header
 
 Message ProxyReq

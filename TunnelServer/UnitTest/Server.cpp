@@ -52,6 +52,7 @@ int main()
     evthread_use_pthreads();
     Net::Protocol::TunnelServerProtocol serverProtocol(BoostProcessor::netInstance());
     Net::Protocol::TunnelProxyProtocol proxyProtocol(BoostProcessor::netInstance(), &serverProtocol);
+    serverProtocol.setProxyProtocol(&proxyProtocol);
     Net::Server::TcpServer innerServer(&serverProtocol, Reactor::instance(), BoostProcessor::netInstance());
     Net::Server::TcpServer proxyServer(&proxyProtocol, Reactor::instance(), BoostProcessor::netInstance());
     innerServer.start();

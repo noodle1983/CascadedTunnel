@@ -48,7 +48,6 @@ SocketConnection::SocketConnection(
     , outputQueueM(theProtocol->getWBufferSizePower())
     , statusM(ActiveE)
     , stopReadingM(false)
-    , watcherM(NULL)
     , clientM(NULL)
     , isConnectedNotified(true)
     , uppperDataM(NULL)
@@ -80,7 +79,6 @@ SocketConnection::SocketConnection(
     , outputQueueM(theProtocol->getWBufferSizePower())
     , statusM(ActiveE)
     , stopReadingM(false)
-    , watcherM(NULL)
     , clientM(theClient)
     , isConnectedNotified(false)
     , uppperDataM(NULL)
@@ -95,11 +93,7 @@ SocketConnection::SocketConnection(
 SocketConnection::~SocketConnection()
 {
     evutil_closesocket(fdM);
-    if (watcherM)
-    {
-        delete watcherM;
-        watcherM = NULL;
-    }
+    clearAllWatchers();
     if (uppperDataM != NULL)
     {
         LOG_WARN("uppperDataM is not NULL and may leek, please free it and set to NULL in upper handling while connection is closed.");
@@ -304,29 +298,61 @@ int SocketConnection::asynWrite(int theFd, short theEvt)
 
 //-----------------------------------------------------------------------------
 
-void SocketConnection::setLowWaterMarkWatcher(Watcher* theWatcher)
+void SocketConnection::setLowWaterMarkWatcher(int theFd, Watcher* theWatcher)
 {
 	//if it is already writable
     Utility::BufferStatus bufferStatus = outputQueueM.getStatus();
 	if (bufferStatus == Utility::BufferLowE)
 	{
-		(*theWatcher)(fdM, selfM);
+		(*theWatcher)();
 		return;
 	}
 
 	//or set theWatcher and add the write event
 	{
 		boost::lock_guard<boost::mutex> lock(watcherMutexM);
-		if (watcherM)
-		{
-			delete watcherM;
-		}
-		watcherM = theWatcher;
+        WatcherMap::iterator it = watcherMapM.find(theFd);
+        if (it != watcherMapM.end()){
+            delete it->second;
+            watcherMapM.erase(it);
+        }
+		watcherMapM[theFd] = theWatcher;
 	}
     if (CloseE != statusM)
     {
         addWriteEvent();
     }
+}
+
+//-----------------------------------------------------------------------------
+
+void SocketConnection::rmLowWaterMarkWatcher(int theFd)
+{
+    boost::lock_guard<boost::mutex> lock(watcherMutexM);
+    WatcherMap::iterator it = watcherMapM.find(theFd);
+    if (it == watcherMapM.end()){return;}
+    delete it->second;
+    watcherMapM.erase(it);
+}
+
+//-----------------------------------------------------------------------------
+
+void SocketConnection::clearAllWatchers()
+{
+    boost::lock_guard<boost::mutex> lock(watcherMutexM);
+    WatcherMap::iterator it = watcherMapM.begin();
+    for(; it != watcherMapM.end(); it++){
+        delete it->second;
+    }
+    watcherMapM.clear();
+}
+
+//-----------------------------------------------------------------------------
+
+bool SocketConnection::hasWatcher(int theFd)
+{
+    boost::lock_guard<boost::mutex> lock(watcherMutexM);
+    return watcherMapM.find(theFd) != watcherMapM.end();
 }
 
 //-----------------------------------------------------------------------------
@@ -367,14 +393,14 @@ void SocketConnection::onWrite(int theFd, short theEvt)
     }
 
     Utility::BufferStatus bufferStatus = outputQueueM.getStatus();
-    if (watcherM && (bufferStatus == Utility::BufferLowE))
+    if (bufferStatus == Utility::BufferLowE)
     {
         boost::lock_guard<boost::mutex> lock(watcherMutexM);
-        if (watcherM)
-        {
-            (*watcherM)(fdM, selfM);
-            delete watcherM;
-            watcherM = NULL;
+        WatcherMap::iterator it = watcherMapM.find(theFd);
+        if (it != watcherMapM.end()){
+            (*it->second)();
+            delete it->second;
+            watcherMapM.erase(it);
         }
     }
 
@@ -482,6 +508,7 @@ void SocketConnection::_close()
         return;
     statusM = CloseE;
 
+    clearAllWatchers();
     if (heartbeatTimerEvtM)
     {
         processorM->cancelLocalTimer(fdM, heartbeatTimerEvtM);

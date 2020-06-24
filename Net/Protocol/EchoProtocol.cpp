@@ -39,7 +39,8 @@ void EchoProtocol::handleInput(Connection::SocketConnectionPtr connection)
     }
     if (!canWrite)
     {
-        connection->setLowWaterMarkWatcher(new Net::Connection::Watcher(boost::bind(&EchoProtocol::asynHandleInput, this, _1, _2)));
+        connection->setLowWaterMarkWatcher(connection->getFd(), new Net::Connection::Watcher(boost::bind(
+            &EchoProtocol::asynHandleInput, this, connection->getFd(), connection)));
     }
 }
 

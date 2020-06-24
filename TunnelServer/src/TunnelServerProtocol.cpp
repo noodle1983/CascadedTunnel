@@ -3,20 +3,23 @@
 #include "SocketConnection.h"
 #include "Message.h"
 #include "Log.h"
+#include "TunnelProxyProtocol.h"
 
 #include <vector>
 
 using namespace std;
 using namespace Net;
-using namespace Net::Protocol;
+using namespace Protocol;
 using namespace Config;
 using namespace Msg;
+using namespace Connection;
 
 
 //-----------------------------------------------------------------------------
 
 TunnelServerProtocol::TunnelServerProtocol(Processor::BoostProcessor* theProcessor)
 	:IProtocol(theProcessor)
+    , proxyProtocolM(NULL)
 {
 }
 
@@ -28,7 +31,7 @@ TunnelServerProtocol::~TunnelServerProtocol()
 
 //-----------------------------------------------------------------------------
 
-void TunnelServerProtocol::handleInput(Connection::SocketConnectionPtr theConnection)
+void TunnelServerProtocol::handleInput(SocketConnectionPtr theConnection)
 {
     char buffer[16 * 1024] = {0};
     while(true)
@@ -87,7 +90,24 @@ void TunnelServerProtocol::handleInput(Connection::SocketConnectionPtr theConnec
                 return;
             }
 
-            unsigned len = it->second.proxyConnectionM->sendn(msg.payload.valueM.c_str(), msg.payload.valueM.length()); 
+            SocketConnectionPtr proxyConnection = it->second.proxyConnectionM;
+            bool canWrite = proxyConnection->isWBufferHealthy();
+            if (!canWrite){
+                RProxySlowDown slowDown(0);
+                slowDown.proxyFd = proxyFd;
+                theConnection->sendMsg(slowDown);
+
+                if (proxyConnection->hasWatcher(proxyFd))
+                {
+                    proxyConnection->setLowWaterMarkWatcher(proxyFd, new Watcher([theConnection, proxyFd](){
+                        RProxySpeedUp speedUp(0);
+                        speedUp.proxyFd = proxyFd;
+                        theConnection->sendMsg(speedUp);
+                    }));
+                }
+            }
+
+            unsigned len = proxyConnection->sendn(msg.payload.valueM.c_str(), msg.payload.valueM.length()); 
             if (len != msg.payload.valueM.length()) {
                 LOG_WARN("speed mismatch. ignore");
                 continue;
@@ -106,7 +126,7 @@ void TunnelServerProtocol::handleInput(Connection::SocketConnectionPtr theConnec
 
 //-----------------------------------------------------------------------------
 
-void TunnelServerProtocol::handleClose(Net::Connection::SocketConnectionPtr theConnection)
+void TunnelServerProtocol::handleClose(SocketConnectionPtr theConnection)
 {
     LOG_DEBUG("tunnel client close. fd: " << theConnection->getFd());
     peerConnectionSetM.erase(theConnection);
@@ -130,7 +150,7 @@ void TunnelServerProtocol::handleClose(Net::Connection::SocketConnectionPtr theC
 
 //-----------------------------------------------------------------------------
 
-void TunnelServerProtocol::handleConnected(Connection::SocketConnectionPtr theConnection)
+void TunnelServerProtocol::handleConnected(SocketConnectionPtr theConnection)
 {
     LOG_DEBUG("tunnel client connected. fd: " << theConnection->getFd());
     peerConnectionSetM.insert(theConnection);
@@ -138,7 +158,7 @@ void TunnelServerProtocol::handleConnected(Connection::SocketConnectionPtr theCo
 
 //-----------------------------------------------------------------------------
 
-void TunnelServerProtocol::handleHeartbeat(Connection::SocketConnectionPtr theConnection)
+void TunnelServerProtocol::handleHeartbeat(SocketConnectionPtr theConnection)
 {
     int hbcounter = theConnection->getHeartbeatTimeoutCounter();
     if (hbcounter > 3){
@@ -148,7 +168,7 @@ void TunnelServerProtocol::handleHeartbeat(Connection::SocketConnectionPtr theCo
         return;
     }
 
-    if (hbcounter > 0)
+    if (hbcounter > 1)
     {
         LOG_DEBUG("heartbeat dida. fd: " << theConnection->getFd() << ", counter:" << hbcounter);
     }
@@ -157,40 +177,50 @@ void TunnelServerProtocol::handleHeartbeat(Connection::SocketConnectionPtr theCo
 
 //-----------------------------------------------------------------------------
 
-void TunnelServerProtocol::handleProxyInput(Connection::SocketConnectionPtr theConnection)
+void TunnelServerProtocol::handleProxyInput(SocketConnectionPtr theConnection)
 {
-    LOG_DEBUG("proxy client input. fd: " << theConnection->getFd());
-    ConnectionMap::iterator it = proxyFd2InfoMapM.find(theConnection->getFd());
+    int proxyFd = theConnection->getFd();
+    LOG_DEBUG("proxy client input. fd: " << proxyFd);
+    ConnectionMap::iterator it = proxyFd2InfoMapM.find(proxyFd);
     if (it == proxyFd2InfoMapM.end()){
         theConnection->close();
-        LOG_WARN("no peer connection found. close proxy: " << theConnection->getFd());
+        LOG_WARN("no peer connection found. close proxy: " << proxyFd);
         return;
     }
 
-    if (it->second.peerConnectionM->isClose()){
+    SocketConnectionPtr peerConnection = it->second.peerConnectionM;
+    if (peerConnection->isClose()){
         theConnection->close();
-        LOG_WARN("peer connection closed. close proxy: " << theConnection->getFd());
+        LOG_WARN("peer connection closed. close proxy: " << proxyFd);
         return;
     }
 
+	bool canWrite = peerConnection->isWBufferHealthy();
     char buffer[2048] = {0};
-    while(true){
+    while(canWrite){
         unsigned len = theConnection->getRBufferSize();
-        if (len == 0) {return;}
+        if (len == 0) {break;}
         if (len > 1024){len = 1024;}
         
         ProxyReq msg(0);
-        msg.proxyFd = theConnection->getFd();
+        msg.proxyFd = proxyFd;
         theConnection->getnInput(buffer, len);
         msg.payload.valueM.assign(buffer, len);
-        it->second.peerConnectionM->sendMsg(msg);
-        LOG_DEBUG("ProxyReq len:" << msg.length << ". fd: " << theConnection->getFd());
+        peerConnection->sendMsg(msg);
+        canWrite = peerConnection->isWBufferHealthy();
+        LOG_DEBUG("ProxyReq len:" << msg.length << ". fd: " << proxyFd);
+    }
+
+    if (!canWrite && !peerConnection->hasWatcher(proxyFd))
+    {
+        peerConnection->setLowWaterMarkWatcher(proxyFd, new Watcher(boost::bind(
+            &TunnelProxyProtocol::asynHandleInput, proxyProtocolM, proxyFd, theConnection)));
     }
 }
 
 //-----------------------------------------------------------------------------
 
-void TunnelServerProtocol::handleProxyClose(Net::Connection::SocketConnectionPtr theConnection)
+void TunnelServerProtocol::handleProxyClose(SocketConnectionPtr theConnection)
 {
     LOG_DEBUG("proxy client closed. fd: " << theConnection->getFd());
     ConnectionMap::iterator it = proxyFd2InfoMapM.find(theConnection->getFd());
@@ -208,7 +238,7 @@ void TunnelServerProtocol::handleProxyClose(Net::Connection::SocketConnectionPtr
 
 //-----------------------------------------------------------------------------
 
-void TunnelServerProtocol::handleProxyConnected(Connection::SocketConnectionPtr theConnection)
+void TunnelServerProtocol::handleProxyConnected(SocketConnectionPtr theConnection)
 {
     LOG_DEBUG("proxy client connected. fd: " << theConnection->getFd());
     if (peerConnectionSetM.empty())
@@ -222,15 +252,10 @@ void TunnelServerProtocol::handleProxyConnected(Connection::SocketConnectionPtr 
     conPair.peerConnectionM = *peerConnectionSetM.begin();
     proxyFd2InfoMapM[theConnection->getFd()] = conPair;
 
-    NewConnection msg;
-    msg.init();
+    NewConnection msg(0);
     msg.proxyFd = theConnection->getFd();
     msg.messageType = NewConnection::ID;
-
-    char buffer[NewConnection::MIN_BYTES] = {0};
-    unsigned endIndex = 0;
-    msg.encode(buffer, NewConnection::MIN_BYTES, endIndex);
-    conPair.peerConnectionM->sendn(buffer, endIndex);
+    conPair.peerConnectionM->sendMsg(msg);
 }
 
 
