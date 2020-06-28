@@ -91,6 +91,10 @@ void TunnelClientProtocol::handleInput(Connection::SocketConnectionPtr theConnec
                 continue;
             }
 
+            LOG_DEBUG("NewConnection, winSize:" << msg.winSize << ", proxyFd:" << msg.proxyFd);
+            SocketConnectionPtr connection = client->getConnection();
+            connection->setUpperData((void*)(uintptr_t)msg.winSize);
+
             ProxyToConnectionMap::iterator it = proxyToConnectionM.find(msg.proxyFd);
             if (it != proxyToConnectionM.end()){
                 LOG_WARN("dup client connection found. del");
@@ -117,17 +121,18 @@ void TunnelClientProtocol::handleInput(Connection::SocketConnectionPtr theConnec
             connectionToProxyM.erase(client);
             continue;
         }
-        else if (RProxySlowDown::ID == header.messageType) {
-            LOG_DEBUG("RProxySlowDown downflow, proxyFd:" << proxyFd);
-            TcpClient* client = it->second;
-            client->getConnection()->setUpperData((void*)1);
-            continue;
-        }
-        else if (RProxySpeedUp::ID == header.messageType) {
-            LOG_DEBUG("RProxySpeedUp downflow, proxyFd:" << proxyFd);
+        else if (SyncWinSize::ID == header.messageType) {
+            SyncWinSize msg;
+            decodeLength = 0;
+            if (msg.decode(buffer, length, decodeLength) != SUCCESS_E) {
+                LOG_ERROR("decode SyncWinSize error");
+                theConnection->close();
+                return;
+            }
+            LOG_DEBUG("downflow SyncWinSize, winSize:" << msg.winSize << ", proxyFd:" << proxyFd);
             TcpClient* client = it->second;
             SocketConnectionPtr con = client->getConnection();
-            con->setUpperData((void*)0);
+            con->setUpperData((void*)(uintptr_t)msg.winSize);
             client->getProtocol()->asynHandleInput(con->getFd(), con);
             continue;
         }
@@ -150,23 +155,6 @@ void TunnelClientProtocol::handleInput(Connection::SocketConnectionPtr theConnec
 
             TcpClient* client = it->second;
             SocketConnectionPtr connection = client->getConnection();
-            bool canWrite = connection->isWBufferHealthy();
-            if (!canWrite){
-                LOG_WARN("throttled upflow, proxyFd:" << proxyFd);
-                RProxySlowDown slowDown(0);
-                slowDown.proxyFd = proxyFd;
-                theConnection->sendMsg(slowDown);
-
-                if (!connection->hasWatcher(proxyFd))
-                {
-                   connection->setLowWaterMarkWatcher(proxyFd, new Watcher([theConnection, proxyFd](){
-                        LOG_DEBUG("throttled upflow recovered, proxyFd:" << proxyFd);
-                        RProxySpeedUp speedUp(0);
-                        speedUp.proxyFd = proxyFd;
-                        theConnection->sendMsg(speedUp);
-                    }));
-                }
-            }
 
             string& payload = msg.payload.valueM;
             unsigned sent = connection->sendn(payload.c_str(), payload.length());
@@ -235,10 +223,6 @@ void TunnelClientProtocol::handleHeartbeat(Connection::SocketConnectionPtr theCo
 
 void TunnelClientProtocol::handleProxyInput(Connection::SocketConnectionPtr theConnection)
 {
-    if (theConnection->getUpperData() != NULL){
-        LOG_DEBUG("Connection throttled, fd:" << theConnection->getFd());
-        return;
-    }
     TcpClient* client = theConnection->getClient();
     ConnectionToProxyFdMap::iterator it = connectionToProxyM.find(client);
     if (it == connectionToProxyM.end())
@@ -254,13 +238,18 @@ void TunnelClientProtocol::handleProxyInput(Connection::SocketConnectionPtr theC
     }
     int proxyFd = it->second;
 
+
+    uintptr_t winSize = (uintptr_t)theConnection->getUpperData();
+
     SocketConnectionPtr peerConnection = client2ServerM->getConnection();
 	bool canWrite = peerConnection->isWBufferHealthy();
     char buffer[2048] = {0};
-    while(canWrite){
+    while(canWrite && winSize > 0){
         unsigned len = theConnection->getRBufferSize();
-        if (len == 0) {return;}
+        if (len == 0) {break;}
+        if (len > winSize) {len = winSize;}
         if (len > 1024){len = 1024;}
+        winSize = winSize - len;
         
         ProxyRsp msg(0);
         msg.proxyFd = proxyFd;
@@ -268,14 +257,33 @@ void TunnelClientProtocol::handleProxyInput(Connection::SocketConnectionPtr theC
         msg.payload.valueM.assign(buffer, len);
         client2ServerM->sendMsg(msg);
         canWrite = peerConnection->isWBufferHealthy();
-        LOG_DEBUG("ProxyRsp len:" << msg.length << ". fd: " << proxyFd);
+        LOG_DEBUG("sent ProxyRsp len:" << msg.length << ", winSize:" << winSize << ". fd: " << proxyFd);
     }
+    theConnection->setUpperData((void*)winSize);
+    LOG_DEBUG("downflow SyncWinSize after sent, winSize:" << winSize << ", proxyFd:" << proxyFd);
 
     if (!canWrite && !peerConnection->hasWatcher(proxyFd))
     {
         peerConnection->setLowWaterMarkWatcher(theConnection->getFd(), new Watcher(boost::bind(
             &TunnelProxyClientProtocol::asynHandleInput, theConnection->getProtocol(), theConnection->getFd(), theConnection)));
     }
+}
+
+void TunnelClientProtocol::handleProxySent(Connection::SocketConnectionPtr theConnection)
+{
+    TcpClient* client = theConnection->getClient();
+    ConnectionToProxyFdMap::iterator it = connectionToProxyM.find(client);
+    if (it == connectionToProxyM.end())
+    {
+        theConnection->close();
+        LOG_ERROR("client should be deleted. fd:" << theConnection->getFd());
+        return;
+    }
+
+    SyncWinSize msg(0);
+    msg.proxyFd = it->second;
+    msg.winSize = theConnection->getWBufferSpace();
+    client2ServerM->sendMsg(msg);
 }
 
 //-----------------------------------------------------------------------------
@@ -317,6 +325,11 @@ void TunnelClientProtocol::handleProxyConnected(Connection::SocketConnectionPtr 
         LOG_ERROR("client should be deleted. fd:" << theConnection->getFd());
         return;
     }
+
+    SyncWinSize msg(0);
+    msg.proxyFd = it->second;
+    msg.winSize = theConnection->getWBufferSpace();
+    client2ServerM->sendMsg(msg);
 }
 
 //-----------------------------------------------------------------------------

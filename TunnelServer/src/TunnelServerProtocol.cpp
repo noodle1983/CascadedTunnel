@@ -75,22 +75,25 @@ void TunnelServerProtocol::handleInput(SocketConnectionPtr theConnection)
             LOG_WARN("no proxy connection found. ignore");
             continue;
         }
+        else if (SyncWinSize::ID == header.messageType) {
+            SyncWinSize msg;
+            decodeLength = 0;
+            if (msg.decode(buffer, length, decodeLength) != SUCCESS_E) {
+                LOG_ERROR("decode SyncWinSize error");
+                theConnection->close();
+                return;
+            }
+
+            LOG_DEBUG("upflow SyncWinSize, winSize:" << msg.winSize << ", proxyFd:" << proxyFd);
+            SocketConnectionPtr con = it->second.proxyConnectionM;
+            con->setUpperData((void*)(uintptr_t)msg.winSize.valueM);
+            con->getProtocol()->asynHandleInput(proxyFd, con);
+            continue;
+        }
         else if (RProxyConClose::ID == header.messageType) {
             LOG_DEBUG("RProxyConClose:" << proxyFd);
             it->second.proxyConnectionM->setUpperData((void*)0);
             it->second.proxyConnectionM->close();
-            continue;
-        }
-        else if (RProxySlowDown::ID == header.messageType) {
-            LOG_DEBUG("UpDataSlowDown upflow, proxyFd:" << proxyFd);
-            it->second.proxyConnectionM->setUpperData((void*)1);
-            continue;
-        }
-        else if (RProxySpeedUp::ID == header.messageType) {
-            LOG_DEBUG("UpDataSpeedUp upflow recovered, proxyFd:" << proxyFd);
-            SocketConnectionPtr con = it->second.proxyConnectionM;
-            con->setUpperData((void*)0);
-            con->getProtocol()->asynHandleInput(con->getFd(), con);
             continue;
         }
         else if (ProxyRsp::ID == header.messageType) {
@@ -104,24 +107,6 @@ void TunnelServerProtocol::handleInput(SocketConnectionPtr theConnection)
             }
 
             SocketConnectionPtr proxyConnection = it->second.proxyConnectionM;
-            bool canWrite = proxyConnection->isWBufferHealthy();
-            if (!canWrite){
-                LOG_WARN("throttled downflow, proxyFd:" << proxyFd);
-                RProxySlowDown slowDown(0);
-                slowDown.proxyFd = proxyFd;
-                theConnection->sendMsg(slowDown);
-
-                if (!proxyConnection->hasWatcher(proxyFd))
-                {
-                    proxyConnection->setLowWaterMarkWatcher(proxyFd, new Watcher([theConnection, proxyFd](){
-                        LOG_WARN("throttled downflow recovered, proxyFd:" << proxyFd);
-                        RProxySpeedUp speedUp(0);
-                        speedUp.proxyFd = proxyFd;
-                        theConnection->sendMsg(speedUp);
-                    }));
-                }
-            }
-
             unsigned len = proxyConnection->sendn(msg.payload.valueM.c_str(), msg.payload.valueM.length()); 
             if (len != msg.payload.valueM.length()) {
                 LOG_ERROR("speed mismatch!!! please enlarge buffer");
@@ -196,11 +181,6 @@ void TunnelServerProtocol::handleHeartbeat(SocketConnectionPtr theConnection)
 
 void TunnelServerProtocol::handleProxyInput(SocketConnectionPtr theConnection)
 {
-    if (theConnection->getUpperData() != NULL){
-        LOG_DEBUG("Upper Connection throttled, fd:" << theConnection->getFd());
-        return;
-    }
-
     int proxyFd = theConnection->getFd();
     LOG_DEBUG("proxy client input. fd: " << proxyFd);
     ConnectionMap::iterator it = proxyFd2InfoMapM.find(proxyFd);
@@ -217,12 +197,15 @@ void TunnelServerProtocol::handleProxyInput(SocketConnectionPtr theConnection)
         return;
     }
 
+    uintptr_t winSize = (uintptr_t)(theConnection->getUpperData());
 	bool canWrite = peerConnection->isWBufferHealthy();
     char buffer[2048] = {0};
-    while(canWrite){
+    while(canWrite && winSize > 0){
         unsigned len = theConnection->getRBufferSize();
         if (len == 0) {break;}
+        if (len > winSize){len = winSize;}
         if (len > 1024){len = 1024;}
+        winSize -= len;
         
         ProxyReq msg(0);
         msg.proxyFd = proxyFd;
@@ -230,14 +213,33 @@ void TunnelServerProtocol::handleProxyInput(SocketConnectionPtr theConnection)
         msg.payload.valueM.assign(buffer, len);
         peerConnection->sendMsg(msg);
         canWrite = peerConnection->isWBufferHealthy();
-        LOG_DEBUG("ProxyReq len:" << msg.length << ". fd: " << proxyFd);
+        LOG_DEBUG("ProxyReq len:" << msg.length << ", winSize:" << winSize << ". fd: " << proxyFd);
     }
+    theConnection->setUpperData((void*)(uintptr_t)winSize);
+    LOG_DEBUG("upflow SyncWinSize after sent, winSize:" << winSize << ", proxyFd:" << proxyFd);
 
     if (!canWrite && !peerConnection->hasWatcher(proxyFd))
     {
         peerConnection->setLowWaterMarkWatcher(proxyFd, new Watcher(boost::bind(
             &TunnelProxyProtocol::asynHandleInput, proxyProtocolM, proxyFd, theConnection)));
     }
+}
+
+
+//-----------------------------------------------------------------------------
+
+void TunnelServerProtocol::handleProxySent(SocketConnectionPtr theConnection)
+{
+    ConnectionMap::iterator it = proxyFd2InfoMapM.find(theConnection->getFd());
+    if (it == proxyFd2InfoMapM.end()) {
+        return;
+    }
+
+    SyncWinSize msg(0);
+    msg.proxyFd = theConnection->getFd();
+    msg.winSize = theConnection->getWBufferSpace();
+    it->second.peerConnectionM->sendMsg(msg);
+    LOG_DEBUG("update downflow SyncWinSize, winSize:" << msg.winSize << ", proxyFd:" << theConnection->getFd());
 }
 
 //-----------------------------------------------------------------------------
@@ -277,7 +279,7 @@ void TunnelServerProtocol::handleProxyConnected(SocketConnectionPtr theConnectio
 
     NewConnection msg(0);
     msg.proxyFd = theConnection->getFd();
-    msg.messageType = NewConnection::ID;
+    msg.winSize = theConnection->getWBufferSpace();
     conPair.peerConnectionM->sendMsg(msg);
 }
 

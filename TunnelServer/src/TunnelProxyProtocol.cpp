@@ -31,6 +31,13 @@ void TunnelProxyProtocol::handleInput(Connection::SocketConnectionPtr theConnect
 
 //-----------------------------------------------------------------------------
 
+void TunnelProxyProtocol::handleSent(Connection::SocketConnectionPtr theConnection)
+{
+    serverProtocolM->handleProxySent(theConnection);
+}
+
+//-----------------------------------------------------------------------------
+
 void TunnelProxyProtocol::handleClose(Net::Connection::SocketConnectionPtr theConnection)
 {
     serverProtocolM->handleProxyClose(theConnection);
@@ -68,7 +75,7 @@ int TunnelProxyProtocol::getRBufferSizePower()
 
 int TunnelProxyProtocol::getWBufferSizePower()
 {
-    return 17;
+    return 13;
 }
 
 //-----------------------------------------------------------------------------

@@ -57,6 +57,11 @@ namespace Net
             return processorM->process(theFd + 1,
                     &IProtocol::handleHeartbeat, this, theConnection);
         }
+        int asynHandleSent(const int theFd, Connection::SocketConnectionPtr theConnection) 
+        {
+            return processorM->process(theFd + 1,
+                    &IProtocol::handleSent, this, theConnection);
+        }
 		inline min_heap_item_t* addLocalTimer(
 				const int theFd,
 				const struct timeval& theInterval, 
@@ -74,8 +79,9 @@ namespace Net
 		}
         
         virtual void handleInput(Net::Connection::SocketConnectionPtr theConnection) = 0;
-        virtual void handleClose(Net::Connection::SocketConnectionPtr theConnection) {}
-        virtual void handleConnected(Connection::SocketConnectionPtr theConnection) {}
+        virtual void handleSent(Net::Connection::SocketConnectionPtr theConnection){};
+        virtual void handleClose(Net::Connection::SocketConnectionPtr theConnection){}
+        virtual void handleConnected(Connection::SocketConnectionPtr theConnection){}
         /*
          * send heartbeat msg in heartbeat 
          * or close the Connection if the connection is no response.

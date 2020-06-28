@@ -17,6 +17,7 @@ MessageList
     RProxySpeedUp               0x07
     ProxyReq                    0x08
     ProxyRsp                    0x09
+    SyncWinSize                 0x0a
 
 ##############################################
 #MessageList
@@ -50,6 +51,7 @@ Message  HeartbeatRsp
 
 Message NewConnection 
     include Header
+    WinSize Uint32      M
 
 Message ConnectionClosed
     include Header
@@ -71,3 +73,6 @@ Message ProxyRsp
     include Header
     Payload          PlainString      M
 
+Message SyncWinSize
+    include Header
+    WinSize Uint32      M

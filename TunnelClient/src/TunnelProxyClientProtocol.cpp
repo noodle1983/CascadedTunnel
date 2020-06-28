@@ -35,6 +35,15 @@ void TunnelProxyClientProtocol::handleInput(Connection::SocketConnectionPtr theC
 
 //-----------------------------------------------------------------------------
 
+void TunnelProxyClientProtocol::handleSent(Connection::SocketConnectionPtr theConnection)
+{
+    clientProtocolM->handleProxySent(theConnection);
+	return ;
+}
+
+
+//-----------------------------------------------------------------------------
+
 void TunnelProxyClientProtocol::handleClose(Net::Connection::SocketConnectionPtr theConnection)
 {
     clientProtocolM->handleProxyClose(theConnection);

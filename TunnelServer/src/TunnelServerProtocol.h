@@ -42,6 +42,7 @@ namespace Protocol
 
         void setProxyProtocol(TunnelProxyProtocol* theProtocol){proxyProtocolM = theProtocol;}
         void handleProxyInput(Connection::SocketConnectionPtr theConnection);
+        void handleProxySent(Connection::SocketConnectionPtr theConnection);
         void handleProxyClose(Net::Connection::SocketConnectionPtr theConnection); 
         void handleProxyConnected(Connection::SocketConnectionPtr theConnection);
 

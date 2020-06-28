@@ -37,6 +37,7 @@ namespace Protocol
         void handleHeartbeat(Connection::SocketConnectionPtr theConnection);
 
         void handleProxyInput(Connection::SocketConnectionPtr theConnection);
+        void handleProxySent(Connection::SocketConnectionPtr theConnection);
         void handleProxyClose(Net::Connection::SocketConnectionPtr theConnection); 
         void handleProxyConnected(Connection::SocketConnectionPtr theConnection);
 

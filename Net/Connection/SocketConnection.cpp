@@ -391,6 +391,7 @@ void SocketConnection::onWrite(int theFd, short theEvt)
         outputQueueM.commitRead(writeLen);
         peekLen = outputQueueM.peek(buffer, sizeof(buffer));
     }
+    protocolM->asynHandleSent(fdM, selfM);
 
     Utility::BufferStatus bufferStatus = outputQueueM.getStatus();
     if (bufferStatus == Utility::BufferLowE)

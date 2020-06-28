@@ -28,6 +28,7 @@ namespace Protocol
         ~TunnelProxyClientProtocol();
 
         void handleInput(Connection::SocketConnectionPtr theConnection);
+        void handleSent(Connection::SocketConnectionPtr theConnection);
         void handleClose(Net::Connection::SocketConnectionPtr theConnection); 
         void handleConnected(Connection::SocketConnectionPtr theConnection);
 
