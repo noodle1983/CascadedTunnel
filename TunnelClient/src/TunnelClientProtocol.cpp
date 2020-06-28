@@ -282,6 +282,7 @@ void TunnelClientProtocol::handleProxySent(Connection::SocketConnectionPtr theCo
     msg.proxyFd = it->second;
     msg.winOffset = theConnection->getWBufferSpace() + theConnection->getWritenBytes();
     client2ServerM->sendMsg(msg);
+    LOG_DEBUG("update upflow SyncWinSize, winOffset:" << msg.winOffset << ", proxyFd:" << it->second);
 }
 
 //-----------------------------------------------------------------------------
@@ -328,6 +329,7 @@ void TunnelClientProtocol::handleProxyConnected(Connection::SocketConnectionPtr 
     msg.proxyFd = it->second;
     msg.winOffset = theConnection->getWBufferSpace() + theConnection->getWritenBytes();
     client2ServerM->sendMsg(msg);
+    LOG_DEBUG("update upflow SyncWinSize, winOffset:" << msg.winOffset << ", proxyFd:" << it->second);
 }
 
 //-----------------------------------------------------------------------------
