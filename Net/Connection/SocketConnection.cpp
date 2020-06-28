@@ -50,6 +50,8 @@ SocketConnection::SocketConnection(
     , stopReadingM(false)
     , clientM(NULL)
     , isConnectedNotified(true)
+    , writenBytesM(0)
+    , readedBytesM(0)
     , uppperDataM(NULL)
 {
     readEvtM = reactorM->newEvent(fdM, EV_READ, on_read, this);
@@ -81,6 +83,8 @@ SocketConnection::SocketConnection(
     , stopReadingM(false)
     , clientM(theClient)
     , isConnectedNotified(false)
+    , writenBytesM(0)
+    , readedBytesM(0)
     , uppperDataM(NULL)
 {
     readEvtM = reactorM->newEvent(fdM, EV_READ, on_read, this);
@@ -227,6 +231,7 @@ unsigned SocketConnection::getInput(char* const theBuffer, const unsigned theLen
             //processorM->process(fdM, &SocketConnection::addReadEvent, selfM);
         }
     }
+    readedBytesM += len;
     return len;
 }
 
@@ -251,6 +256,7 @@ unsigned SocketConnection::getnInput(char* const theBuffer, const unsigned theLe
             //processorM->process(fdM, &SocketConnection::addReadEvent, selfM);
         }
     }
+    readedBytesM += len;
     return len;
 }
 
@@ -284,6 +290,7 @@ unsigned SocketConnection::sendn(const char* const theBuffer, const unsigned the
         LOG_WARN("outage of the connection's write queue!");
     }
     processorM->process(fdM, &SocketConnection::addWriteEvent, selfM);
+    writenBytesM += len;
     return len;
 }
 

@@ -51,7 +51,7 @@ Message  HeartbeatRsp
 
 Message NewConnection 
     include Header
-    WinSize Uint32      M
+    WinOffset Uint32      M
 
 Message ConnectionClosed
     include Header
@@ -75,4 +75,4 @@ Message ProxyRsp
 
 Message SyncWinSize
     include Header
-    WinSize Uint32      M
+    WinOffset Uint32      M

@@ -84,9 +84,9 @@ void TunnelServerProtocol::handleInput(SocketConnectionPtr theConnection)
                 return;
             }
 
-            LOG_DEBUG("upflow SyncWinSize, winSize:" << msg.winSize << ", proxyFd:" << proxyFd);
+            LOG_DEBUG("upflow SyncWinSize, winOffset:" << msg.winOffset << ", proxyFd:" << proxyFd);
             SocketConnectionPtr con = it->second.proxyConnectionM;
-            con->setUpperData((void*)(uintptr_t)msg.winSize.valueM);
+            con->setUpperData((void*)(uintptr_t)msg.winOffset.valueM);
             con->getProtocol()->asynHandleInput(proxyFd, con);
             continue;
         }
@@ -197,11 +197,11 @@ void TunnelServerProtocol::handleProxyInput(SocketConnectionPtr theConnection)
         return;
     }
 
-    uintptr_t winSize = (uintptr_t)(theConnection->getUpperData());
+    int32_t winSize = (uint32_t)(uintptr_t)(theConnection->getUpperData()) - (uint32_t)theConnection->getReadedBytes();
 	bool canWrite = peerConnection->isWBufferHealthy();
     char buffer[2048] = {0};
     while(canWrite && winSize > 0){
-        unsigned len = theConnection->getRBufferSize();
+        int32_t len = (int32_t)theConnection->getRBufferSize();
         if (len == 0) {break;}
         if (len > winSize){len = winSize;}
         if (len > 1024){len = 1024;}
@@ -215,7 +215,6 @@ void TunnelServerProtocol::handleProxyInput(SocketConnectionPtr theConnection)
         canWrite = peerConnection->isWBufferHealthy();
         LOG_DEBUG("ProxyReq len:" << msg.length << ", winSize:" << winSize << ". fd: " << proxyFd);
     }
-    theConnection->setUpperData((void*)(uintptr_t)winSize);
     LOG_DEBUG("upflow SyncWinSize after sent, winSize:" << winSize << ", proxyFd:" << proxyFd);
 
     if (!canWrite && !peerConnection->hasWatcher(proxyFd))
@@ -237,9 +236,9 @@ void TunnelServerProtocol::handleProxySent(SocketConnectionPtr theConnection)
 
     SyncWinSize msg(0);
     msg.proxyFd = theConnection->getFd();
-    msg.winSize = theConnection->getWBufferSpace();
+    msg.winOffset = theConnection->getWBufferSpace() + theConnection->getWritenBytes();
     it->second.peerConnectionM->sendMsg(msg);
-    LOG_DEBUG("update downflow SyncWinSize, winSize:" << msg.winSize << ", proxyFd:" << theConnection->getFd());
+    LOG_DEBUG("update downflow SyncWinSize, winOffset:" << msg.winOffset << ", proxyFd:" << theConnection->getFd());
 }
 
 //-----------------------------------------------------------------------------
@@ -279,7 +278,7 @@ void TunnelServerProtocol::handleProxyConnected(SocketConnectionPtr theConnectio
 
     NewConnection msg(0);
     msg.proxyFd = theConnection->getFd();
-    msg.winSize = theConnection->getWBufferSpace();
+    msg.winOffset = theConnection->getWBufferSpace();
     conPair.peerConnectionM->sendMsg(msg);
 }
 

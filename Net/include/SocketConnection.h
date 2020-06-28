@@ -75,6 +75,8 @@ namespace Connection
         unsigned getRBufferSize(){return inputQueueM.size();};
         unsigned getWBufferSize(){return outputQueueM.size();};
         unsigned getWBufferSpace(){return outputQueueM.unusedSize();};
+        uint64_t getReadedBytes(){return readedBytesM;}
+        uint64_t getWritenBytes(){return writenBytesM;}
 
         unsigned getInput(char* const theBuffer, const unsigned theLen);
         unsigned getnInput(char* const theBuffer, const unsigned theLen);
@@ -167,6 +169,10 @@ namespace Connection
 		struct sockaddr_in peerAddrM;
 		struct sockaddr_in localAddrM;
         
+        //counter
+        uint64_t writenBytesM;
+        uint64_t readedBytesM;
+
         //upper data
         void* uppperDataM;
     };
