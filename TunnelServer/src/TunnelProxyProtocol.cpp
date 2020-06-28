@@ -68,7 +68,7 @@ int TunnelProxyProtocol::getRBufferSizePower()
 
 int TunnelProxyProtocol::getWBufferSizePower()
 {
-    return 13;
+    return 17;
 }
 
 //-----------------------------------------------------------------------------

@@ -37,7 +37,7 @@
 			<ValueType>Int</ValueType>
 			<ValueRange>1-65535</ValueRange>
 			<DefaultValue>5466</DefaultValue>
-			<Value>5466</Value>
+			<Value>22</Value>
 		</Parameter>
 	</Group>
 

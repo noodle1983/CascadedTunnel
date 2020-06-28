@@ -82,19 +82,19 @@ void TunnelServerProtocol::handleInput(SocketConnectionPtr theConnection)
             continue;
         }
         else if (RProxySlowDown::ID == header.messageType) {
-            LOG_DEBUG("UpDataSlowDown, proxyFd:" << proxyFd);
+            LOG_DEBUG("UpDataSlowDown upflow, proxyFd:" << proxyFd);
             it->second.proxyConnectionM->setUpperData((void*)1);
             continue;
         }
         else if (RProxySpeedUp::ID == header.messageType) {
-            LOG_DEBUG("UpDataSpeedUp, proxyFd:" << proxyFd);
+            LOG_DEBUG("UpDataSpeedUp upflow recovered, proxyFd:" << proxyFd);
             SocketConnectionPtr con = it->second.proxyConnectionM;
             con->setUpperData((void*)0);
             con->getProtocol()->asynHandleInput(con->getFd(), con);
             continue;
         }
         else if (ProxyRsp::ID == header.messageType) {
-            LOG_DEBUG("ProxyRsp, proxyFd:" << proxyFd);
+            LOG_DEBUG("ProxyRsp, len:" << length << ", proxyFd:" << proxyFd);
             ProxyRsp msg;
             decodeLength = 0;
             if (msg.decode(buffer, length, decodeLength) != SUCCESS_E) {
@@ -106,6 +106,7 @@ void TunnelServerProtocol::handleInput(SocketConnectionPtr theConnection)
             SocketConnectionPtr proxyConnection = it->second.proxyConnectionM;
             bool canWrite = proxyConnection->isWBufferHealthy();
             if (!canWrite){
+                LOG_WARN("throttled downflow, proxyFd:" << proxyFd);
                 RProxySlowDown slowDown(0);
                 slowDown.proxyFd = proxyFd;
                 theConnection->sendMsg(slowDown);
@@ -113,6 +114,7 @@ void TunnelServerProtocol::handleInput(SocketConnectionPtr theConnection)
                 if (!proxyConnection->hasWatcher(proxyFd))
                 {
                     proxyConnection->setLowWaterMarkWatcher(proxyFd, new Watcher([theConnection, proxyFd](){
+                        LOG_WARN("throttled downflow recovered, proxyFd:" << proxyFd);
                         RProxySpeedUp speedUp(0);
                         speedUp.proxyFd = proxyFd;
                         theConnection->sendMsg(speedUp);

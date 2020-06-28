@@ -118,13 +118,13 @@ void TunnelClientProtocol::handleInput(Connection::SocketConnectionPtr theConnec
             continue;
         }
         else if (RProxySlowDown::ID == header.messageType) {
-            LOG_DEBUG("RProxySlowDown, proxyFd:" << proxyFd);
+            LOG_DEBUG("RProxySlowDown downflow, proxyFd:" << proxyFd);
             TcpClient* client = it->second;
             client->getConnection()->setUpperData((void*)1);
             continue;
         }
         else if (RProxySpeedUp::ID == header.messageType) {
-            LOG_DEBUG("RProxySpeedUp, proxyFd:" << proxyFd);
+            LOG_DEBUG("RProxySpeedUp downflow, proxyFd:" << proxyFd);
             TcpClient* client = it->second;
             SocketConnectionPtr con = client->getConnection();
             con->setUpperData((void*)0);
@@ -132,7 +132,7 @@ void TunnelClientProtocol::handleInput(Connection::SocketConnectionPtr theConnec
             continue;
         }
         else if (ProxyReq::ID == header.messageType) {
-            LOG_DEBUG("ProxyReq, proxyFd:" << proxyFd);
+            LOG_DEBUG("ProxyReq, len:" << length << ", proxyFd:" << proxyFd);
             ProxyReq msg;
             decodeLength = 0;
             if (msg.decode(buffer, length, decodeLength) != SUCCESS_E) {
@@ -152,6 +152,7 @@ void TunnelClientProtocol::handleInput(Connection::SocketConnectionPtr theConnec
             SocketConnectionPtr connection = client->getConnection();
             bool canWrite = connection->isWBufferHealthy();
             if (!canWrite){
+                LOG_WARN("throttled upflow, proxyFd:" << proxyFd);
                 RProxySlowDown slowDown(0);
                 slowDown.proxyFd = proxyFd;
                 theConnection->sendMsg(slowDown);
@@ -159,6 +160,7 @@ void TunnelClientProtocol::handleInput(Connection::SocketConnectionPtr theConnec
                 if (!connection->hasWatcher(proxyFd))
                 {
                    connection->setLowWaterMarkWatcher(proxyFd, new Watcher([theConnection, proxyFd](){
+                        LOG_DEBUG("throttled upflow recovered, proxyFd:" << proxyFd);
                         RProxySpeedUp speedUp(0);
                         speedUp.proxyFd = proxyFd;
                         theConnection->sendMsg(speedUp);
@@ -266,7 +268,7 @@ void TunnelClientProtocol::handleProxyInput(Connection::SocketConnectionPtr theC
         msg.payload.valueM.assign(buffer, len);
         client2ServerM->sendMsg(msg);
         canWrite = peerConnection->isWBufferHealthy();
-        LOG_DEBUG("ProxyReq len:" << msg.length << ". fd: " << proxyFd);
+        LOG_DEBUG("ProxyRsp len:" << msg.length << ". fd: " << proxyFd);
     }
 
     if (!canWrite && !peerConnection->hasWatcher(proxyFd))
@@ -342,7 +344,7 @@ int TunnelClientProtocol::getRBufferSizePower()
 
 int TunnelClientProtocol::getWBufferSizePower()
 {
-    return 13;
+    return 17;
 }
 
 //-----------------------------------------------------------------------------
