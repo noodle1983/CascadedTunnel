@@ -170,7 +170,8 @@ void TunnelClientProtocol::handleInput(Connection::SocketConnectionPtr theConnec
             unsigned sent = connection->sendn(payload.c_str(), payload.length());
             if(sent != payload.length())
             {
-                LOG_WARN("data dropped! fd:" << msg.proxyFd << ", sent:" << sent);
+                LOG_ERROR("data dropped! fd:" << msg.proxyFd << ", sent:" << sent);
+                theConnection->close();
                 continue;
             }
         }
@@ -249,18 +250,29 @@ void TunnelClientProtocol::handleProxyInput(Connection::SocketConnectionPtr theC
         LOG_WARN("peer connection closed. close proxy: " << theConnection->getFd());
         return;
     }
+    int proxyFd = it->second;
 
+    SocketConnectionPtr peerConnection = client2ServerM->getConnection();
+	bool canWrite = peerConnection->isWBufferHealthy();
     char buffer[2048] = {0};
-    while(true){
+    while(canWrite){
         unsigned len = theConnection->getRBufferSize();
         if (len == 0) {return;}
         if (len > 1024){len = 1024;}
         
         ProxyRsp msg(0);
-        msg.proxyFd = it->second;
+        msg.proxyFd = proxyFd;
         theConnection->getnInput(buffer, len);
         msg.payload.valueM.assign(buffer, len);
         client2ServerM->sendMsg(msg);
+        canWrite = peerConnection->isWBufferHealthy();
+        LOG_DEBUG("ProxyReq len:" << msg.length << ". fd: " << proxyFd);
+    }
+
+    if (!canWrite && !peerConnection->hasWatcher(proxyFd))
+    {
+        peerConnection->setLowWaterMarkWatcher(theConnection->getFd(), new Watcher(boost::bind(
+            &TunnelProxyClientProtocol::asynHandleInput, theConnection->getProtocol(), theConnection->getFd(), theConnection)));
     }
 }
 
