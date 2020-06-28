@@ -77,7 +77,20 @@ void TunnelServerProtocol::handleInput(SocketConnectionPtr theConnection)
         }
         else if (RProxyConClose::ID == header.messageType) {
             LOG_DEBUG("RProxyConClose:" << proxyFd);
+            it->second.proxyConnectionM->setUpperData((void*)0);
             it->second.proxyConnectionM->close();
+            continue;
+        }
+        else if (RProxySlowDown::ID == header.messageType) {
+            LOG_DEBUG("UpDataSlowDown, proxyFd:" << proxyFd);
+            it->second.proxyConnectionM->setUpperData((void*)1);
+            continue;
+        }
+        else if (RProxySpeedUp::ID == header.messageType) {
+            LOG_DEBUG("UpDataSpeedUp, proxyFd:" << proxyFd);
+            SocketConnectionPtr con = it->second.proxyConnectionM;
+            con->setUpperData((void*)0);
+            con->getProtocol()->asynHandleInput(con->getFd(), con);
             continue;
         }
         else if (ProxyRsp::ID == header.messageType) {
@@ -97,7 +110,7 @@ void TunnelServerProtocol::handleInput(SocketConnectionPtr theConnection)
                 slowDown.proxyFd = proxyFd;
                 theConnection->sendMsg(slowDown);
 
-                if (proxyConnection->hasWatcher(proxyFd))
+                if (!proxyConnection->hasWatcher(proxyFd))
                 {
                     proxyConnection->setLowWaterMarkWatcher(proxyFd, new Watcher([theConnection, proxyFd](){
                         RProxySpeedUp speedUp(0);
@@ -109,7 +122,8 @@ void TunnelServerProtocol::handleInput(SocketConnectionPtr theConnection)
 
             unsigned len = proxyConnection->sendn(msg.payload.valueM.c_str(), msg.payload.valueM.length()); 
             if (len != msg.payload.valueM.length()) {
-                LOG_WARN("speed mismatch. ignore");
+                LOG_ERROR("speed mismatch!!! please enlarge buffer");
+                theConnection->close();
                 continue;
             }
 
@@ -138,6 +152,7 @@ void TunnelServerProtocol::handleClose(SocketConnectionPtr theConnection)
         if (it->second.peerConnectionM.get() == theConnection.get())
         {
             invalidFds.push_back(it->first);
+            it->second.proxyConnectionM->setUpperData((void*)0);
             it->second.proxyConnectionM->close();
         }
     }
@@ -179,6 +194,11 @@ void TunnelServerProtocol::handleHeartbeat(SocketConnectionPtr theConnection)
 
 void TunnelServerProtocol::handleProxyInput(SocketConnectionPtr theConnection)
 {
+    if (theConnection->getUpperData() != NULL){
+        LOG_DEBUG("Upper Connection throttled, fd:" << theConnection->getFd());
+        return;
+    }
+
     int proxyFd = theConnection->getFd();
     LOG_DEBUG("proxy client input. fd: " << proxyFd);
     ConnectionMap::iterator it = proxyFd2InfoMapM.find(proxyFd);
@@ -223,6 +243,7 @@ void TunnelServerProtocol::handleProxyInput(SocketConnectionPtr theConnection)
 void TunnelServerProtocol::handleProxyClose(SocketConnectionPtr theConnection)
 {
     LOG_DEBUG("proxy client closed. fd: " << theConnection->getFd());
+    theConnection->setUpperData((void*)0);
     ConnectionMap::iterator it = proxyFd2InfoMapM.find(theConnection->getFd());
     if (it == proxyFd2InfoMapM.end()) {
         return;

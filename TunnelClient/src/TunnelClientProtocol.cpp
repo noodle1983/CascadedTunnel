@@ -13,6 +13,7 @@ using namespace Net::Protocol;
 using namespace Config;
 using namespace Msg;
 using namespace Processor;
+using namespace Net::Connection;
 
 
 //-----------------------------------------------------------------------------
@@ -139,16 +140,34 @@ void TunnelClientProtocol::handleInput(Connection::SocketConnectionPtr theConnec
                 theConnection->close();
                 return;
             }
+            int proxyFd = msg.proxyFd;
 
-            ProxyToConnectionMap::iterator it = proxyToConnectionM.find(msg.proxyFd);
+            ProxyToConnectionMap::iterator it = proxyToConnectionM.find(proxyFd);
             if (it == proxyToConnectionM.end()){
                 LOG_WARN("dup client connection found. del");
                 continue;
             }
 
             TcpClient* client = it->second;
+            SocketConnectionPtr connection = client->getConnection();
+            bool canWrite = connection->isWBufferHealthy();
+            if (!canWrite){
+                RProxySlowDown slowDown(0);
+                slowDown.proxyFd = proxyFd;
+                theConnection->sendMsg(slowDown);
+
+                if (!connection->hasWatcher(proxyFd))
+                {
+                   connection->setLowWaterMarkWatcher(proxyFd, new Watcher([theConnection, proxyFd](){
+                        RProxySpeedUp speedUp(0);
+                        speedUp.proxyFd = proxyFd;
+                        theConnection->sendMsg(speedUp);
+                    }));
+                }
+            }
+
             string& payload = msg.payload.valueM;
-            unsigned sent = client->sendn(payload.c_str(), payload.length());
+            unsigned sent = connection->sendn(payload.c_str(), payload.length());
             if(sent != payload.length())
             {
                 LOG_WARN("data dropped! fd:" << msg.proxyFd << ", sent:" << sent);
@@ -250,7 +269,7 @@ void TunnelClientProtocol::handleProxyInput(Connection::SocketConnectionPtr theC
 void TunnelClientProtocol::handleProxyClose(Net::Connection::SocketConnectionPtr theConnection)
 {
     LOG_DEBUG("proxy client close. fd: " << theConnection->getFd());
-    con->setUpperData((void*)0);
+    theConnection->setUpperData((void*)0);
     TcpClient* client = theConnection->getClient();
     if (client == NULL) {return;}
 
