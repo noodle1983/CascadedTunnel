@@ -4,10 +4,10 @@
 #include "KfifoBuffer.h"
 #include "min_heap.h"
 
-#include <boost/thread.hpp>
-#include <boost/function.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/weak_ptr.hpp>
+#include <mutex>
+#include <functional>
+#include <memory>
+#include <map>
 #include <event.h>
 
 struct timeval;
@@ -32,9 +32,9 @@ namespace Connection
 {
 
     class SocketConnection;
-    typedef boost::shared_ptr<SocketConnection> SocketConnectionPtr;
-    typedef boost::weak_ptr<SocketConnection> SocketConnectionWPtr;
-    typedef boost::function<void ()> Watcher;
+    typedef std::shared_ptr<SocketConnection> SocketConnectionPtr;
+    typedef std::weak_ptr<SocketConnection> SocketConnectionWPtr;
+    typedef std::function<void ()> Watcher;
     typedef std::map<int, Watcher*> WatcherMap;
 
     class SocketConnection
@@ -110,7 +110,7 @@ namespace Connection
             return sendn(buffer, encodeIndex);
         }
     private:
-        friend class boost::function<void ()>;
+        friend class std::function<void ()>;
         void addReadEvent();
         void addWriteEvent();
         void onRead(int theFd, short theEvt);
@@ -148,21 +148,21 @@ namespace Connection
         evutil_socket_t fdM;
 
         //we ensure there is only 1 thread read/write the input queue
-        //boost::mutex inputQueueMutexM;
+        //std::mutex inputQueueMutexM;
         Utility::KfifoBuffer inputQueueM;
-        boost::mutex outputQueueMutexM;
+        std::mutex outputQueueMutexM;
         Utility::KfifoBuffer outputQueueM;
 
         enum Status{ActiveE = 0, CloseE = 1};
         mutable int statusM;
 
-        boost::mutex stopReadingMutexM;
+        std::mutex stopReadingMutexM;
         bool stopReadingM;
-        boost::mutex watcherMutexM;
+        std::mutex watcherMutexM;
         WatcherMap watcherMapM;
 
         Client::TcpClient* clientM;
-        boost::mutex clientMutexM;
+        std::mutex clientMutexM;
         bool isConnectedNotified;
 
 		struct sockaddr_in peerAddrM;

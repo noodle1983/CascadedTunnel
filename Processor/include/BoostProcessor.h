@@ -15,6 +15,7 @@ namespace Protocol
 }
 }
 
+#define PROCESS(fd, ...) process(fd, NEW_JOB(__VA_ARGS__))
 namespace Processor
 {
     class BoostWorker;

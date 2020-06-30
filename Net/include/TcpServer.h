@@ -30,7 +30,7 @@ namespace Server{
         int start();
         void stop();
 
-        int asynAccept(int theFd, short theEvt);
+        void asynAccept(int theFd, short theEvt);
         void onAccept(int theFd, short theEvt);
 
     private:

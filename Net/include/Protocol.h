@@ -2,21 +2,20 @@
 #define PROTOCOL_H
 
 #include "BoostProcessor.h"
-#include <boost/bind/bind.hpp>
-
-using namespace boost::placeholders;
+#include <functional>
+#include <memory>
 
 namespace Net
 {
     namespace Connection
     {
         class SocketConnection;
-        typedef boost::shared_ptr<SocketConnection> SocketConnectionPtr;
+        typedef std::shared_ptr<SocketConnection> SocketConnectionPtr;
     }
     namespace Server
     {
         class UdpServer;
-        typedef boost::shared_ptr<UdpServer> UdpServerPtr;
+        typedef std::shared_ptr<UdpServer> UdpServerPtr;
     }
     class IProtocol
     {

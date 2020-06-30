@@ -85,7 +85,7 @@ Session::~Session()
 
 int Session::asynHandleEvent(const int theEventId)
 {
-    Processor::BoostProcessor::fsmInstance()->process(sessionIdM,
+    Processor::BoostProcessor::fsmInstance()->PROCESS(sessionIdM,
         &Session::handleEvent, this, theEventId);
     return 0;
 }

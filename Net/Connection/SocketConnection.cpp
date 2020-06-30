@@ -12,6 +12,7 @@
 
 
 using namespace Net::Connection;
+using namespace std;
 
 //-----------------------------------------------------------------------------
 
@@ -58,7 +59,7 @@ SocketConnection::SocketConnection(
     writeEvtM = reactorM->newEvent(fdM, EV_WRITE, on_write, this);
     addReadEvent();
     protocolM->asynHandleConnected(fdM, selfM);
-    processorM->process(fdM, &SocketConnection::startHeartbeatTimer, this);
+    processorM->PROCESS(fdM, &SocketConnection::startHeartbeatTimer, this);
 }
 
 //-----------------------------------------------------------------------------
@@ -109,7 +110,7 @@ SocketConnection::~SocketConnection()
 
 void SocketConnection::rmClient()
 {
-    boost::lock_guard<boost::mutex> lock(clientMutexM);
+    lock_guard<mutex> lock(clientMutexM);
     clientM = NULL;
 }
 
@@ -121,7 +122,7 @@ void SocketConnection::addReadEvent()
         return;
     if (-1 == event_add(readEvtM, NULL))
     {
-        processorM->process(fdM, &SocketConnection::addReadEvent, this);
+        processorM->PROCESS(fdM, &SocketConnection::addReadEvent, this);
     }
 }
 
@@ -133,7 +134,7 @@ void SocketConnection::addWriteEvent()
         return;
     if (-1 == event_add(writeEvtM, NULL))
     {
-        processorM->process(fdM, &SocketConnection::addWriteEvent, this);
+        processorM->PROCESS(fdM, &SocketConnection::addWriteEvent, this);
     }
 }
 
@@ -141,7 +142,8 @@ void SocketConnection::addWriteEvent()
 
 int SocketConnection::asynRead(int theFd, short theEvt)
 {
-    return processorM->process(fdM, &SocketConnection::onRead, this, theFd, theEvt);
+    processorM->PROCESS(fdM, &SocketConnection::onRead, this, theFd, theEvt);
+    return 0;
 }
 
 //-----------------------------------------------------------------------------
@@ -155,7 +157,7 @@ void SocketConnection::onRead(int theFd, short theEvt)
     {
         if (!stopReadingM)
         {
-            boost::lock_guard<boost::mutex> lock(stopReadingMutexM);
+            lock_guard<mutex> lock(stopReadingMutexM);
             stopReadingM = true;
         }
         protocolM->asynHandleInput(fdM, selfM);
@@ -200,7 +202,7 @@ void SocketConnection::onRead(int theFd, short theEvt)
             || Utility::BufferNotEnoughE == inputQueueM.getStatus())
     {
         //TRACE("Flow Control:Socket " << fdM << " stop reading.", fdM);
-        boost::lock_guard<boost::mutex> lock(stopReadingMutexM);
+        lock_guard<mutex> lock(stopReadingMutexM);
         stopReadingM = true;
     }
     else
@@ -224,11 +226,11 @@ unsigned SocketConnection::getInput(char* const theBuffer, const unsigned theLen
         if (postBufferStatus == Utility::BufferLowE)
         {
             {
-                boost::lock_guard<boost::mutex> lock(stopReadingMutexM);
+                lock_guard<mutex> lock(stopReadingMutexM);
                 stopReadingM = false;
             }
             asynRead(fdM, 0);
-            //processorM->process(fdM, &SocketConnection::addReadEvent, selfM);
+            //processorM->PROCESS(fdM, &SocketConnection::addReadEvent, selfM);
         }
     }
     readedBytesM += len;
@@ -249,11 +251,11 @@ unsigned SocketConnection::getnInput(char* const theBuffer, const unsigned theLe
         if (postBufferStatus == Utility::BufferLowE)
         {
             {
-                boost::lock_guard<boost::mutex> lock(stopReadingMutexM);
+                lock_guard<mutex> lock(stopReadingMutexM);
                 stopReadingM = false;
             }
             asynRead(fdM, 0);
-            //processorM->process(fdM, &SocketConnection::addReadEvent, selfM);
+            //processorM->PROCESS(fdM, &SocketConnection::addReadEvent, selfM);
         }
     }
     readedBytesM += len;
@@ -282,14 +284,14 @@ unsigned SocketConnection::sendn(const char* const theBuffer, const unsigned the
 
     unsigned len = 0;
     {
-        boost::lock_guard<boost::mutex> lock(outputQueueMutexM);
+        lock_guard<mutex> lock(outputQueueMutexM);
         len = outputQueueM.putn(theBuffer, theLen);
     }
     if (0 == len)
     {
         LOG_WARN("outage of the connection's write queue!");
     }
-    processorM->process(fdM, &SocketConnection::addWriteEvent, selfM);
+    processorM->PROCESS(fdM, &SocketConnection::addWriteEvent, selfM);
     writenBytesM += len;
     return len;
 }
@@ -300,7 +302,8 @@ int SocketConnection::asynWrite(int theFd, short theEvt)
 {
     if (CloseE == statusM)
         return -1;
-    return processorM->process(fdM, &SocketConnection::onWrite, this, theFd, theEvt);
+    processorM->PROCESS(fdM, &SocketConnection::onWrite, this, theFd, theEvt);
+    return 0;
 }
 
 //-----------------------------------------------------------------------------
@@ -317,7 +320,7 @@ void SocketConnection::setLowWaterMarkWatcher(int theFd, Watcher* theWatcher)
 
 	//or set theWatcher and add the write event
 	{
-		boost::lock_guard<boost::mutex> lock(watcherMutexM);
+		lock_guard<mutex> lock(watcherMutexM);
         WatcherMap::iterator it = watcherMapM.find(theFd);
         if (it != watcherMapM.end()){
             delete it->second;
@@ -335,7 +338,7 @@ void SocketConnection::setLowWaterMarkWatcher(int theFd, Watcher* theWatcher)
 
 void SocketConnection::rmLowWaterMarkWatcher(int theFd)
 {
-    boost::lock_guard<boost::mutex> lock(watcherMutexM);
+    lock_guard<mutex> lock(watcherMutexM);
     WatcherMap::iterator it = watcherMapM.find(theFd);
     if (it == watcherMapM.end()){return;}
     delete it->second;
@@ -346,7 +349,7 @@ void SocketConnection::rmLowWaterMarkWatcher(int theFd)
 
 void SocketConnection::clearAllWatchers()
 {
-    boost::lock_guard<boost::mutex> lock(watcherMutexM);
+    lock_guard<mutex> lock(watcherMutexM);
     WatcherMap::iterator it = watcherMapM.begin();
     for(; it != watcherMapM.end(); it++){
         delete it->second;
@@ -358,7 +361,7 @@ void SocketConnection::clearAllWatchers()
 
 bool SocketConnection::hasWatcher(int theFd)
 {
-    boost::lock_guard<boost::mutex> lock(watcherMutexM);
+    lock_guard<mutex> lock(watcherMutexM);
     return watcherMapM.find(theFd) != watcherMapM.end();
 }
 
@@ -368,7 +371,7 @@ void SocketConnection::onWrite(int theFd, short theEvt)
 {
     if (!isConnectedNotified && clientM && CloseE != statusM)
     {
-        boost::lock_guard<boost::mutex> lock(clientMutexM);
+        lock_guard<mutex> lock(clientMutexM);
         if (clientM)
         {
             clientM->onConnected(theFd, selfM);
@@ -403,7 +406,7 @@ void SocketConnection::onWrite(int theFd, short theEvt)
     Utility::BufferStatus bufferStatus = outputQueueM.getStatus();
     if (bufferStatus == Utility::BufferLowE)
     {
-        boost::lock_guard<boost::mutex> lock(watcherMutexM);
+        lock_guard<mutex> lock(watcherMutexM);
         WatcherMap::iterator it = watcherMapM.find(theFd);
         if (it != watcherMapM.end()){
             (*it->second)();
@@ -453,7 +456,7 @@ void SocketConnection::onHeartbeat(void *theArg)
 void SocketConnection::addClientTimer(unsigned theSec)
 {
     if(theSec == 0) { return; }
-    processorM->process(fdM, &SocketConnection::_addClientTimer, this, theSec);
+    processorM->PROCESS(fdM, &SocketConnection::_addClientTimer, this, theSec);
 }
 
 //-----------------------------------------------------------------------------
@@ -483,7 +486,7 @@ void SocketConnection::_addClientTimer(unsigned theSec)
 void SocketConnection::onClientTimeout(void *theArg)
 {
     SocketConnection* connection = (SocketConnection*) theArg;
-    boost::lock_guard<boost::mutex> lock(connection->clientMutexM);
+    lock_guard<mutex> lock(connection->clientMutexM);
     connection->clientTimerEvtM = NULL;
     if (connection->clientM)
     {
@@ -498,7 +501,7 @@ void SocketConnection::close()
 {
     if (CloseE == statusM)
         return;
-    processorM->process(fdM, &SocketConnection::_close, this);
+    processorM->PROCESS(fdM, &SocketConnection::_close, this);
 }
 
 //-----------------------------------------------------------------------------
@@ -528,7 +531,7 @@ void SocketConnection::_close()
 	protocolM->asynHandleClose(fdM, selfM);
     if (clientM)
     {
-        boost::lock_guard<boost::mutex> lock(clientMutexM);
+        lock_guard<mutex> lock(clientMutexM);
         if (clientM)
         {
             clientM->onError(selfM);
@@ -536,7 +539,7 @@ void SocketConnection::_close()
     }
     reactorM->delEvent(readEvtM);
     reactorM->delEvent(writeEvtM);
-    processorM->process(fdM, &SocketConnection::_release, this);
+    processorM->PROCESS(fdM, &SocketConnection::_release, this);
 }
 
 //-----------------------------------------------------------------------------

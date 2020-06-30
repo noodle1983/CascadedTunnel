@@ -4,15 +4,14 @@
 #include "KfifoBuffer.h"
 #include "UdpPacket.h"
 
-#include <boost/thread.hpp>
-#include <boost/function.hpp>
-#include <boost/shared_ptr.hpp>
+#include <mutex>
+#include <functional>
+#include <memory>
 #include <event.h>
 
 struct timeval;
 namespace Processor
 {
-    typedef boost::function<void ()> Job;
     class BoostProcessor;
 }
 
@@ -28,7 +27,7 @@ namespace Server
 {
 
     class UdpServer;
-    typedef boost::shared_ptr<UdpServer> UdpServerPtr;
+    typedef std::shared_ptr<UdpServer> UdpServerPtr;
 
     class UdpServer
     {
@@ -54,7 +53,7 @@ namespace Server
 
 
     private:
-        friend class boost::function<void ()>;
+        friend class std::function<void ()>;
         void addReadEvent();
         void onRead(int theFd, short theEvt);
         void _close();
@@ -75,12 +74,12 @@ namespace Server
         //we ensure there is only 1 thread read/write the input queue
         //boost::mutex inputQueueMutexM;
         Utility::KfifoBuffer inputQueueM;
-        boost::mutex outputQueueMutexM;
+        std::mutex outputQueueMutexM;
 
         enum Status{ActiveE = 0, CloseE = 1};
         mutable int statusM;
 
-        boost::mutex stopReadingMutexM;
+        std::mutex stopReadingMutexM;
         bool stopReadingM;
 
     };

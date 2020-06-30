@@ -42,8 +42,7 @@ void AsynFileWriter::write(const uint64_t theId, const std::string& theContent, 
 {
     Utility::FileWriter* fileWriter = fileWriterVectorM[theId%ioThreadCntM];
     const std::string* content = new std::string(theContent);
-    Processor::BoostProcessor::ioInstance()->process 
-        (theId, &FileWriter::_write,
+    Processor::BoostProcessor::ioInstance()->PROCESS(theId, &FileWriter::_write,
             fileWriter, content, theTime);
 }
 

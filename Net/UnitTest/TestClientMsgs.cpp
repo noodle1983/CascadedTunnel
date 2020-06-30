@@ -67,8 +67,9 @@ public:
 
     int asynSend(int theFd, Net::Connection::SocketConnectionPtr theConnection)
     {
-        return proProcessorM.process(theFd + 1,
+        proProcessorM.PROCESS(theFd + 1,
                 &BatchDataProtocol::send, this, theFd, theConnection);
+        return 0;
     }
 
     void send(int theFd, Net::Connection::SocketConnectionPtr theConnection)
@@ -91,7 +92,7 @@ public:
         if (!canWrite)
         {
             theConnection->setLowWaterMarkWatcher(
-                    new Net::Connection::Watcher(boost::bind(&BatchDataProtocol::asynSend, this, _1, _2)));
+                    theFd, new Net::Connection::Watcher(boost::bind(&BatchDataProtocol::asynSend, this, _1, _2)));
         }
         return;
     }

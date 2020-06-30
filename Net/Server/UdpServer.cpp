@@ -11,6 +11,7 @@
 
 
 using namespace Net::Server;
+using namespace std;
 
 //-----------------------------------------------------------------------------
 
@@ -73,7 +74,7 @@ void UdpServer::addReadEvent()
         return;
     if (-1 == event_add(readEvtM, NULL))
     {
-        processorM->process(fdM, &UdpServer::addReadEvent, this);
+        processorM->PROCESS(fdM, &UdpServer::addReadEvent, this);
     }
 }
 
@@ -81,7 +82,8 @@ void UdpServer::addReadEvent()
 
 int UdpServer::asynRead(int theFd, short theEvt)
 {
-    return processorM->process(fdM, &UdpServer::onRead, this, theFd, theEvt);
+    processorM->PROCESS(fdM, &UdpServer::onRead, this, theFd, theEvt);
+    return 0;
 }
 
 //-----------------------------------------------------------------------------
@@ -107,7 +109,7 @@ void UdpServer::onRead(int theFd, short theEvt)
 
     if (!inputQueueM.isHealthy())
     {
-        boost::lock_guard<boost::mutex> lock(stopReadingMutexM);
+        lock_guard<mutex> lock(stopReadingMutexM);
         stopReadingM = true;
     }
     else
@@ -163,10 +165,10 @@ bool UdpServer::getAPackage(Net::UdpPacket* thePackage)
         if (postBufferStatus == Utility::BufferLowE)
         {
             {
-                boost::lock_guard<boost::mutex> lock(stopReadingMutexM);
+                lock_guard<mutex> lock(stopReadingMutexM);
                 stopReadingM = false;
             }
-            processorM->process(fdM, &UdpServer::addReadEvent, selfM);
+            processorM->PROCESS(fdM, &UdpServer::addReadEvent, selfM);
         }
     }
     return len;
@@ -181,7 +183,7 @@ bool UdpServer::sendAPackage(Net::UdpPacket* thePackage)
 
     int len = 0;
     {
-        boost::lock_guard<boost::mutex> lock(outputQueueMutexM);
+        lock_guard<mutex> lock(outputQueueMutexM);
         len = sendto(fdM, thePackage->content, thePackage->contentLen, 0, 
                 (sockaddr*)&thePackage->peerAddr, thePackage->addrlen);
     }
@@ -198,7 +200,7 @@ void UdpServer::close()
 {
     if (CloseE == statusM)
         return;
-    processorM->process(fdM, &UdpServer::_close, this);
+    processorM->PROCESS(fdM, &UdpServer::_close, this);
 }
 
 //-----------------------------------------------------------------------------
@@ -216,7 +218,7 @@ void UdpServer::_close()
         return;
     statusM = CloseE;
     reactorM->delEvent(readEvtM);
-    processorM->process(fdM, &UdpServer::_release, this);
+    processorM->PROCESS(fdM, &UdpServer::_release, this);
 }
 
 //-----------------------------------------------------------------------------

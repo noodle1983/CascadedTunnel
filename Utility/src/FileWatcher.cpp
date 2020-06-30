@@ -15,7 +15,7 @@ using namespace boost::placeholders;
 static void onFilewatcherTimeout(int theFd, short theEvt, void *theArg)
 {
     FileWatcher* theWatcher = (FileWatcher*) theArg;
-    Processor::BoostProcessor::manInstance()->process(
+    Processor::BoostProcessor::manInstance()->PROCESS(
             0, 
             &FileWatcher::checkFile, theWatcher);
 }
@@ -71,7 +71,7 @@ void FileWatcher::checkFile()
     {
         if (lastModTimeM != fileStat.st_mtime)
         {
-            Processor::BoostProcessor::manInstance()->process(
+            Processor::BoostProcessor::manInstance()->PROCESS(
                     0, callbackM, filePathM);
             lastModTimeM = fileStat.st_mtime;
             CFG_DEBUG("reload file:" << filePathM);

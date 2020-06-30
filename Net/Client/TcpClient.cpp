@@ -56,7 +56,7 @@ TcpClient::~TcpClient()
 void TcpClient::deleteSelf()
 {
     close();
-    processorM->process(protocolM->getPort(), &TcpClient::_deleteSelf, this); 
+    processorM->PROCESS(protocolM->getPort(), &TcpClient::_deleteSelf, this); 
 }
 
 //-----------------------------------------------------------------------------
@@ -201,7 +201,7 @@ void TcpClient::onError(Connection::SocketConnectionPtr theConnection)
 
     if (protocolM->getReConnectInterval() > 0)
     {
-        processorM->process(protocolM->getPort(), &TcpClient::reconnectLater, this); 
+        processorM->PROCESS(protocolM->getPort(), &TcpClient::reconnectLater, this); 
     }
 
 }
@@ -216,7 +216,7 @@ void TcpClient::onClientTimeout()
     }
     if (!isConnectedM)
     {
-        processorM->process(protocolM->getPort(), &reconnect, (void*)this); 
+        processorM->PROCESS(protocolM->getPort(), &reconnect, (void*)this); 
     }
 }
 

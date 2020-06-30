@@ -56,15 +56,15 @@ void TcpServer::addAcceptEvent()
 {
     if (-1 == event_add(acceptEvtM, NULL))
     {
-        processorM->process(fdM, &TcpServer::addAcceptEvent, this);
+        processorM->PROCESS(fdM, &TcpServer::addAcceptEvent, this);
     }
 }
 
 //-----------------------------------------------------------------------------
 
-int TcpServer::asynAccept(int theFd, short theEvt)
+void TcpServer::asynAccept(int theFd, short theEvt)
 {
-    return processorM->process(fdM, &TcpServer::onAccept, this, theFd, theEvt);
+    processorM->PROCESS(fdM, &TcpServer::onAccept, this, theFd, theEvt);
 } 
 
 //-----------------------------------------------------------------------------
