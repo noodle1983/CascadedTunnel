@@ -5,10 +5,11 @@
 #include <assert.h>
 #include <boost/date_time/posix_time/posix_time.hpp>
 
-boost::thread_specific_ptr<unsigned> g_threadGroupTotal;
-boost::thread_specific_ptr<unsigned> g_threadGroupIndex;
-
 using namespace Processor;
+using namespace std;
+
+thread_local static unsigned g_threadGroupTotal = 0;
+thread_local static unsigned g_threadGroupIndex = 0;
 
 #ifdef DEBUG
 #include <assert.h>
@@ -19,7 +20,6 @@ using namespace Processor;
 BoostWorker::BoostWorker()
     : groupTotalM(0)
     , groupIndexM(-1)
-    , bufferJobQueueM(25) //(32M/8) jobs Max
     , isToStopM(false)
 {
     min_heap_ctor(&timerHeapM);	
@@ -49,22 +49,18 @@ void BoostWorker::stop()
 //-----------------------------------------------------------------------------
 
 
-int BoostWorker::process(IJob* theJob)
+void BoostWorker::process(Job* theJob)
 {
     bool jobQueueEmpty = false;
     {
-        boost::lock_guard<boost::mutex> lock(queueMutexM);
-        //jobQueueEmpty = jobQueueM.empty();
-        //jobQueueM.push_back(theJob);
-        jobQueueEmpty = bufferJobQueueM.empty();
-        unsigned len = bufferJobQueueM.putn((char*)&theJob, sizeof(IJob*));
-        assert(len > 0);
+        lock_guard<mutex> lock(queueMutexM);
+        jobQueueEmpty = jobQueueM.empty();
+        jobQueueM.push_back(theJob);
     }
     if (jobQueueEmpty)
     {
         queueCondM.notify_one();
     }
-    return 0;
 }
 
 //-----------------------------------------------------------------------------
@@ -75,8 +71,8 @@ min_heap_item_t* BoostWorker::addLocalTimer(
 		void* theArg)
 {
 #ifdef DEBUG
-    unsigned threadCount = *g_threadGroupTotal.get();
-    unsigned threadIndex = *g_threadGroupIndex.get();
+    unsigned threadCount = g_threadGroupTotal;
+    unsigned threadIndex = g_threadGroupIndex;
     if (threadIndex != groupIndexM || threadCount != threadCount)
     {
         LOG_FATAL("job is handled in wrong thread:" << threadIndex 
@@ -105,9 +101,9 @@ min_heap_item_t* BoostWorker::addLocalTimer(
     {
         evutil_gettimeofday(&timeNowM, NULL);
     }
-    if (1000000 > min_heap_size(&timerHeapM))
+    if (1024 > min_heap_size(&timerHeapM))
     {
-        min_heap_reserve(&timerHeapM, 1000000);
+        min_heap_reserve(&timerHeapM, 1024);
     }
 
 	min_heap_item_t* timeoutEvt = new min_heap_item_t();
@@ -144,8 +140,8 @@ void BoostWorker::cancelLocalTimer(min_heap_item_t*& theEvent)
 
 void BoostWorker::initThreadAttr()
 {
-    g_threadGroupTotal.reset(new unsigned(groupTotalM));
-    g_threadGroupIndex.reset(new unsigned(groupIndexM));
+    g_threadGroupTotal = groupTotalM;
+    g_threadGroupIndex = groupIndexM;
 }
 
 //-----------------------------------------------------------------------------
@@ -179,47 +175,38 @@ void BoostWorker::handleLocalTimer()
 void BoostWorker::run()
 {
     initThreadAttr();
-    IJob* job;
+    Job* job;
     while (!isToStopM)
     {
-        /*
+        job = NULL;
         {
-            boost::unique_lock<boost::mutex> lock(queueMutexM);
-            while (jobQueueM.empty())
+            lock_guard<mutex> lock(queueMutexM);
+            if (!jobQueueM.empty())
             {
-                queueCondM.wait(lock);
+                job = jobQueueM.front();
+                jobQueueM.pop_front();
             }
-
-            job = jobQueueM.front();
-            jobQueueM.pop_front();
         }
-        */
+
         //handle Job
-        if (0 < bufferJobQueueM.getn((char*)&job, sizeof(IJob*)))
+        if (job != NULL)
         {
             (*job)();
-            job->returnToPool();
-            job = NULL;
         }
 
         //handle timer
         handleLocalTimer();
 
-		if (!bufferJobQueueM.empty())
-		{
-			continue;
-		}
-        else if (!isToStopM && bufferJobQueueM.empty() && !min_heap_empty(&timerHeapM))
+        unique_lock<mutex> queueLock(queueMutexM);
+		if (!jobQueueM.empty()) { continue; }
+
+        if (!isToStopM && jobQueueM.empty() && !min_heap_empty(&timerHeapM))
         {
-            boost::unique_lock<boost::mutex> queueLock(queueMutexM);
-            queueCondM.timed_wait(queueLock, 
-                    boost::posix_time::from_time_t(timeNowM.tv_sec) 
-                        + boost::posix_time::microseconds(timeNowM.tv_usec + 500));
+            queueCondM.wait_for(queueLock, chrono::microseconds(500));
         }
         else
         {
-            boost::unique_lock<boost::mutex> queueLock(queueMutexM);
-            while (!isToStopM && bufferJobQueueM.empty() && min_heap_empty(&timerHeapM))
+            while (!isToStopM && jobQueueM.empty() && min_heap_empty(&timerHeapM))
             {
                 queueCondM.wait(queueLock); 
             }

@@ -1,25 +1,27 @@
 #include <iostream>
-#include <boost/bind/bind.hpp>
-using namespace boost::placeholders;
+#include <functional>
 
 #include "BoostProcessor.h"
 #include "Log.h"
 
+using namespace std;
+using namespace Processor;
+
 static int closed = false;
-static boost::mutex closedMutexM;
-static boost::condition_variable closedCondM;
+static mutex closedMutexM;
+static condition_variable closedCondM;
+
 void sig_stop(int sig)
 {
-    LOG_DEBUG("receive signal " << sig << ". stopping...");
-    boost::lock_guard<boost::mutex> lock(closedMutexM);
+    cout << "receive signal " << sig << ". stopping..." << endl;
+    lock_guard<mutex> lock(closedMutexM);
     closed = true;
     closedCondM.notify_one();
 }
 
-
 void on_timeout(void *theArg)
 {
-    LOG_WARN("time end");
+    std::cout << "time end" << endl;
     sig_stop(2);
 }
 
@@ -30,17 +32,16 @@ void say(Processor::BoostProcessor* theProcessor)
     tv.tv_sec = 1;
     tv.tv_usec = 0;
     theProcessor->addLocalTimer(1, tv, on_timeout, NULL);
-    LOG_WARN("time begin");
-
+    std::cout << "time begin" << std::endl;
 }
 
 int main()
 {
-    Processor::BoostProcessor processor(1);
+    BoostProcessor processor(1);
     processor.start();
-    processor.process(1, say, &processor);
+    processor.process(1, new Job(bind(say, &processor)));
 
-    boost::unique_lock<boost::mutex> lock(closedMutexM);
+    unique_lock<mutex> lock(closedMutexM);
     while(!closed)
     {
         closedCondM.wait(lock);

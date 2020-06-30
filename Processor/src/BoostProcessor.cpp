@@ -4,22 +4,22 @@
 #include "ProcessorJob.hpp"
 #include "ProcessorSensor.h"
 
-#include <boost/bind/bind.hpp>
+#include <functional>
 
-using namespace boost::placeholders;
+using namespace std;
 using namespace Processor;
 using namespace Config;
 
 //-----------------------------------------------------------------------------
 
-static boost::mutex fsmProcessorInstanceMutex;
-static boost::mutex netProcessorInstanceMutex;
-static boost::mutex manProcessorInstanceMutex;
-static boost::mutex ioProcessorInstanceMutex;
-static boost::shared_ptr<BoostProcessor> fsmProcessorInstanceReleaser;
-static boost::shared_ptr<BoostProcessor> netProcessorInstanceReleaser;
-static boost::shared_ptr<BoostProcessor> manProcessorInstanceReleaser;
-static boost::shared_ptr<BoostProcessor> ioProcessorInstanceReleaser;
+static mutex fsmProcessorInstanceMutex;
+static mutex netProcessorInstanceMutex;
+static mutex manProcessorInstanceMutex;
+static mutex ioProcessorInstanceMutex;
+static shared_ptr<BoostProcessor> fsmProcessorInstanceReleaser;
+static shared_ptr<BoostProcessor> netProcessorInstanceReleaser;
+static shared_ptr<BoostProcessor> manProcessorInstanceReleaser;
+static shared_ptr<BoostProcessor> ioProcessorInstanceReleaser;
 BoostProcessor* BoostProcessor::fsmProcessorM = NULL;
 BoostProcessor* BoostProcessor::netProcessorM = NULL;
 BoostProcessor* BoostProcessor::manProcessorM = NULL;
@@ -30,7 +30,7 @@ BoostProcessor* BoostProcessor::fsmInstance()
 {
     if (NULL == fsmProcessorM)
     {
-        boost::lock_guard<boost::mutex> lock(fsmProcessorInstanceMutex);
+        lock_guard<mutex> lock(fsmProcessorInstanceMutex);
         if (NULL == fsmProcessorM)
         {
             int threadCount = ConfigCenter::instance()->get("prc.fsmTno", 3);
@@ -38,8 +38,6 @@ BoostProcessor* BoostProcessor::fsmInstance()
             fsmProcessorInstanceReleaser.reset(fsmProcessor);
             fsmProcessor->start();
             fsmProcessorM = fsmProcessor;
-			Net::Protocol::ProcessorSensorSingleton::instance()->registProcessor(
-					"FsmProcessor", fsmProcessorM);
         }
     }
     return fsmProcessorM;
@@ -52,7 +50,7 @@ BoostProcessor* BoostProcessor::netInstance()
 {
     if (NULL == netProcessorM)
     {
-        boost::lock_guard<boost::mutex> lock(netProcessorInstanceMutex);
+        lock_guard<mutex> lock(netProcessorInstanceMutex);
         if (NULL == netProcessorM)
         {
             int threadCount = ConfigCenter::instance()->get("prc.netTno", 3);
@@ -60,8 +58,6 @@ BoostProcessor* BoostProcessor::netInstance()
             netProcessorInstanceReleaser.reset(netProcessor);
             netProcessor->start();
             netProcessorM = netProcessor;
-			Net::Protocol::ProcessorSensorSingleton::instance()->registProcessor(
-					"NetProcessor", netProcessorM);
         }
     }
     return netProcessorM;
@@ -73,7 +69,7 @@ BoostProcessor* BoostProcessor::manInstance()
 {
     if (NULL == manProcessorM)
     {
-        boost::lock_guard<boost::mutex> lock(manProcessorInstanceMutex);
+        lock_guard<mutex> lock(manProcessorInstanceMutex);
         if (NULL == manProcessorM)
         {
             int threadCount = ConfigCenter::instance()->get("prc.manTno", 1);
@@ -81,8 +77,6 @@ BoostProcessor* BoostProcessor::manInstance()
             manProcessorInstanceReleaser.reset(manProcessor);
             manProcessor->start();
             manProcessorM = manProcessor;
-			Net::Protocol::ProcessorSensorSingleton::instance()->registProcessor(
-					"ManProcessor", manProcessorM);
         }
     }
     return manProcessorM;
@@ -94,7 +88,7 @@ BoostProcessor* BoostProcessor::ioInstance()
 {
     if (NULL == ioProcessorM)
     {
-        boost::lock_guard<boost::mutex> lock(ioProcessorInstanceMutex);
+        lock_guard<mutex> lock(ioProcessorInstanceMutex);
         if (NULL == ioProcessorM)
         {
             int threadCount = ConfigCenter::instance()->get("prc.ioTno", 1);
@@ -102,8 +96,6 @@ BoostProcessor* BoostProcessor::ioInstance()
             ioProcessorInstanceReleaser.reset(ioProcessor);
             ioProcessor->start();
             ioProcessorM = ioProcessor;
-			Net::Protocol::ProcessorSensorSingleton::instance()->registProcessor(
-					"IoProcessor", ioProcessorM);
         }
     }
     return ioProcessorM;
@@ -124,26 +116,15 @@ BoostProcessor::BoostProcessor(const std::string& theName, const unsigned theThr
     , workersM(NULL)
     , nameM(theName)
 {
-    if (!nameM.empty())
-    {
-        Net::Protocol::ProcessorSensorSingleton::instance()->registProcessor(
-            nameM, this);
-    }
 }
 
 //-----------------------------------------------------------------------------
 
 BoostProcessor::~BoostProcessor()
 {
-    //threadsM.interrupt_all();
-    if (!nameM.empty())
-    {
-        Net::Protocol::ProcessorSensorSingleton::instance()->unregistProcessor(nameM);
-    }
     if (workersM)
     {
         stop();
-        delete []workersM;
     }
 }
 
@@ -158,10 +139,11 @@ void BoostProcessor::start()
         return;
 
     workersM = new BoostWorker[threadCountM];
+    threadsM.reserve(threadCountM);
     for (unsigned i = 0; i < threadCountM; i++)
     {
         workersM[i].setGroupInfo(threadCountM, i);
-        threadsM.create_thread(boost::bind(&BoostWorker::run, &workersM[i]));
+        threadsM.push_back(thread(&BoostWorker::run, &workersM[i]));
     }
 }
 
@@ -190,8 +172,12 @@ void BoostProcessor::waitStop()
             usleep(1);
         }
     }
-    threadsM.interrupt_all();
-    threadsM.join_all();
+    for (unsigned i = 0; i < threadCountM; i++)
+    {
+        threadsM[i].join();
+    }
+    delete []workersM;
+    workersM = NULL;
 }
 
 //-----------------------------------------------------------------------------
@@ -205,32 +191,12 @@ void BoostProcessor::stop()
     {
         workersM[i].stop();
     }
-    threadsM.interrupt_all();
-    threadsM.join_all();
-}
-
-//-----------------------------------------------------------------------------
-
-/*
-int BoostProcessor::process(const unsigned long long theId, Job* job)
-{
-    unsigned workerId = theId % threadCountM;
-    return workersM[workerId].process(job);
-}
-*/
-
-//-----------------------------------------------------------------------------
-
-int BoostProcessor::process(
-        const unsigned long long theId, 
-        void (*theFunc)())
-{
-    NullParamJob* job = 
-        NullParamJob::AllocatorSingleton::instance()->newData(theId);
-    job->init(theFunc);
-
-    unsigned workerId = theId % threadCountM;
-    return workersM[workerId].process(job);
+    for (unsigned i = 0; i < threadCountM; i++)
+    {
+        threadsM[i].join();
+    }
+    delete []workersM;
+    workersM = NULL;
 }
 
 //-----------------------------------------------------------------------------

@@ -20,7 +20,6 @@ INC_DIR=-I. \
 	 -I$(PROJBASE)/Utility/include \
 
 STATIC_LIB= \
-	$(PROJBASE)/.lib/libNet.a \
 	$(PROJBASE)/.lib/libUtility.a \
 
 SHARED_LIB_DIR=

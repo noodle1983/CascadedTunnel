@@ -4,6 +4,7 @@
 #include <sstream>
 
 using namespace Net::Protocol;
+using namespace std;
 
 //-----------------------------------------------------------------------------
 
@@ -80,7 +81,7 @@ void ProcessorSensor::stat(ProcessorSensorData* theData)
         << std::setw(15) << "ProcessorName" 
         << std::setw(10) << "QueueSize" << "\r\n";
 	{
-		boost::shared_lock<boost::shared_mutex> lock(processorMapMutexM);
+        lock_guard<mutex> lock(processorMapMutexM);
 		ProcessorMap::iterator it = processorMapM.begin();
 		for (; it != processorMapM.end(); it++)
 		{
@@ -131,7 +132,7 @@ void ProcessorSensor::registProcessor(
 		const std::string& theName, 
 		Processor::BoostProcessor* theProcessor)
 {
-	boost::unique_lock<boost::shared_mutex> lock(processorMapMutexM);
+	lock_guard<mutex> lock(processorMapMutexM);
 	processorMapM[theName] = theProcessor;
 }
 
@@ -140,7 +141,7 @@ void ProcessorSensor::registProcessor(
 void ProcessorSensor::unregistProcessor(
 		const std::string& theName)
 {
-	boost::unique_lock<boost::shared_mutex> lock(processorMapMutexM);
+	lock_guard<mutex> lock(processorMapMutexM);
 	processorMapM.erase(theName);
 }
 

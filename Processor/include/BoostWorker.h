@@ -2,19 +2,20 @@
 #define BOOSTWORKER_H
 
 #include "ProcessorJob.hpp"
-#include "KfifoBuffer.h"
 
-#include <boost/function.hpp>
-#include <boost/thread.hpp>
+#include <functional>
+#include <condition_variable>
 #include <list>
 
 #include <min_heap.h>
 
 typedef void (*TimerCallback)(void *arg);
+#define NEW_JOB(...) {new Processor::Job(std::bind(__VA_ARGS__))}
 
 namespace Processor
 {
-    //typedef std::list<IJob*> JobQueue;
+    typedef std::function<void ()> Job;
+    typedef std::list<Job*> JobQueue;
     class BoostWorker
     {
     public:
@@ -27,12 +28,18 @@ namespace Processor
         }
 
         inline bool isJobQueueEmpty()
-        {return bufferJobQueueM.empty();}
+        {
+            std::lock_guard<std::mutex> lock(queueMutexM);
+            return jobQueueM.empty();
+        }
 		inline unsigned getQueueSize()
-		{return bufferJobQueueM.size()/sizeof(void*);}
+		{
+            std::lock_guard<std::mutex> lock(queueMutexM);
+            return jobQueueM.size();
+        }
         void stop();
 
-        int process(IJob* theJob);
+        void process(Job* theJob);
 		min_heap_item_t* addLocalTimer(
 				const struct timeval& theInterval, 
 				TimerCallback theCallback,
@@ -50,11 +57,10 @@ namespace Processor
         unsigned groupTotalM;
         unsigned groupIndexM;
 		
-        //JobQueue jobQueueM;
-		Utility::KfifoBuffer bufferJobQueueM;
-        boost::mutex queueMutexM;
-        boost::mutex nullMutexM;
-        boost::condition_variable queueCondM;
+        JobQueue jobQueueM;
+        std::mutex queueMutexM;
+        std::mutex nullMutexM;
+        std::condition_variable queueCondM;
 
 		//integrate timer handling
 		min_heap_t timerHeapM;

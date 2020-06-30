@@ -7,7 +7,7 @@
 
 #include <map>
 #include <string>
-#include <boost/thread.hpp>
+#include <thread>
 
 namespace Net
 {
@@ -52,7 +52,7 @@ namespace Protocol
 
 	private:
 		ProcessorMap processorMapM;
-        boost::shared_mutex processorMapMutexM;
+        std::mutex processorMapMutexM;
     };
     typedef class DesignPattern::Singleton<ProcessorSensor> ProcessorSensorSingleton; 
 }

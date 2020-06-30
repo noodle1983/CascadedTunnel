@@ -37,30 +37,30 @@ namespace Net
          *         connection: the socket connection which can be write to
          *
          */
-        int asynHandleInput(const int theFd, Connection::SocketConnectionPtr theConnection)
+        void asynHandleInput(const int theFd, Connection::SocketConnectionPtr theConnection)
         {
             return processorM->process(theFd + 1,
-                    &IProtocol::handleInput, this, theConnection);
+                    NEW_JOB(&IProtocol::handleInput, this, theConnection));
         }
-        int asynHandleClose(const int theFd, Connection::SocketConnectionPtr theConnection)
+        void asynHandleClose(const int theFd, Connection::SocketConnectionPtr theConnection)
         {
             return processorM->process(theFd + 1,
-                    &IProtocol::handleClose, this, theConnection);
+                    NEW_JOB(&IProtocol::handleClose, this, theConnection));
         }
-        int asynHandleConnected(const int theFd, Connection::SocketConnectionPtr theConnection)
+        void asynHandleConnected(const int theFd, Connection::SocketConnectionPtr theConnection)
         {
             return processorM->process(theFd + 1,
-                    &IProtocol::handleConnected, this, theConnection);
+                    NEW_JOB(&IProtocol::handleConnected, this, theConnection));
         }
-        int asynHandleHeartbeat(const int theFd, Connection::SocketConnectionPtr theConnection) 
+        void asynHandleHeartbeat(const int theFd, Connection::SocketConnectionPtr theConnection) 
         {
             return processorM->process(theFd + 1,
-                    &IProtocol::handleHeartbeat, this, theConnection);
+                    NEW_JOB(&IProtocol::handleHeartbeat, this, theConnection));
         }
-        int asynHandleSent(const int theFd, Connection::SocketConnectionPtr theConnection) 
+        void asynHandleSent(const int theFd, Connection::SocketConnectionPtr theConnection) 
         {
             return processorM->process(theFd + 1,
-                    &IProtocol::handleSent, this, theConnection);
+                    NEW_JOB(&IProtocol::handleSent, this, theConnection));
         }
 		inline min_heap_item_t* addLocalTimer(
 				const int theFd,
@@ -133,10 +133,10 @@ namespace Net
          *         connection: the socket connection which can be write to
          *
          */
-        int asynHandleInput(int theFd, Server::UdpServerPtr theUdpServer)
+        void asynHandleInput(int theFd, Server::UdpServerPtr theUdpServer)
         {
             return processorM->process(theFd,
-                    &IUdpProtocol::handleInput, this, theUdpServer);
+                    NEW_JOB(&IUdpProtocol::handleInput, this, theUdpServer));
         }
         
         virtual void handleInput(Net::Server::UdpServerPtr theUdpServer) = 0;

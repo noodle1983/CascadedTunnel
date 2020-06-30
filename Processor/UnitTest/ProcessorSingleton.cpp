@@ -1,9 +1,9 @@
 #include <iostream>
-#include <boost/bind/bind.hpp>
 
 #include <BoostProcessor.h>
 
-using namespace boost::placeholders;
+using namespace std;
+using namespace Processor;
 
 void say(const char* theWords)
 {
@@ -13,7 +13,7 @@ void say(const char* theWords)
 int main()
 {
     Processor::BoostProcessor::netInstance()->start();
-    Processor::BoostProcessor::netInstance()->process(1, say, "Hello");
+    Processor::BoostProcessor::netInstance()->process(1, new Job(bind(say, "Hello")));
     sleep(1);
     return 0;
 }

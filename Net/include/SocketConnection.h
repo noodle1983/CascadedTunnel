@@ -13,7 +13,6 @@
 struct timeval;
 namespace Processor
 {
-    typedef boost::function<void ()> Job;
     class BoostProcessor;
 }
 
