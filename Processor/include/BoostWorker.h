@@ -6,6 +6,7 @@
 #include <functional>
 #include <condition_variable>
 #include <list>
+#include <thread>
 
 #include <min_heap.h>
 
@@ -68,7 +69,7 @@ namespace Processor
 
         mutable bool isToStopM;
 #ifdef DEBUG
-		int64_t tidM;
+        std::thread::id tidM;
 #endif
     };
 }

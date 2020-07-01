@@ -4,8 +4,8 @@
 #include "SocketConnection.h"
 
 #include <string>
-#include <boost/thread.hpp>
-#include <boost/shared_ptr.hpp>
+#include <mutex>
+#include <memory>
 #include <event.h>
 
 
@@ -15,8 +15,8 @@ class IClientProtocol;
 namespace Client
 {
     class TcpClient;
-    typedef boost::shared_ptr<TcpClient> TcpClientPtr;
-    typedef boost::weak_ptr<TcpClient> TcpClientWPtr;
+    typedef std::shared_ptr<TcpClient> TcpClientPtr;
+    typedef std::weak_ptr<TcpClient> TcpClientWPtr;
     class TcpClient
     {
     public:
@@ -40,7 +40,7 @@ namespace Client
         int close();
         bool isClose()
         {
-            boost::lock_guard<boost::mutex> lock(connectionMutexM);
+            std::lock_guard<std::mutex> lock(connectionMutexM);
             if (connectionM.get())
             {
                 return connectionM->isClose();
@@ -49,7 +49,7 @@ namespace Client
         }
         bool isConnected()
         {
-            boost::lock_guard<boost::mutex> lock(connectionMutexM);
+            std::lock_guard<std::mutex> lock(connectionMutexM);
             return connectionM.get() && isConnectedM;
         }
         unsigned sendn(const char* theBuffer, const unsigned theLen);
@@ -81,7 +81,7 @@ namespace Client
 
         mutable bool isClosedM;
 
-        boost::mutex connectionMutexM;
+        std::mutex connectionMutexM;
         bool isConnectedM;
         Net::Connection::SocketConnectionPtr connectionM;
         TcpClientPtr selfM;
@@ -94,7 +94,7 @@ namespace Client
     TcpClient::sendn(const char* theBuffer, const unsigned theLen)
     {
         if (isClosedM) {return 0;}
-        boost::lock_guard<boost::mutex> lock(connectionMutexM);
+        std::lock_guard<std::mutex> lock(connectionMutexM);
         if (connectionM.get() && (isConnectedM || connectTimesM == 1))
         {
             return connectionM->sendn(theBuffer, theLen);
@@ -109,7 +109,7 @@ namespace Client
     unsigned TcpClient::sendMsg(Msg& msg)
     {
         if (isClosedM) {return 0;}
-        boost::lock_guard<boost::mutex> lock(connectionMutexM);
+        std::lock_guard<std::mutex> lock(connectionMutexM);
         if (connectionM.get() && (isConnectedM || connectTimesM == 1))
         {
             return connectionM->sendMsg(msg);

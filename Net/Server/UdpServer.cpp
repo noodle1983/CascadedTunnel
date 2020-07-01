@@ -8,6 +8,7 @@
 #include <errno.h>
 #include <string.h>
 #include <err.h>
+#include <assert.h>
 
 
 using namespace Net::Server;

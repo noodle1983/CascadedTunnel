@@ -4,6 +4,7 @@
 #include <Log.h>
 #include <ConfigCenter.h>
 #include <DirCreator.h>
+#include <string.h>
 
 using namespace Utility;
 using namespace Config;

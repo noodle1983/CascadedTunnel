@@ -219,7 +219,7 @@ void TunnelServerProtocol::handleProxyInput(SocketConnectionPtr theConnection)
 
     if (!canWrite && !peerConnection->hasWatcher(proxyFd))
     {
-        peerConnection->setLowWaterMarkWatcher(proxyFd, new Watcher(boost::bind(
+        peerConnection->setLowWaterMarkWatcher(proxyFd, new Watcher(bind(
             &TunnelProxyProtocol::asynHandleInput, proxyProtocolM, proxyFd, theConnection)));
     }
 }

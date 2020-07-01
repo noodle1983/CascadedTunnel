@@ -1,7 +1,7 @@
 #ifndef SINGLETON_HPP
 #define SINGLETON_HPP
 
-#include <boost/thread.hpp>
+#include <mutex>
 #include <memory>
 
 namespace DesignPattern
@@ -14,7 +14,7 @@ namespace DesignPattern
         {
             if (NULL == dataHolderM.get())
             {
-                boost::lock_guard<boost::mutex> lock(dbLockMutexM);
+                std::lock_guard<std::mutex> lock(dbLockMutexM);
                 if (NULL == dataHolderM.get())
                 {
                     dataHolderM.reset(new DataType);
@@ -28,14 +28,14 @@ namespace DesignPattern
         ~Singleton(){};
 
         static std::auto_ptr<DataType> dataHolderM;
-        static boost::mutex dbLockMutexM;
+        static std::mutex dbLockMutexM;
     };
 
     template<typename DataType, int instanceId>
     std::auto_ptr<DataType> Singleton<DataType, instanceId>::dataHolderM;
 
     template<typename DataType, int instanceId>
-    boost::mutex Singleton<DataType, instanceId>::dbLockMutexM;
+    std::mutex Singleton<DataType, instanceId>::dbLockMutexM;
 	
 	//DataType with init
     template<typename DataType, int instanceId = 0>
@@ -46,7 +46,7 @@ namespace DesignPattern
         {
             if (NULL == dataHolderM.get())
             {
-                boost::lock_guard<boost::mutex> lock(dbLockMutexM);
+                std::lock_guard<std::mutex> lock(dbLockMutexM);
                 if (NULL == dataHolderM.get())
                 {
 					DataType* data = new DataType;
@@ -62,14 +62,14 @@ namespace DesignPattern
         ~InitDataSingleton(){};
 
         static std::auto_ptr<DataType> dataHolderM;
-        static boost::mutex dbLockMutexM;
+        static std::mutex dbLockMutexM;
     };
 
     template<typename DataType, int instanceId>
     std::auto_ptr<DataType> InitDataSingleton<DataType, instanceId>::dataHolderM;
 
     template<typename DataType, int instanceId>
-    boost::mutex InitDataSingleton<DataType, instanceId>::dbLockMutexM;
+    std::mutex InitDataSingleton<DataType, instanceId>::dbLockMutexM;
 }
 
 #endif /* SINGLETON_HPP */

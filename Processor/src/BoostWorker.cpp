@@ -3,18 +3,16 @@
 
 #include <event2/util.h>
 #include <assert.h>
-#include <boost/date_time/posix_time/posix_time.hpp>
 
 using namespace Processor;
 using namespace std;
 
-thread_local static unsigned g_threadGroupTotal = 0;
-thread_local static unsigned g_threadGroupIndex = 0;
+thread_local unsigned g_threadGroupTotal = 0;
+thread_local unsigned g_threadGroupIndex = 0;
 
 #ifdef DEBUG
-#include <assert.h>
-#include <sys/syscall.h>
-#define gettid() syscall(__NR_gettid)
+#include <thread>
+static const thread::id default_thread_id;
 #endif
 //-----------------------------------------------------------------------------
 BoostWorker::BoostWorker()
@@ -25,10 +23,6 @@ BoostWorker::BoostWorker()
     min_heap_ctor(&timerHeapM);	
     timeNowM.tv_sec = 0;
     timeNowM.tv_usec = 0;
-
-#ifdef DEBUG 
-    tidM = -1;
-#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -83,13 +77,13 @@ min_heap_item_t* BoostWorker::addLocalTimer(
     }
     
 
-    if (-1 == tidM)
+    if (default_thread_id == tidM)
     {
-        tidM = gettid();
+        tidM = this_thread::get_id();
     }
-    else if (tidM != gettid())
+    else if (tidM != this_thread::get_id())
     {
-        LOG_FATAL("tid not match pre:" << tidM << "-now:" << gettid());
+        LOG_FATAL("tid not match pre:" << tidM << "-now:" << this_thread::get_id());
         assert(false);
     }
 #endif

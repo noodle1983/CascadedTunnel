@@ -5,6 +5,7 @@
 #include "ProcessorSensor.h"
 
 #include <functional>
+#include <chrono>
 
 using namespace std;
 using namespace Processor;
@@ -169,7 +170,7 @@ void BoostProcessor::waitStop()
         }
         else
         {
-            usleep(1);
+            this_thread::sleep_for(chrono::milliseconds(1));
         }
     }
     for (unsigned i = 0; i < threadCountM; i++)

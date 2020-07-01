@@ -12,9 +12,9 @@ void say(const char* theWords)
 
 int main()
 {
-    Processor::BoostProcessor::netInstance()->start();
-    Processor::BoostProcessor::netInstance()->process(1, new Job(bind(say, "Hello")));
-    sleep(1);
+    g_net_processor->start();
+    g_net_processor->process(1, new Job(bind(say, "Hello")));
+    g_net_processor->waitStop();
     return 0;
 }
 

@@ -9,8 +9,7 @@
 #include <list>
 #include <map>
 #include <string>
-#include <boost/thread.hpp>
-#include <boost/shared_ptr.hpp>
+#include <mutex>
 
 namespace Processor
 {
@@ -40,7 +39,7 @@ namespace Protocol
         virtual int getWBufferSizePower();
     private:
 		Con2CmdManagerMap con2CmdManagerMapM;
-        boost::shared_mutex manMapMutexM;
+        std::mutex manMapMutexM;
     };
 
 }

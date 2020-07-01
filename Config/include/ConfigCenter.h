@@ -4,9 +4,8 @@
 #include "IntParameter.h"
 #include "StringParameter.h"
 
-#include <boost/thread.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/unordered_map.hpp>
+#include <mutex>
+#include <memory>
 #include <string>
 
 namespace Config
@@ -14,7 +13,7 @@ namespace Config
     class XmlGroup;
     class ConfigCenter;
 
-    typedef boost::shared_ptr<ConfigCenter> ConfigCenterPtr;
+    typedef std::shared_ptr<ConfigCenter> ConfigCenterPtr;
     typedef std::map<std::string, IntParameter> IntParamMap;
     typedef std::map<std::string, StringParameter> StringParamMap;
 
@@ -75,7 +74,7 @@ namespace Config
         static const std::string TOP_XMLNODE_NAME;
     private:
         static ConfigCenterPtr configCenterM;
-        static boost::shared_mutex configCenterMutexM;
+        static std::mutex configCenterMutexM;
 
         ConfigCenter();
         XmlGroup*   topGroupM;

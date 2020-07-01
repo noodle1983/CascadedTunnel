@@ -8,6 +8,7 @@
 #include <event.h>
 #include <stdint.h>
 #include <string>
+#include <thread>
 
 namespace Processor
 {
@@ -73,7 +74,7 @@ namespace Fsm
         uint64_t sessionIdM;
 
 #ifdef DEBUG
-		int64_t tidM;
+        std::thread::id tidM;
 #endif
 
     };

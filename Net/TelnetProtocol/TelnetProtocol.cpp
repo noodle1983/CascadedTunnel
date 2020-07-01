@@ -6,6 +6,7 @@
 using namespace Net;
 using namespace Net::Protocol;
 using namespace Config;
+using namespace std;
 
 
 //-----------------------------------------------------------------------------
@@ -28,12 +29,11 @@ void TelnetProtocol::handleInput(Connection::SocketConnectionPtr theConnection)
 	TelnetCmdManager* cmdManager = NULL;
     int fd = theConnection->getFd();
     {
-        boost::upgrade_lock<boost::shared_mutex> lock(manMapMutexM);
+        lock_guard<mutex> lock(manMapMutexM);
         Con2CmdManagerMap::iterator it = con2CmdManagerMapM.find(fd);
         if (it == con2CmdManagerMapM.end())
         {
             cmdManager = new TelnetCmdManager(theConnection->getPeerAddr(), theConnection, this);		
-            boost::upgrade_to_unique_lock<boost::shared_mutex> uniqueLock(lock);
             con2CmdManagerMapM[fd] = cmdManager;
         }
         else if (!it->second->validate(theConnection->getPeerAddr()))
@@ -53,7 +53,7 @@ void TelnetProtocol::handleInput(Connection::SocketConnectionPtr theConnection)
 	if (-1 == cmdManager->handleInput())
     {
         theConnection->close();
-        boost::unique_lock<boost::shared_mutex> lock(manMapMutexM);
+        unique_lock<mutex> lock(manMapMutexM);
         con2CmdManagerMapM.erase(fd);
         delete cmdManager; 
     }
@@ -66,11 +66,10 @@ void TelnetProtocol::handleClose(Net::Connection::SocketConnectionPtr theConnect
 {
     LOG_DEBUG("telnet close. fd: " << theConnection->getFd());
     int fd = theConnection->getFd();
-    boost::upgrade_lock<boost::shared_mutex> lock(manMapMutexM);
+    lock_guard<mutex> lock(manMapMutexM);
     Con2CmdManagerMap::iterator it = con2CmdManagerMapM.find(fd);
     if (it != con2CmdManagerMapM.end())
     {
-        boost::upgrade_to_unique_lock<boost::shared_mutex> uniqueLock(lock);
         delete it->second;
         con2CmdManagerMapM.erase(it);
     }
@@ -85,12 +84,11 @@ void TelnetProtocol::handleConnected(Connection::SocketConnectionPtr theConnecti
 	TelnetCmdManager* cmdManager = NULL;
     int fd = theConnection->getFd();
     {
-        boost::upgrade_lock<boost::shared_mutex> lock(manMapMutexM);
+        lock_guard<mutex> lock(manMapMutexM);
         Con2CmdManagerMap::iterator it = con2CmdManagerMapM.find(fd);
         if (it == con2CmdManagerMapM.end())
         {
             cmdManager = new TelnetCmdManager(theConnection->getPeerAddr(), theConnection, this);		
-            boost::upgrade_to_unique_lock<boost::shared_mutex> uniqueLock(lock);
             con2CmdManagerMapM[fd] = cmdManager;
         }
         else

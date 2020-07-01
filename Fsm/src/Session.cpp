@@ -5,12 +5,14 @@
 
 #include <utility>
 
+using namespace std;
+
 #ifdef DEBUG
-extern boost::thread_specific_ptr<unsigned> g_threadGroupTotal;
-extern boost::thread_specific_ptr<unsigned> g_threadGroupIndex;
+#include <thread>
 #include <assert.h>
-#include <sys/syscall.h>
-#define gettid() syscall(__NR_gettid)
+extern thread_local unsigned g_threadGroupTotal;
+extern thread_local unsigned g_threadGroupIndex;
+static const thread::id default_thread_id;
 #endif
 
 using namespace Fsm;
@@ -29,10 +31,6 @@ Session::Session(
     , fsmTimeoutEvtM(NULL)
     , sessionIdM(theSessionId)
 {
-#ifdef DEBUG 
-    tidM = -1;
-#endif
-
 }
 
 //-----------------------------------------------------------------------------
@@ -46,10 +44,6 @@ Session::Session()
     , fsmTimeoutEvtM(NULL)
     , sessionIdM(0)
 {
-#ifdef DEBUG 
-    tidM = -1;
-#endif
-
 }
 
 //-----------------------------------------------------------------------------
@@ -70,9 +64,6 @@ void Session::init(
                 sessionIdM, fsmTimeoutEvtM);
     }
     fsmTimeoutEvtM = NULL;
-#ifdef DEBUG 
-    tidM = -1;
-#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -95,8 +86,8 @@ int Session::asynHandleEvent(const int theEventId)
 void Session::handleEvent(const int theEventId)
 {
 #ifdef DEBUG
-    unsigned threadCount = *g_threadGroupTotal.get();
-    unsigned threadIndex = *g_threadGroupIndex.get();
+    unsigned threadCount = g_threadGroupTotal;
+    unsigned threadIndex = g_threadGroupIndex;
     if ((sessionIdM%threadCount) != threadIndex)
     {
         LOG_FATAL("job is handled in wrong thread:" << threadIndex 
@@ -106,13 +97,13 @@ void Session::handleEvent(const int theEventId)
     }
     
 
-    if (-1 == tidM)
+    if (default_thread_id == tidM)
     {
-        tidM = gettid();
+        tidM = this_thread::get_id();
     }
-    else if (tidM != gettid())
+    else if (tidM != this_thread::get_id())
     {
-        LOG_FATAL("tid not match pre:" << tidM << "-now:" << gettid());
+        LOG_FATAL("tid not match pre:" << tidM << "-now:" << this_thread::get_id());
         assert(false);
     }
 #endif
@@ -199,8 +190,8 @@ void onFsmTimeOut(void *theArg)
 void Session::handleTimeout()
 {
 #ifdef DEBUG
-    unsigned threadCount = *g_threadGroupTotal.get();
-    unsigned threadIndex = *g_threadGroupIndex.get();
+    unsigned threadCount = g_threadGroupTotal;
+    unsigned threadIndex = g_threadGroupIndex;
     if ((sessionIdM%threadCount) != threadIndex)
     {
         LOG_FATAL("job is handled in wrong thread:" << threadIndex 
@@ -210,13 +201,13 @@ void Session::handleTimeout()
     }
     
 
-    if (-1 == tidM)
+    if (default_thread_id == tidM)
     {
-        tidM = gettid();
+        tidM = this_thread::get_id();
     }
-    else if (tidM != gettid())
+    else if (tidM != this_thread::get_id())
     {
-        LOG_FATAL("tid not match pre:" << tidM << "-now:" << gettid());
+        LOG_FATAL("tid not match pre:" << tidM << "-now:" << this_thread::get_id());
         assert(false);
     }
 #endif

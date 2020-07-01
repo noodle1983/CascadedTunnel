@@ -1,7 +1,7 @@
 #ifndef REACTOR_H
 #define REACTOR_H
 
-#include <boost/thread.hpp>
+#include <thread>
 #include <event.h>
 
 namespace Net
@@ -36,7 +36,7 @@ namespace Reactor
     private:
         struct event_base* evtBaseM;
         struct event* heartbeatEventM;//to avoid the event loop exit
-        boost::thread_group threadsM;
+        std::thread threadM;
 
         static Reactor* reactorM;
     };

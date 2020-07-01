@@ -4,6 +4,7 @@
 #include <stdio.h>
 
 using namespace Config;
+using namespace std;
 
 //-----------------------------------------------------------------------------
 
@@ -35,7 +36,7 @@ IntParameter::~IntParameter()
 
 int IntParameter::get()
 {
-    boost::shared_lock<boost::shared_mutex> lock(valueMutexM);
+    lock_guard<mutex> lock(valueMutexM);
     return valueM;
 }
 
@@ -62,12 +63,11 @@ int IntParameter::set(const int theValue)
     bool notifyWatcher = false;
 
     {
-        boost::upgrade_lock<boost::shared_mutex> lock(valueMutexM);
+        lock_guard<mutex> lock(valueMutexM);
         if (!checkRangeM 
                 || (checkRangeM && theValue >= minValueM && theValue <= maxValueM))
         {
             {
-                boost::upgrade_to_unique_lock<boost::shared_mutex> uniqueLock(lock);
                 valueM = theValue;
             }
             notifyWatcher = true;
@@ -82,7 +82,7 @@ int IntParameter::set(const int theValue)
     }
     if (notifyWatcher)
     {
-        boost::unique_lock<boost::mutex> lock(watcherMutexM);
+        lock_guard<mutex> lock(watcherMutexM);
         for (WatcherMap::iterator it = changesWatchersM.begin();
                 it != changesWatchersM.end(); it++)
         {
@@ -122,7 +122,7 @@ void IntParameter::setRange(const std::string& theRange)
 
 void IntParameter::setRange(const int theMin, const int theMax)
 {
-    boost::unique_lock<boost::shared_mutex> lock(valueMutexM);
+    lock_guard<mutex> lock(valueMutexM);
     checkRangeM = true;
     minValueM = theMin;
     maxValueM = theMax;
@@ -132,7 +132,7 @@ void IntParameter::setRange(const int theMin, const int theMax)
 
 void IntParameter::registerWatcher(void* theKey, Watcher& theWatcher)
 {
-    boost::unique_lock<boost::mutex> lock(watcherMutexM);
+    lock_guard<mutex> lock(watcherMutexM);
     changesWatchersM[theKey] = theWatcher;
 }
 
@@ -140,7 +140,7 @@ void IntParameter::registerWatcher(void* theKey, Watcher& theWatcher)
 
 void IntParameter::unregisterWatcher(void* theKey)
 {
-    boost::unique_lock<boost::mutex> lock(watcherMutexM);
+    lock_guard<mutex> lock(watcherMutexM);
     changesWatchersM.erase(theKey);
 }
 

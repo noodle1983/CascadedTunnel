@@ -4,6 +4,7 @@
 #include <stdio.h>
 
 using namespace Config;
+using namespace std;
 
 //-----------------------------------------------------------------------------
 
@@ -28,7 +29,7 @@ StringParameter::~StringParameter()
 
 const std::string StringParameter::get()
 {
-    boost::shared_lock<boost::shared_mutex> lock(valueMutexM);
+    lock_guard<mutex> lock(valueMutexM);
     return valueM;
 }
 
@@ -40,11 +41,11 @@ int StringParameter::set(const std::string& theValue)
         return 0;
 
     {
-        boost::unique_lock<boost::shared_mutex> lock(valueMutexM);
+        lock_guard<mutex> lock(valueMutexM);
         valueM = theValue;
     }
     {
-        boost::unique_lock<boost::mutex> lock(watcherMutexM);
+        lock_guard<mutex> lock(watcherMutexM);
         for (WatcherMap::iterator it = changesWatchersM.begin();
                 it != changesWatchersM.end(); it++)
         {
@@ -59,7 +60,7 @@ int StringParameter::set(const std::string& theValue)
 
 void StringParameter::registerWatcher(void *theKey, Watcher& theWatcher)
 {
-    boost::unique_lock<boost::mutex> lock(watcherMutexM);
+    lock_guard<mutex> lock(watcherMutexM);
     changesWatchersM[theKey] = theWatcher;
 }
 
@@ -67,7 +68,7 @@ void StringParameter::registerWatcher(void *theKey, Watcher& theWatcher)
 
 void StringParameter::unregisterWatcher(void *theKey)
 {
-    boost::unique_lock<boost::mutex> lock(watcherMutexM);
+    lock_guard<mutex> lock(watcherMutexM);
     changesWatchersM.erase(theKey);
 }
 

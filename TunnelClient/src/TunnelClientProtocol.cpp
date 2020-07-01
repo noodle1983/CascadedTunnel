@@ -262,7 +262,7 @@ void TunnelClientProtocol::handleProxyInput(Connection::SocketConnectionPtr theC
 
     if (!canWrite && !peerConnection->hasWatcher(proxyFd))
     {
-        peerConnection->setLowWaterMarkWatcher(theConnection->getFd(), new Watcher(boost::bind(
+        peerConnection->setLowWaterMarkWatcher(theConnection->getFd(), new Watcher(bind(
             &TunnelProxyClientProtocol::asynHandleInput, theConnection->getProtocol(), theConnection->getFd(), theConnection)));
     }
 }

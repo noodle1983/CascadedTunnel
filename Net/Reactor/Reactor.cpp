@@ -1,12 +1,11 @@
 #include "Reactor.h"
 #include "Log.h"
 
+#include <mutex>
 #include <event.h>
+
 using namespace Net::Reactor;
-
-#include <boost/thread.hpp>
-#include <boost/shared_ptr.hpp>
-
+using namespace std;
 
 //-----------------------------------------------------------------------------
 
@@ -36,14 +35,14 @@ Reactor::~Reactor()
 
 //-----------------------------------------------------------------------------
 
-static boost::mutex reactorInstanceMutex;
-static boost::shared_ptr<Reactor> reactorInstanceReleaser;
+static mutex reactorInstanceMutex;
+static shared_ptr<Reactor> reactorInstanceReleaser;
 Reactor* Reactor::reactorM = NULL;
 Reactor* Reactor::instance()
 {
     if (NULL == reactorM)
     {
-        boost::lock_guard<boost::mutex> lock(reactorInstanceMutex);
+        lock_guard<mutex> lock(reactorInstanceMutex);
         if (NULL == reactorM)
         {
             Reactor* reactor = new Reactor();
@@ -64,7 +63,7 @@ void Reactor::start()
     tv.tv_sec = 5;  //5 seconds
     tv.tv_usec = 0;
     event_add(heartbeatEventM, &tv);
-    threadsM.create_thread(boost::bind(&Reactor::dispatchLoop, this));
+    threadM = thread(&Reactor::dispatchLoop, this);
 }
 
 //-----------------------------------------------------------------------------
@@ -89,8 +88,7 @@ void Reactor::dispatchLoop()
 void Reactor::stop()
 {
     event_base_loopexit(evtBaseM, NULL);
-    threadsM.interrupt_all();
-    //threadsM.join_all();
+    if (threadM.joinable()){threadM.join();}
 }
 
 

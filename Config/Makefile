@@ -22,10 +22,7 @@ STATIC_LIB= $(PROJBASE)/.lib/libLog.a \
 SHARED_LIB_DIR=
 SHARED_LIB= -pthread
 
-include $(PROJBASE)/build/makefile.boost.header
 include $(PROJBASE)/build/makefile.rapidxml.header
-include $(PROJBASE)/build/makefile.staticlib.boost.thread.linux
-include $(PROJBASE)/build/makefile.staticlib.boost.log.linux
 
 #########################################
 #              compiler                 #

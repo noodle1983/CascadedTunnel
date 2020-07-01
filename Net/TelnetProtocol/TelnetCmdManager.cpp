@@ -3,13 +3,15 @@
 #include "Log.h"
 #include <set>
 #include <assert.h>
+#include <string.h>
 
 using namespace Net;
 using namespace Net::Protocol;
+using namespace std;
 
 bool TelnetCmdManager::isTopCmdsMInitedM = false;
 CmdMap TelnetCmdManager::allTopCmdsM;
-boost::shared_mutex TelnetCmdManager::topCmdMutexM;
+mutex TelnetCmdManager::topCmdMutexM;
 QuitHandler TelnetCmdManager::quitHandlerM;
 HelpHandler TelnetCmdManager::helpHandlerM;
 //-----------------------------------------------------------------------------
@@ -18,7 +20,7 @@ void TelnetCmdManager::initTopCmd()
 {
     if (!isTopCmdsMInitedM)
     {
-        boost::unique_lock<boost::shared_mutex> lock(topCmdMutexM);
+        lock_guard<mutex> lock(topCmdMutexM);
         if(!isTopCmdsMInitedM)
         {
             allTopCmdsM["quit"] = &quitHandlerM;
@@ -70,7 +72,7 @@ void TelnetCmdManager::registCmd(
 	const std::string& theCmdName,
 	ICmdHandler* theHandler)
 {
-    boost::unique_lock<boost::shared_mutex> lock(topCmdMutexM);
+    lock_guard<mutex> lock(topCmdMutexM);
     CmdMap::iterator it = allTopCmdsM.find(theCmdName);
     if(it != allTopCmdsM.end())
     {
@@ -173,7 +175,7 @@ int TelnetCmdManager::handleCmd(const unsigned theStart, const unsigned theEnd)
 		argsList.pop_front();
 		ICmdHandler* cmdHandler = NULL; 
 		{
-			boost::shared_lock<boost::shared_mutex> lock(topCmdMutexM);
+			lock_guard<mutex> lock(topCmdMutexM);
 			CmdMap::iterator it = allTopCmdsM.find(cmd);
 			if (it == allTopCmdsM.end())
 			{
@@ -290,7 +292,7 @@ void TelnetCmdManager::printUsage()
 {
     std::set<std::string> outSet;
     {
-        boost::shared_lock<boost::shared_mutex> lock(topCmdMutexM);
+        lock_guard<mutex> lock(topCmdMutexM);
         CmdMap::iterator it = allTopCmdsM.begin();     
         for (; it != allTopCmdsM.end(); it++)
         {

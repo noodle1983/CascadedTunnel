@@ -1,8 +1,8 @@
 #ifndef STRINGPARAMETER_H
 #define STRINGPARAMETER_H
 
-#include <boost/function.hpp>
-#include <boost/thread.hpp>
+#include <functional>
+#include <mutex>
 #include <map>
 #include <string>
 
@@ -15,7 +15,7 @@ namespace Config
         StringParameter(const StringParameter& theStringParam);
         ~StringParameter();
 
-        typedef boost::function<void (const std::string&)> Watcher;
+        typedef std::function<void (const std::string&)> Watcher;
         typedef std::map<void*, Watcher> WatcherMap;
 
         const std::string get();
@@ -29,8 +29,8 @@ namespace Config
         const std::string nameM;
         std::string valueM;
         WatcherMap changesWatchersM;
-        boost::shared_mutex valueMutexM;
-        boost::mutex watcherMutexM;
+        std::mutex valueMutexM;
+        std::mutex watcherMutexM;
     };
 }
 #endif /* STRINGPARAMETER_H */

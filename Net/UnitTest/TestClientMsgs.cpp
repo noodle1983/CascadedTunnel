@@ -10,16 +10,21 @@
 #include <unistd.h>
 #include <signal.h>
 #include <iostream>
+#include <string.h>
+#include <functional>
+#include <assert.h>
 
 using namespace Config;
+using namespace std;
+using namespace std::placeholders;
 
 static int closed = false;
-static boost::mutex closedMutexM;
-static boost::condition_variable closedCondM;
+static mutex closedMutexM;
+static condition_variable closedCondM;
 void sig_stop(int sig)
 {
     LOG_DEBUG("receive signal " << sig << ". stopping...");
-    boost::lock_guard<boost::mutex> lock(closedMutexM);
+    lock_guard<mutex> lock(closedMutexM);
     closed = true;
     closedCondM.notify_one();
 }
@@ -92,7 +97,7 @@ public:
         if (!canWrite)
         {
             theConnection->setLowWaterMarkWatcher(
-                    theFd, new Net::Connection::Watcher(boost::bind(&BatchDataProtocol::asynSend, this, _1, _2)));
+                    theFd, new Net::Connection::Watcher(bind(&BatchDataProtocol::asynSend, this, theFd, theConnection)));
         }
         return;
     }
@@ -172,7 +177,7 @@ int main()
     BatchDataProtocol singleDataProtocol;
     singleDataProtocol.startTest();
 
-    boost::unique_lock<boost::mutex> lock(closedMutexM);
+    unique_lock<mutex> lock(closedMutexM);
     while(!closed)
     {
         closedCondM.wait(lock);

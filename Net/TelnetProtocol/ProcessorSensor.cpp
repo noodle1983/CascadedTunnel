@@ -2,6 +2,7 @@
 #include "TelnetCmdManager.h"
 
 #include <sstream>
+#include <iomanip>
 
 using namespace Net::Protocol;
 using namespace std;

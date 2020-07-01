@@ -1,8 +1,8 @@
 #ifndef INTPARAMETER_H
 #define INTPARAMETER_H
 
-#include <boost/function.hpp>
-#include <boost/thread.hpp>
+#include <functional>
+#include <mutex>
 #include <map>
 #include <string>
 
@@ -15,7 +15,7 @@ namespace Config
         IntParameter(const IntParameter& theIntParam);
         ~IntParameter();
 
-        typedef boost::function<void (const int)> Watcher;
+        typedef std::function<void (const int)> Watcher;
         typedef std::map<void*, Watcher> WatcherMap;
 
         int get();
@@ -38,8 +38,8 @@ namespace Config
         int maxValueM;
         int valueM;
         WatcherMap changesWatchersM;
-        boost::shared_mutex valueMutexM;
-        boost::mutex watcherMutexM;
+        std::mutex valueMutexM;
+        std::mutex watcherMutexM;
     };
 }
 #endif /* INTPARAMETER_H */

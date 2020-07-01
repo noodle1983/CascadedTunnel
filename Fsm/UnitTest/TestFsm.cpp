@@ -4,7 +4,7 @@
 #include "Session.h"
 #include "Reactor.h"
 #include <iostream>
-#include <boost/bind.hpp>
+#include <functional>
 #include <unistd.h>
 using namespace std;
 

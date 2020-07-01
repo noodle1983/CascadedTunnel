@@ -10,8 +10,8 @@
 #include <list>
 #include <map>
 #include <string>
-#include <boost/thread.hpp>
-#include <boost/shared_ptr.hpp>
+#include <mutex>
+#include <memory>
 
 namespace Processor
 {
@@ -66,7 +66,7 @@ namespace Protocol
 	private:
 		static bool isTopCmdsMInitedM;
 		static CmdMap allTopCmdsM;
-        static boost::shared_mutex topCmdMutexM;
+        static std::mutex topCmdMutexM;
         static QuitHandler quitHandlerM;
         static HelpHandler helpHandlerM;
 

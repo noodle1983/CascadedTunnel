@@ -9,6 +9,7 @@
 #include <errno.h>
 #include <string.h>
 #include <err.h>
+#include <assert.h>
 
 
 using namespace Net::Connection;
@@ -171,12 +172,6 @@ void SocketConnection::onRead(int theFd, short theEvt)
         _close();
         return;
     }
-    else if (len > SSIZE_MAX)
-    {
-        LOG_WARN("Socket failure, disconnecting client:" << strerror(errno));
-        _close();
-        return;
-    }
     else if (len < 0 && errno == EWOULDBLOCK)
     {
         len = 0;
@@ -190,7 +185,7 @@ void SocketConnection::onRead(int theFd, short theEvt)
         readBufferLeft = inputQueueM.unusedSize();
         readLen = (readBufferLeft < sizeof(buffer)) ? readBufferLeft : sizeof(buffer);
         len = read(theFd, buffer, readLen);
-        if (len <= 0 || len > SSIZE_MAX)
+        if (len <= 0)
         {
             break;
         }

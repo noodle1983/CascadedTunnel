@@ -8,11 +8,12 @@
 
 using namespace Config;
 using namespace rapidxml;
+using namespace std;
 
 const std::string ConfigCenter::TOP_XMLNODE_NAME = "Configuration";
 //-----------------------------------------------------------------------------
 
-boost::shared_mutex ConfigCenter::configCenterMutexM;
+mutex ConfigCenter::configCenterMutexM;
 ConfigCenterPtr ConfigCenter::configCenterM;
 
 //-----------------------------------------------------------------------------
@@ -21,7 +22,7 @@ ConfigCenterPtr ConfigCenter::instance()
 {
     if (NULL == configCenterM.get())
     {
-        boost::unique_lock<boost::shared_mutex> lock(configCenterMutexM);
+        lock_guard<mutex> lock(configCenterMutexM);
         if (NULL == configCenterM.get())
         {
             configCenterM.reset(new ConfigCenter());
@@ -31,7 +32,7 @@ ConfigCenterPtr ConfigCenter::instance()
             }
         }
     }
-    boost::shared_lock<boost::shared_mutex> lock(configCenterMutexM);
+    lock_guard<mutex> lock(configCenterMutexM);
     return configCenterM;
 }
 
@@ -43,7 +44,7 @@ int ConfigCenter::loadConfig(const std::string& theInputXmlFile)
     if (0 == newConfigCenter->loadXml(theInputXmlFile))
     {
         {
-            boost::unique_lock<boost::shared_mutex> lock(configCenterMutexM);
+            lock_guard<mutex> lock(configCenterMutexM);
             configCenterM = newConfigCenter;
         }
         CFG_DEBUG("loaded config file:" << theInputXmlFile);
@@ -53,7 +54,7 @@ int ConfigCenter::loadConfig(const std::string& theInputXmlFile)
     else if (NULL == configCenterM.get())
     {
         CFG_ERROR("load xml file failed, the default config will be applied.");
-        boost::unique_lock<boost::shared_mutex> lock(configCenterMutexM);
+        lock_guard<mutex> lock(configCenterMutexM);
         configCenterM->borrowFrom(newConfigCenter);
         return -1;
     }

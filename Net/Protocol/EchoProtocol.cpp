@@ -7,6 +7,7 @@
 
 using namespace Net::Protocol;
 using namespace Config;
+using namespace std;
 
 //-----------------------------------------------------------------------------
 EchoProtocol::EchoProtocol(
@@ -39,7 +40,7 @@ void EchoProtocol::handleInput(Connection::SocketConnectionPtr connection)
     }
     if (!canWrite)
     {
-        connection->setLowWaterMarkWatcher(connection->getFd(), new Net::Connection::Watcher(boost::bind(
+        connection->setLowWaterMarkWatcher(connection->getFd(), new Net::Connection::Watcher(bind(
             &EchoProtocol::asynHandleInput, this, connection->getFd(), connection)));
     }
 }

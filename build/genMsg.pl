@@ -62,7 +62,6 @@ print CMSG_HANDLE<<END_OF_HEADER;
 #include "Log.h"
 
 #include <sstream>
-#include <boost/optional.hpp>
 
 namespace Msg
 {

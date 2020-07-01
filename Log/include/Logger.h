@@ -3,14 +3,6 @@
 
 #include "Singleton.hpp"
 
-#include <boost/log/core.hpp>
-#include <boost/log/trivial.hpp>
-#include <boost/log/sources/severity_logger.hpp>
-
-namespace logging=boost::log;
-namespace src = boost::log::sources;
-using namespace logging::trivial;
-
 namespace Log
 {
     class Logger
@@ -21,7 +13,6 @@ namespace Log
 
         void init();
 
-        static src::severity_logger<severity_level> lg;
     private:
     };
     typedef DesignPattern::Singleton<Logger> CfgLoggerSingleton;

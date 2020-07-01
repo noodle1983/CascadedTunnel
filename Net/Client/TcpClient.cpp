@@ -8,9 +8,11 @@
 #include <event.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <string.h>
 
 using namespace Net::Client;
 using namespace Config;
+using namespace std;
 
 #ifndef WIN32
 /* True iff e is an error that means an connect can be retried. */
@@ -75,7 +77,7 @@ int TcpClient::close()
     isClosedM = true;
     isConnectedM = false;
 
-    boost::lock_guard<boost::mutex> lock(connectionMutexM);
+    lock_guard<mutex> lock(connectionMutexM);
     if (connectionM.get())
     {
         connectionM->rmClient();
@@ -89,7 +91,7 @@ int TcpClient::close()
 
 int TcpClient::connect()
 {
-    boost::lock_guard<boost::mutex> lock(connectionMutexM);
+    lock_guard<mutex> lock(connectionMutexM);
     //connect
     peerAddrM = protocolM->getAddr();
     peerPortM = protocolM->getPort();
@@ -161,7 +163,7 @@ void TcpClient::onConnected(int theFd, Connection::SocketConnectionPtr theConnec
     LOG_DEBUG("connected to " << peerAddrM
             << ":" << peerPortM);
     {
-        boost::lock_guard<boost::mutex> lock(connectionMutexM);
+        lock_guard<mutex> lock(connectionMutexM);
         isConnectedM = true;
     }
     protocolM->asynHandleConnected(theFd, theConnection);
@@ -192,7 +194,7 @@ void TcpClient::onError(Connection::SocketConnectionPtr theConnection)
     LOG_WARN("connection lost from " << peerAddrM
             << ":" << peerPortM);
     {
-        boost::lock_guard<boost::mutex> lock(connectionMutexM);
+        lock_guard<mutex> lock(connectionMutexM);
         connectionM.reset();
         //reconnect
         isConnectedM = false;

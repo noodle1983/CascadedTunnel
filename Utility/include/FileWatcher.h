@@ -2,7 +2,6 @@
 #define FILEWATCHER_H
 
 #include <string>
-#include <boost/function.hpp>
 #include <time.h>
 #include <event.h>
 

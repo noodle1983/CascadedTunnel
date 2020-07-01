@@ -5,10 +5,8 @@
 
 #include <sys/stat.h>
 #include <unistd.h>
-#include <boost/bind/bind.hpp>
 
 using namespace Utility;
-using namespace boost::placeholders;
 
 //-----------------------------------------------------------------------------
 

@@ -1,71 +1,70 @@
 #ifndef LOG_H
 #define LOG_H
 
-#include "Logger.h"
-#include <boost/thread/thread.hpp>
+#include <iostream>
 
 //-----------------------------------------------------------------------------
 //trafficLogger
 #define LOG_TRACE(msg) \
-BOOST_LOG_SEV(g_logger->lg, trace) \
+std::cout \
     << "(" <<  __FILE__ << ":" << __LINE__ << ") "  \
-    << msg
+    << msg << std::endl
 
 #define LOG_DEBUG(msg) \
-BOOST_LOG_SEV(g_logger->lg, debug)\
+std::cout\
     << "(" <<  __FILE__ << ":" << __LINE__ << ") "  \
-    << msg
+    << msg << std::endl
 
 #define LOG_INFO(msg) \
-BOOST_LOG_SEV(g_logger->lg, info) \
+std::cout \
     << "(" <<  __FILE__ << ":" << __LINE__ << ") "  \
-    << msg
+    << msg << std::endl
 
 #define LOG_WARN(msg) \
-BOOST_LOG_SEV(g_logger->lg, warning) \
+std::cout \
     << "(" <<  __FILE__ << ":" << __LINE__ << ") "  \
-    << msg
+    << msg << std::endl
 
 #define LOG_ERROR(msg) \
-BOOST_LOG_SEV(g_logger->lg, error) \
+std::cout \
     << "(" <<  __FILE__ << ":" << __LINE__ << ") "  \
-    << msg
+    << msg << std::endl
 
 #define LOG_FATAL(msg) \
-BOOST_LOG_SEV(g_logger->lg, fatal) \
+std::cout \
     << "(" <<  __FILE__ << ":" << __LINE__ << ") "  \
-    << msg
+    << msg << std::endl
 
 //-----------------------------------------------------------------------------
 //configLogger
 #define CFG_TRACE(msg) \
-BOOST_LOG_SEV(g_cfg_logger->lg, trace) \
+std::cout \
     << "(" <<  __FILE__ << ":" << __LINE__ << ") "  \
-    << msg
+    << msg << std::endl
 
 #define CFG_DEBUG(msg) \
-BOOST_LOG_SEV(g_cfg_logger->lg, debug) \
+std::cout \
     << "(" <<  __FILE__ << ":" << __LINE__ << ") "  \
-    << msg
+    << msg << std::endl
 
 #define CFG_INFO(msg) \
-BOOST_LOG_SEV(g_cfg_logger->lg, info) \
+std::cout \
     << "(" <<  __FILE__ << ":" << __LINE__ << ") "  \
-    << msg
+    << msg << std::endl
 
 #define CFG_WARN(msg) \
-BOOST_LOG_SEV(g_cfg_logger->lg, warning) \
+std::cout \
     << "(" <<  __FILE__ << ":" << __LINE__ << ") "  \
-    << msg
+    << msg << std::endl
 
 #define CFG_ERROR(msg) \
-BOOST_LOG_SEV(g_cfg_logger->lg, error) \
+std::cout \
     << "(" <<  __FILE__ << ":" << __LINE__ << ") "  \
-    << msg
+    << msg << std::endl
 
 #define CFG_FATAL(msg) \
-BOOST_LOG_SEV(g_cfg_logger->lg, fatal) \
+std::cout \
     << "(" <<  __FILE__ << ":" << __LINE__ << ") "  \
-    << msg
+    << msg << std::endl
 
 #endif /* LOG_H */

@@ -11,15 +11,16 @@
 #include <event2/util.h>
 #include <iostream>
 #include <string.h>
+#include <assert.h>
 using namespace std;
 
 static int closed = false;
-static boost::mutex closedMutexM;
-static boost::condition_variable closedCondM;
+static mutex closedMutexM;
+static condition_variable closedCondM;
 void sig_stop(int sig)
 {
     LOG_DEBUG("receive signal " << sig << ". stopping...");
-    boost::lock_guard<boost::mutex> lock(closedMutexM);
+    lock_guard<mutex> lock(closedMutexM);
     closed = true;
     closedCondM.notify_one();
 }

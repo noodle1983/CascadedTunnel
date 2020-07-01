@@ -12,16 +12,17 @@
 #include <unistd.h>
 #include <signal.h>
 
+using namespace std;
 using namespace Processor;
 using namespace Net::Reactor;
 
 static int closed = false;
-static boost::mutex closedMutexM;
-static boost::condition_variable closedCondM;
+static mutex closedMutexM;
+static condition_variable closedCondM;
 void sig_stop(int sig)
 {
     LOG_DEBUG("receive signal " << sig << ". stopping...");
-    boost::lock_guard<boost::mutex> lock(closedMutexM);
+    lock_guard<mutex> lock(closedMutexM);
     closed = true;
     closedCondM.notify_one();
 }
@@ -58,7 +59,7 @@ int main()
     innerServer.start();
     proxyServer.start();
 
-    boost::unique_lock<boost::mutex> lock(closedMutexM);
+    unique_lock<mutex> lock(closedMutexM);
     while(!closed)
     {
         closedCondM.wait(lock);
