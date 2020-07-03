@@ -10,14 +10,17 @@
 
 namespace nd
 {
+    const int LOG_TYPE_CFG = 0;
+    const int LOG_TYPE_NORMAL = 1;
     extern thread_local ThreadLocalLogMeta tl_logmeta;
     class Logger
     {
     public:
-        Logger();
+        Logger(int logType);
         ~Logger();
 
-        void init();
+        void initCfgLog();
+        void initNormalLog();
         bool willAccept();
 
         void handleLogMeta(LogMeta* meta);
@@ -37,8 +40,8 @@ namespace nd
     template<> Logger& operator<<(Logger& theLogger, const Condition& condition);
     template<> Logger& operator<<(Logger& theLogger, const SrcLine& srcline);
     template<> Logger& operator<<(Logger& theLogger, const LogEnd& end);
-    typedef DesignPattern::Singleton<Logger> CfgLoggerSingleton;
-    typedef DesignPattern::InitDataSingleton<Logger> LoggerSingleton;
+    typedef DesignPattern::ParamSingleton<Logger, 0> CfgLoggerSingleton;
+    typedef DesignPattern::ParamSingleton<Logger, 1> LoggerSingleton;
 }
 
 #define g_logger nd::LoggerSingleton::instance()

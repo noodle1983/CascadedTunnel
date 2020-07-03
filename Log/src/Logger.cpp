@@ -13,9 +13,14 @@ using namespace std;
 
 //-----------------------------------------------------------------------------
 
-Logger::Logger()
+Logger::Logger(int logType)
     : minSeverityM((int)Severity::Trace)
 {
+    if (logType == LOG_TYPE_CFG){
+        initCfgLog();
+    }else{
+        initNormalLog();
+    }
 }
 
 //-----------------------------------------------------------------------------
@@ -32,7 +37,16 @@ Logger::~Logger()
 
 //-----------------------------------------------------------------------------
 
-void Logger::init()
+void Logger::initCfgLog()
+{
+    minSeverityM = Severity::Trace;
+    string prefix("cfg_");
+    sinksM.push_back(new FileSink(prefix, 0, (Severity)minSeverityM));
+    sinksM.push_back(new ConsoleSink((Severity)minSeverityM));
+}
+
+//-----------------------------------------------------------------------------
+void Logger::initNormalLog()
 {
     int logLevel = g_cfg->get("log.level", (int)Severity::Debug);
     bool runInBackground = g_cfg->get("process.background", 1);

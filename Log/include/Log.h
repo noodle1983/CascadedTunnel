@@ -39,33 +39,34 @@
 //-----------------------------------------------------------------------------
 //configLogger
 #define CFG_TRACE(msg) \
-std::cout \
-    << "(" <<  __FILE__ << ":" << __LINE__ << ") "  \
-    << msg << std::endl
+*g_cfg_logger << nd::Severity::Trace \
+    << nd::SrcLine(__FILE__, __LINE__) \
+    << msg << nd::LogEnd()
 
 #define CFG_DEBUG(msg) \
-std::cout \
-    << "(" <<  __FILE__ << ":" << __LINE__ << ") "  \
-    << msg << std::endl
+*g_cfg_logger << nd::Severity::Debug \
+    << nd::SrcLine(__FILE__, __LINE__) \
+    << msg << nd::LogEnd()
 
 #define CFG_INFO(msg) \
-std::cout \
-    << "(" <<  __FILE__ << ":" << __LINE__ << ") "  \
-    << msg << std::endl
+*g_cfg_logger << nd::Severity::Info \
+    << nd::SrcLine(__FILE__, __LINE__) \
+    << msg << nd::LogEnd()
 
 #define CFG_WARN(msg) \
-std::cout \
-    << "(" <<  __FILE__ << ":" << __LINE__ << ") "  \
-    << msg << std::endl
+*g_cfg_logger << nd::Severity::Warning \
+    << nd::SrcLine(__FILE__, __LINE__) \
+    << msg << nd::LogEnd()
 
 #define CFG_ERROR(msg) \
-std::cout \
-    << "(" <<  __FILE__ << ":" << __LINE__ << ") "  \
-    << msg << std::endl
+*g_cfg_logger << nd::Severity::Error \
+    << nd::SrcLine(__FILE__, __LINE__) \
+    << msg << nd::LogEnd()
 
 #define CFG_FATAL(msg) \
-std::cout \
-    << "(" <<  __FILE__ << ":" << __LINE__ << ") "  \
-    << msg << std::endl
+*g_cfg_logger << nd::Severity::Fatal \
+    << nd::SrcLine(__FILE__, __LINE__) \
+    << msg << nd::LogEnd()
+
 
 #endif /* LOG_H */

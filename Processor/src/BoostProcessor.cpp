@@ -92,7 +92,7 @@ BoostProcessor* BoostProcessor::ioInstance()
         lock_guard<mutex> lock(ioProcessorInstanceMutex);
         if (NULL == ioProcessorM)
         {
-            int threadCount = ConfigCenter::instance()->get("prc.ioTno", 1);
+            int threadCount = 1; 
             BoostProcessor* ioProcessor = new BoostProcessor(threadCount);
             ioProcessorInstanceReleaser.reset(ioProcessor);
             ioProcessor->start(true);
