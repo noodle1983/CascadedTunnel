@@ -91,7 +91,7 @@ void TunnelClientProtocol::handleInput(Connection::SocketConnectionPtr theConnec
                 continue;
             }
 
-            LOG_DEBUG("NewConnection, winOffset:" << msg.winOffset << ", proxyFd:" << msg.proxyFd);
+            LOG_DEBUG("NewConnection, winOffset:" << msg.winOffset.valueM << ", proxyFd:" << msg.proxyFd.valueM);
             SocketConnectionPtr connection = client->getConnection();
             connection->setUpperData((void*)(uintptr_t)msg.winOffset);
 
@@ -129,7 +129,7 @@ void TunnelClientProtocol::handleInput(Connection::SocketConnectionPtr theConnec
                 theConnection->close();
                 return;
             }
-            LOG_DEBUG("downflow SyncWinSize, winOffset:" << msg.winOffset << ", proxyFd:" << proxyFd);
+            LOG_DEBUG("downflow SyncWinSize, winOffset:" << msg.winOffset.valueM << ", proxyFd:" << proxyFd);
             TcpClient* client = it->second;
             SocketConnectionPtr con = client->getConnection();
             con->setUpperData((void*)(uintptr_t)msg.winOffset);
@@ -160,13 +160,13 @@ void TunnelClientProtocol::handleInput(Connection::SocketConnectionPtr theConnec
             unsigned sent = connection->sendn(payload.c_str(), payload.length());
             if(sent != payload.length())
             {
-                LOG_ERROR("data dropped! fd:" << msg.proxyFd << ", sent:" << sent);
+                LOG_ERROR("data dropped! fd:" << msg.proxyFd.valueM << ", sent:" << sent);
                 theConnection->close();
                 continue;
             }
         }
         else{
-            LOG_ERROR("unknow msg type:" << header.messageType);
+            LOG_ERROR("unknow msg type:" << header.messageType.valueM);
             theConnection->close();
             return;
         }
@@ -256,7 +256,7 @@ void TunnelClientProtocol::handleProxyInput(Connection::SocketConnectionPtr theC
         msg.payload.valueM.assign(buffer, len);
         client2ServerM->sendMsg(msg);
         canWrite = peerConnection->isWBufferHealthy();
-        LOG_DEBUG("sent ProxyRsp len:" << msg.length << ", winSize:" << winSize << ". fd: " << proxyFd);
+        LOG_DEBUG("sent ProxyRsp len:" << msg.length.valueM << ", winSize:" << winSize << ". fd: " << proxyFd);
     }
     LOG_DEBUG("downflow SyncWinSize after sent, winSize:" << winSize << ", proxyFd:" << proxyFd);
 
@@ -282,7 +282,7 @@ void TunnelClientProtocol::handleProxySent(Connection::SocketConnectionPtr theCo
     msg.proxyFd = it->second;
     msg.winOffset = theConnection->getWBufferSpace() + theConnection->getWritenBytes();
     client2ServerM->sendMsg(msg);
-    LOG_DEBUG("update upflow SyncWinSize, winOffset:" << msg.winOffset << ", proxyFd:" << it->second);
+    LOG_DEBUG("update upflow SyncWinSize, winOffset:" << msg.winOffset.valueM << ", proxyFd:" << it->second);
 }
 
 //-----------------------------------------------------------------------------
@@ -329,7 +329,7 @@ void TunnelClientProtocol::handleProxyConnected(Connection::SocketConnectionPtr 
     msg.proxyFd = it->second;
     msg.winOffset = theConnection->getWBufferSpace() + theConnection->getWritenBytes();
     client2ServerM->sendMsg(msg);
-    LOG_DEBUG("update upflow SyncWinSize, winOffset:" << msg.winOffset << ", proxyFd:" << it->second);
+    LOG_DEBUG("update upflow SyncWinSize, winOffset:" << msg.winOffset.valueM << ", proxyFd:" << it->second);
 }
 
 //-----------------------------------------------------------------------------

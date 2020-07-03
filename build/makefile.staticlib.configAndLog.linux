@@ -6,8 +6,9 @@ INC_DIR+= \
      -I$(PROJBASE)/Log/include \
 
 STATIC_LIB+= \
-	$(PROJBASE)/.lib/libConfig.a \
 	$(PROJBASE)/.lib/libLog.a \
+	$(PROJBASE)/.lib/libConfig.a \
+    $(PROJBASE)/.lib/libProcessor.a \
 
 SHARED_LIB_DIR+=
 SHARED_LIB+=  -pthread -lrt
