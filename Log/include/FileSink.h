@@ -14,9 +14,11 @@ namespace nd
         virtual ~FileSink() = default;
         virtual void log(const LogMeta* theMeta);
 
+        void checkDelHisFile();
+
     private:
         std::string prefixM;
-        int keepnoM;
+        int keepHisNoM;
         std::string timeFormatM;
         Severity severityM;
         std::ofstream fileHandleM;

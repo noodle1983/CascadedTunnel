@@ -5,7 +5,7 @@ RANLIB=ranlib
 ARFLAGS=rcs
 SYMBOL_DUMPPER=$(PROJBASE)/3PP/google-breakpad/bin/dump_syms
 SHAREDFLAG= -fPIC -shared
-CXXFLAGS=-DDEBUG -Wall -Wno-write-strings -std=gnu++11 -g $(INC_DIR) 
+CXXFLAGS=-DDEBUG -Wall -Wno-write-strings -std=gnu++17 -g $(INC_DIR) 
 CFLAGs=-DDEBUG -Wall -Wno-write-strings -g $(INC_DIR)
 #CXXFLAGS=-Wall -Wno-write-strings -g -O2 $(INC_DIR) 
 #CFLAGs=-Wall -Wno-write-strings -g -O2 $(INC_DIR)
