@@ -1,5 +1,13 @@
 <?xml version='1.0' encoding='utf-8' ?>
 <Configuration>
+    <Group name="Process Group">
+		<Parameter name="Should the process be running background" id="process.background">
+            <Description>0:not run in background; 1: run in background;</Description>
+			<ValueType>Int</ValueType>
+			<DefaultValue>1</DefaultValue>
+			<Value>0</Value>
+		</Parameter>
+	</Group>
 	<Group name="Traffic Log Group">
 		<Parameter name="Log Level" id="log.level">
             <Description>specify the log level: 0:TRACE/ALL; 1:DEBUG; 2:INFO; 3:WARN; 4:ERROR; 5:FATAL; 6:NONE</Description>
@@ -32,7 +40,7 @@
 			<ValueType>Int</ValueType>
 			<ValueRange>1-100</ValueRange>
 			<DefaultValue>10</DefaultValue>
-			<Value>10</Value>
+			<Value>0</Value>
 		</Parameter>
 	</Group>
 </Configuration>

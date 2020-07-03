@@ -11,7 +11,7 @@ using namespace nd;
 using namespace std;
 namespace fs = std::filesystem;
 
-inline std::tm localtime_nd(std::time_t timer)
+static inline std::tm localtime_nd(std::time_t timer)
 {
     std::tm bt;
 #if defined(_MSC_VER)
