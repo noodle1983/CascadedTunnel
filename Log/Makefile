@@ -15,9 +15,11 @@ INC_DIR=-I. \
      -I./include \
      -I./src \
 	 -I$(PROJBASE)/Config/include \
+	 -I$(PROJBASE)/Processor/include \
 	 -I$(PROJBASE)/DesignPattern/include
 
 STATIC_LIB= $(PROJBASE)/.lib/libConfig.a \
+	$(PROJBASE)/.lib/libProcessor.a \
 
 SHARED_LIB_DIR=
 SHARED_LIB= -pthread

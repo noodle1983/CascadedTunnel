@@ -27,12 +27,12 @@ namespace DesignPattern
         Singleton(){};
         ~Singleton(){};
 
-        static std::auto_ptr<DataType> dataHolderM;
+        static std::shared_ptr<DataType> dataHolderM;
         static std::mutex dbLockMutexM;
     };
 
     template<typename DataType, int instanceId>
-    std::auto_ptr<DataType> Singleton<DataType, instanceId>::dataHolderM;
+    std::shared_ptr<DataType> Singleton<DataType, instanceId>::dataHolderM;
 
     template<typename DataType, int instanceId>
     std::mutex Singleton<DataType, instanceId>::dbLockMutexM;
@@ -61,12 +61,12 @@ namespace DesignPattern
         InitDataSingleton(){};
         ~InitDataSingleton(){};
 
-        static std::auto_ptr<DataType> dataHolderM;
+        static std::shared_ptr<DataType> dataHolderM;
         static std::mutex dbLockMutexM;
     };
 
     template<typename DataType, int instanceId>
-    std::auto_ptr<DataType> InitDataSingleton<DataType, instanceId>::dataHolderM;
+    std::shared_ptr<DataType> InitDataSingleton<DataType, instanceId>::dataHolderM;
 
     template<typename DataType, int instanceId>
     std::mutex InitDataSingleton<DataType, instanceId>::dbLockMutexM;

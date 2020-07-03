@@ -39,6 +39,7 @@ namespace Processor
             return jobQueueM.size();
         }
         void stop();
+        void waitStop();
 
         void process(Job* theJob);
 		min_heap_item_t* addLocalTimer(
@@ -67,7 +68,8 @@ namespace Processor
 		min_heap_t timerHeapM;
 		struct timeval timeNowM;	
 
-        mutable bool isToStopM;
+        volatile size_t isToStopM;
+        volatile size_t isWaitStopM;
 #ifdef DEBUG
         std::thread::id tidM;
 #endif

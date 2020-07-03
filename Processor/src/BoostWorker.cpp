@@ -19,6 +19,7 @@ BoostWorker::BoostWorker()
     : groupTotalM(0)
     , groupIndexM(-1)
     , isToStopM(false)
+    , isWaitStopM(false)
 {
     min_heap_ctor(&timerHeapM);	
     timeNowM.tv_sec = 0;
@@ -37,6 +38,14 @@ BoostWorker::~BoostWorker()
 void BoostWorker::stop()
 {
     isToStopM = true;
+    queueCondM.notify_one();
+}
+
+//-----------------------------------------------------------------------------
+
+void BoostWorker::waitStop()
+{
+    isWaitStopM = true;
     queueCondM.notify_one();
 }
 
@@ -67,7 +76,7 @@ min_heap_item_t* BoostWorker::addLocalTimer(
 #ifdef DEBUG
     unsigned threadCount = g_threadGroupTotal;
     unsigned threadIndex = g_threadGroupIndex;
-    if (threadIndex != groupIndexM || threadCount != threadCount)
+    if (threadIndex != groupIndexM || threadCount != groupTotalM)
     {
         LOG_FATAL("job is handled in wrong thread:" << threadIndex 
                 << ", count:" << threadCount
@@ -180,6 +189,10 @@ void BoostWorker::run()
                 job = jobQueueM.front();
                 jobQueueM.pop_front();
             }
+            else if(isWaitStopM)
+            {
+                break;
+            }
         }
 
         //handle Job
@@ -194,13 +207,13 @@ void BoostWorker::run()
         unique_lock<mutex> queueLock(queueMutexM);
 		if (!jobQueueM.empty()) { continue; }
 
-        if (!isToStopM && jobQueueM.empty() && !min_heap_empty(&timerHeapM))
+        if (!isToStopM && !isWaitStopM && jobQueueM.empty() && !min_heap_empty(&timerHeapM))
         {
             queueCondM.wait_for(queueLock, chrono::microseconds(500));
         }
         else
         {
-            while (!isToStopM && jobQueueM.empty() && min_heap_empty(&timerHeapM))
+            while (!isToStopM && !isWaitStopM && jobQueueM.empty() && min_heap_empty(&timerHeapM))
             {
                 queueCondM.wait(queueLock); 
             }

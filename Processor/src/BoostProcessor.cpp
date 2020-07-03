@@ -95,7 +95,7 @@ BoostProcessor* BoostProcessor::ioInstance()
             int threadCount = ConfigCenter::instance()->get("prc.ioTno", 1);
             BoostProcessor* ioProcessor = new BoostProcessor(threadCount);
             ioProcessorInstanceReleaser.reset(ioProcessor);
-            ioProcessor->start();
+            ioProcessor->start(true);
             ioProcessorM = ioProcessor;
         }
     }
@@ -116,6 +116,7 @@ BoostProcessor::BoostProcessor(const std::string& theName, const unsigned theThr
     : threadCountM(theThreadCount)
     , workersM(NULL)
     , nameM(theName)
+    , waitStopM(false)
 {
 }
 
@@ -123,16 +124,21 @@ BoostProcessor::BoostProcessor(const std::string& theName, const unsigned theThr
 
 BoostProcessor::~BoostProcessor()
 {
-    if (workersM)
-    {
-        stop();
+    if (workersM) {
+        if (waitStopM){
+            waitStop();
+        }
+        else {
+            stop();
+        }
     }
 }
 
 //-----------------------------------------------------------------------------
 
-void BoostProcessor::start()
+void BoostProcessor::start(bool toWaitStop)
 {
+    waitStopM = toWaitStop;
     if (0 == threadCountM)
         return;
 
@@ -161,7 +167,7 @@ void BoostProcessor::waitStop()
         /* check the worker once only */
         if(i < threadCountM && workersM[i].isJobQueueEmpty())
         {
-            workersM[i].stop();
+            workersM[i].waitStop();
             i++;
         }
         if (i == threadCountM)

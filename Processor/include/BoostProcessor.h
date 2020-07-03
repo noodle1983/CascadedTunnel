@@ -34,7 +34,7 @@ namespace Processor
         static BoostProcessor* manInstance();
         static BoostProcessor* ioInstance();
 
-        void start();
+        void start(bool toWaitStop = false);
         void waitStop();
         void stop();
 
@@ -68,6 +68,7 @@ namespace Processor
         BoostWorker* workersM;
         std::vector<std::thread> threadsM;
         std::string nameM;
+        bool waitStopM; 
 
         static BoostProcessor* fsmProcessorM;
         static BoostProcessor* netProcessorM;
