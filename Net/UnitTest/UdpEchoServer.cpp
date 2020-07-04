@@ -1,4 +1,4 @@
-#include "BoostProcessor.h"
+#include "Processor.h"
 #include "UdpServer.h"
 #include "Reactor.h"
 #include "Protocol.h"
@@ -10,6 +10,8 @@
 #include <signal.h>
 
 using namespace std;
+using namespace nd;
+using namespace nd;
 
 static int closed = false;
 static mutex closedMutexM;
@@ -22,19 +24,19 @@ void sig_stop(int sig)
     closedCondM.notify_one();
 }
 
-class UdpEchoProtocol:public Net::IUdpProtocol
+class UdpEchoProtocol:public IUdpProtocol
 {
 public:
     UdpEchoProtocol(
-        Processor::BoostProcessor* theProcessor)
+        CppProcessor* theProcessor)
         : IUdpProtocol(theProcessor) 
     {
     }
     ~UdpEchoProtocol(){};
 
-    void handleInput(Net::Server::UdpServerPtr theUdpServer)
+    void handleInput(UdpServerPtr theUdpServer)
     {
-        Net::UdpPacket packet;
+        UdpPacket packet;
         while (theUdpServer->getAPackage(&packet))
         {
             theUdpServer->sendAPackage(&packet);
@@ -66,11 +68,11 @@ int main()
     signal(SIGTERM, sig_stop);
     signal(SIGINT, sig_stop);
     evthread_use_pthreads();
-    Processor::BoostProcessor processor(4);
+    CppProcessor processor(4);
     processor.start();
-    Net::Reactor::Reactor reactor;
+    Reactor reactor;
     UdpEchoProtocol echoProtocol(&processor);
-    Net::Server::UdpServer *server = new Net::Server::UdpServer(&echoProtocol, &reactor, &processor);
+    UdpServer *server = new UdpServer(&echoProtocol, &reactor, &processor);
     server->startAt(5555);
     reactor.start();
 

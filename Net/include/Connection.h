@@ -3,7 +3,7 @@
 
 #include <boost/shared_ptr.hpp>
 
-namespace Net
+namespace nd
 {
     class Connection
     {

@@ -1,18 +1,17 @@
-#include "BoostProcessor.h"
+#include "Processor.h"
 #include "EchoProtocol.h"
 #include "SocketConnection.h"
 #include "Reactor.h"
 #include "ConfigCenter.h"
 #include "Log.h"
 
-using namespace Net::Protocol;
-using namespace Config;
+using namespace nd;
 using namespace std;
 
 //-----------------------------------------------------------------------------
 EchoProtocol::EchoProtocol(
-        Reactor::Reactor* theReactor,
-        Processor::BoostProcessor* theProcessor)
+        Reactor* theReactor,
+        CppProcessor* theProcessor)
     : IProtocol(theProcessor) 
     , reactorM(theReactor)
     , processorM(theProcessor)
@@ -27,7 +26,7 @@ EchoProtocol::~EchoProtocol()
 
 //-----------------------------------------------------------------------------
 
-void EchoProtocol::handleInput(Connection::SocketConnectionPtr connection)
+void EchoProtocol::handleInput(SocketConnectionPtr connection)
 {
     char buffer[1024];
     unsigned len = 1;
@@ -40,7 +39,7 @@ void EchoProtocol::handleInput(Connection::SocketConnectionPtr connection)
     }
     if (!canWrite)
     {
-        connection->setLowWaterMarkWatcher(connection->getFd(), new Net::Connection::Watcher(bind(
+        connection->setLowWaterMarkWatcher(connection->getFd(), new Watcher(bind(
             &EchoProtocol::asynHandleInput, this, connection->getFd(), connection)));
     }
 }
@@ -89,7 +88,7 @@ int getMaxHeartbeatTimeout()
 
 //-----------------------------------------------------------------------------
 
-void EchoProtocol::handleHeartbeat(Connection::SocketConnectionPtr theConnection)
+void EchoProtocol::handleHeartbeat(SocketConnectionPtr theConnection)
 {
     int timeoutCounter = theConnection->incHeartbeatTimeoutCounter();
     LOG_TRACE("handleHeartbeat time:" << timeoutCounter);

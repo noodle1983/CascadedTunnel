@@ -1,4 +1,4 @@
-#include <BoostProcessor.h>
+#include <Processor.h>
 #include <TcpClient.h>
 #include <Reactor.h>
 #include <Protocol.h>
@@ -13,6 +13,8 @@
 #include <string.h>
 #include <assert.h>
 using namespace std;
+using namespace nd;
+using namespace nd;
 
 static int closed = false;
 static mutex closedMutexM;

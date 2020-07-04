@@ -3,27 +3,19 @@
 #include <event.h>
 
 
-namespace Processor
-{
-    class BoostProcessor;
-}
 
-namespace Net
+namespace nd
 {
-class IProtocol;
-namespace Reactor
-{
+    class CppProcessor;
+    class IProtocol;
     class Reactor;
-}
-namespace Server{
-
     class TcpServer
     {
     public:
         TcpServer(
             IProtocol* theProtocol,
-            Reactor::Reactor* theReactor,
-            Processor::BoostProcessor* theProcessor);
+            Reactor* theReactor,
+            CppProcessor* theProcessor);
         virtual ~TcpServer();
 
         void addAcceptEvent();
@@ -35,16 +27,14 @@ namespace Server{
 
     private:
         IProtocol* protocolM;
-        Reactor::Reactor* reactorM;
-        Processor::BoostProcessor* processorM;
+        Reactor* reactorM;
+        CppProcessor* processorM;
 
         struct event* acceptEvtM;
         int portM;
         evutil_socket_t fdM;
     };
-
-} /* Server */
-} /* Net */
+}
 
 #endif /*TCPSERVER_H*/
 

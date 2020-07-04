@@ -4,7 +4,7 @@
 #include <sstream>
 #include <iomanip>
 
-using namespace Net::Protocol;
+using namespace nd;
 using namespace std;
 
 //-----------------------------------------------------------------------------
@@ -87,7 +87,7 @@ void ProcessorSensor::stat(ProcessorSensorData* theData)
 		for (; it != processorMapM.end(); it++)
 		{
 			const std::string& name = it->first;
-			Processor::BoostProcessor* processor = it->second;
+			CppProcessor* processor = it->second;
 			for (unsigned i = 0; i < processor->threadCountM; i++)
 			{
 				std::ostringstream ossName;
@@ -131,7 +131,7 @@ void ProcessorSensor::addTimer(ProcessorSensorData* theData)
 
 void ProcessorSensor::registProcessor(
 		const std::string& theName, 
-		Processor::BoostProcessor* theProcessor)
+		CppProcessor* theProcessor)
 {
 	lock_guard<mutex> lock(processorMapMutexM);
 	processorMapM[theName] = theProcessor;

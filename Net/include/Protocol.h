@@ -1,26 +1,20 @@
 #ifndef PROTOCOL_H
 #define PROTOCOL_H
 
-#include "BoostProcessor.h"
+#include "Processor.h"
 #include <functional>
 #include <memory>
 
-namespace Net
+namespace nd
 {
-    namespace Connection
-    {
-        class SocketConnection;
-        typedef std::shared_ptr<SocketConnection> SocketConnectionPtr;
-    }
-    namespace Server
-    {
-        class UdpServer;
-        typedef std::shared_ptr<UdpServer> UdpServerPtr;
-    }
+    class SocketConnection;
+    typedef std::shared_ptr<SocketConnection> SocketConnectionPtr;
+    class UdpServer;
+    typedef std::shared_ptr<UdpServer> UdpServerPtr;
     class IProtocol
     {
     public:
-        IProtocol(Processor::BoostProcessor* theProcessor)
+        IProtocol(CppProcessor* theProcessor)
             : processorM(theProcessor)
         {
         }
@@ -36,27 +30,27 @@ namespace Net
          *         connection: the socket connection which can be write to
          *
          */
-        void asynHandleInput(const int theFd, Connection::SocketConnectionPtr theConnection)
+        void asynHandleInput(const int theFd, SocketConnectionPtr theConnection)
         {
             return processorM->process(theFd + 1,
                     NEW_JOB(&IProtocol::handleInput, this, theConnection));
         }
-        void asynHandleClose(const int theFd, Connection::SocketConnectionPtr theConnection)
+        void asynHandleClose(const int theFd, SocketConnectionPtr theConnection)
         {
             return processorM->process(theFd + 1,
                     NEW_JOB(&IProtocol::handleClose, this, theConnection));
         }
-        void asynHandleConnected(const int theFd, Connection::SocketConnectionPtr theConnection)
+        void asynHandleConnected(const int theFd, SocketConnectionPtr theConnection)
         {
             return processorM->process(theFd + 1,
                     NEW_JOB(&IProtocol::handleConnected, this, theConnection));
         }
-        void asynHandleHeartbeat(const int theFd, Connection::SocketConnectionPtr theConnection) 
+        void asynHandleHeartbeat(const int theFd, SocketConnectionPtr theConnection) 
         {
             return processorM->process(theFd + 1,
                     NEW_JOB(&IProtocol::handleHeartbeat, this, theConnection));
         }
-        void asynHandleSent(const int theFd, Connection::SocketConnectionPtr theConnection) 
+        void asynHandleSent(const int theFd, SocketConnectionPtr theConnection) 
         {
             return processorM->process(theFd + 1,
                     NEW_JOB(&IProtocol::handleSent, this, theConnection));
@@ -77,15 +71,15 @@ namespace Net
 			return processorM->cancelLocalTimer(theFd + 1,theEvent);
 		}
         
-        virtual void handleInput(Net::Connection::SocketConnectionPtr theConnection) = 0;
-        virtual void handleSent(Net::Connection::SocketConnectionPtr theConnection){};
-        virtual void handleClose(Net::Connection::SocketConnectionPtr theConnection){}
-        virtual void handleConnected(Connection::SocketConnectionPtr theConnection){}
+        virtual void handleInput(SocketConnectionPtr theConnection) = 0;
+        virtual void handleSent(SocketConnectionPtr theConnection){};
+        virtual void handleClose(SocketConnectionPtr theConnection){}
+        virtual void handleConnected(SocketConnectionPtr theConnection){}
         /*
          * send heartbeat msg in heartbeat 
          * or close the Connection if the connection is no response.
          */
-        virtual void handleHeartbeat(Connection::SocketConnectionPtr theConnection) {}
+        virtual void handleHeartbeat(SocketConnectionPtr theConnection) {}
 
         //Config
         virtual const std::string getAddr(){ return "0.0.0.0"; }
@@ -96,13 +90,13 @@ namespace Net
         virtual int getMaxHeartbeatTimeout(){ return 3; }
         
     private:
-        Processor::BoostProcessor* processorM;
+        CppProcessor* processorM;
     };
 
     class IClientProtocol: public IProtocol
     {
     public:
-        IClientProtocol(Processor::BoostProcessor* theProcessor)
+        IClientProtocol(CppProcessor* theProcessor)
             :IProtocol(theProcessor)
         {
         }
@@ -116,7 +110,7 @@ namespace Net
     class IUdpProtocol
     {
     public:
-        IUdpProtocol(Processor::BoostProcessor* theProcessor)
+        IUdpProtocol(CppProcessor* theProcessor)
             : processorM(theProcessor)
         {
         }
@@ -132,20 +126,19 @@ namespace Net
          *         connection: the socket connection which can be write to
          *
          */
-        void asynHandleInput(int theFd, Server::UdpServerPtr theUdpServer)
+        void asynHandleInput(int theFd, UdpServerPtr theUdpServer)
         {
             return processorM->process(theFd,
                     NEW_JOB(&IUdpProtocol::handleInput, this, theUdpServer));
         }
         
-        virtual void handleInput(Net::Server::UdpServerPtr theUdpServer) = 0;
+        virtual void handleInput(UdpServerPtr theUdpServer) = 0;
         
         //Config
         virtual int getRBufferSizePower(){ return 20; }
     private:
-        Processor::BoostProcessor* processorM;
+        CppProcessor* processorM;
     };
-
 }
 
 #endif /*PROTOCOL_H*/

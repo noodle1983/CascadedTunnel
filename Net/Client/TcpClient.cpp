@@ -10,8 +10,7 @@
 #include <sys/socket.h>
 #include <string.h>
 
-using namespace Net::Client;
-using namespace Config;
+using namespace nd;
 using namespace std;
 
 #ifndef WIN32
@@ -33,8 +32,8 @@ using namespace std;
 
 TcpClient::TcpClient(
             IClientProtocol* theProtocol,
-            Reactor::Reactor* theReactor,
-            Processor::BoostProcessor* theProcessor)
+            Reactor* theReactor,
+            CppProcessor* theProcessor)
     : protocolM(theProtocol)
     , reactorM(theReactor)
     , processorM(theProcessor)
@@ -146,8 +145,8 @@ int TcpClient::connect()
         //connected
         isConnectedM = true;
     }
-    Net::Connection::SocketConnection* connection =
-        new Net::Connection::SocketConnection(protocolM, reactorM, processorM, sock, this);
+    SocketConnection* connection =
+        new SocketConnection(protocolM, reactorM, processorM, sock, this);
     connectionM = connection->self();
     if (!isConnectedM)
     {
@@ -158,7 +157,7 @@ int TcpClient::connect()
 
 //-----------------------------------------------------------------------------
 
-void TcpClient::onConnected(int theFd, Connection::SocketConnectionPtr theConnection)
+void TcpClient::onConnected(int theFd, SocketConnectionPtr theConnection)
 {
     LOG_DEBUG("connected to " << peerAddrM
             << ":" << peerPortM);
@@ -188,7 +187,7 @@ void TcpClient::reconnectLater()
 
 //-----------------------------------------------------------------------------
 
-void TcpClient::onError(Connection::SocketConnectionPtr theConnection)
+void TcpClient::onError(SocketConnectionPtr theConnection)
 {
     if (connectionM.get() != theConnection.get()) { return; }
     LOG_WARN("connection lost from " << peerAddrM

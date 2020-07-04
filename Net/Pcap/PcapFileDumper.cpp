@@ -1,7 +1,7 @@
 #include "PcapFileDumper.h"
 #include "ConfigCenter.h"
 
-using namespace Net::Pcap;
+using namespace nd;
 using namespace Config;
 
 //-----------------------------------------------------------------------------

@@ -3,9 +3,7 @@
 
 #include "ICmdHandler.h"
 
-namespace Net
-{
-namespace Protocol
+namespace nd
 {
     class HelpHandler: public ICmdHandler
     {
@@ -18,8 +16,6 @@ namespace Protocol
 		virtual void handle(TelnetCmdManager* theManager, CmdArgsList& theArgs);
 
     };
-
-}
 }
 
 #endif

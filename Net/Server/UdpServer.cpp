@@ -1,4 +1,4 @@
-#include "BoostProcessor.h"
+#include "Processor.h"
 #include "UdpServer.h"
 #include "Reactor.h"
 #include "Protocol.h"
@@ -11,7 +11,7 @@
 #include <assert.h>
 
 
-using namespace Net::Server;
+using namespace nd;
 using namespace std;
 
 //-----------------------------------------------------------------------------
@@ -26,8 +26,8 @@ void on_udp_server_read(int theFd, short theEvt, void *theArg)
 
 UdpServer::UdpServer(
             IUdpProtocol* theProtocol,
-            Reactor::Reactor* theReactor,
-            Processor::BoostProcessor* theProcessor)
+            Reactor* theReactor,
+            CppProcessor* theProcessor)
     : selfM(this)
     , readEvtM(NULL)
     , protocolM(theProtocol)
@@ -91,7 +91,7 @@ int UdpServer::asynRead(int theFd, short theEvt)
 
 void UdpServer::onRead(int theFd, short theEvt)
 {
-    Net::UdpPacket packet;
+    UdpPacket packet;
 
     while(inputQueueM.isHealthy())
     {
@@ -121,7 +121,7 @@ void UdpServer::onRead(int theFd, short theEvt)
 }
 //-----------------------------------------------------------------------------
 
-bool UdpServer::getAPackage(Net::UdpPacket* thePackage)
+bool UdpServer::getAPackage(UdpPacket* thePackage)
 {
     if (CloseE == statusM)
         return false;
@@ -146,7 +146,7 @@ bool UdpServer::getAPackage(Net::UdpPacket* thePackage)
     }
 
     len = inputQueueM.getn((char*)&thePackage->contentLen, sizeof(thePackage->contentLen));
-    if (0 == len || thePackage->contentLen > Net::UdpPacket::MAX_UDP_PACKAGE)
+    if (0 == len || thePackage->contentLen > UdpPacket::MAX_UDP_PACKAGE)
     {
         LOG_FATAL("internal error");
         exit(-1);
@@ -177,7 +177,7 @@ bool UdpServer::getAPackage(Net::UdpPacket* thePackage)
 
 //-----------------------------------------------------------------------------
 
-bool UdpServer::sendAPackage(Net::UdpPacket* thePackage)
+bool UdpServer::sendAPackage(UdpPacket* thePackage)
 {
     if (CloseE == statusM || NULL == thePackage)
         return false;

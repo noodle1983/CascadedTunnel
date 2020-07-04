@@ -1,4 +1,4 @@
-#include "BoostProcessor.h"
+#include "Processor.h"
 #include "TcpServer.h"
 #include "Reactor.h"
 #include "EchoProtocol.h"
@@ -13,6 +13,7 @@
 #include <signal.h>
 
 using namespace std;
+using namespace nd;
 
 static int closed = false;
 static mutex closedMutexM;
@@ -41,20 +42,20 @@ int main()
     setsid();
 
 	{
-		Net::Protocol::TelnetCmdManager::registCmd("prcstat", Net::Protocol::ProcessorSensorSingleton::instance());
+		TelnetCmdManager::registCmd("prcstat", ProcessorSensorSingleton::instance());
 	}
     signal(SIGPIPE, SIG_IGN);
     signal(SIGALRM, SIG_IGN);
     signal(SIGTERM, sig_stop);
     signal(SIGINT, sig_stop);
     evthread_use_pthreads();
-    Processor::BoostProcessor processor("NetProcessor", 4);
+    CppProcessor processor("NetProcessor", 4);
     processor.start();
-    Net::Reactor::Reactor reactor;
-    Net::Protocol::EchoProtocol echoProtocol(&reactor, &processor);
-    Net::Protocol::TelnetProtocol telnetProtocol(Processor::BoostProcessor::manInstance());
-    Net::Server::TcpServer server(&echoProtocol, &reactor, &processor);
-    Net::Server::TcpServer telnetServer(&telnetProtocol, &reactor, &processor);
+    Reactor reactor;
+    EchoProtocol echoProtocol(&reactor, &processor);
+    TelnetProtocol telnetProtocol(g_man_processor);
+    TcpServer server(&echoProtocol, &reactor, &processor);
+    TcpServer telnetServer(&telnetProtocol, &reactor, &processor);
     server.start();
     telnetServer.start();
     reactor.start();

@@ -2,7 +2,7 @@
 #define UDPPACKET_H
 #include <event.h>
 
-namespace Net
+namespace nd
 {
     struct UdpPacket
     {

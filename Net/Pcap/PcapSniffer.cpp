@@ -4,7 +4,7 @@
 
 #include <boost/bind.hpp>
 
-using namespace Net::Pcap;
+using namespace nd;
 using namespace Config;
 
 //-----------------------------------------------------------------------------

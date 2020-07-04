@@ -5,8 +5,7 @@
 #include <assert.h>
 #include <string.h>
 
-using namespace Net;
-using namespace Net::Protocol;
+using namespace nd;
 using namespace std;
 
 bool TelnetCmdManager::isTopCmdsMInitedM = false;
@@ -36,7 +35,7 @@ void TelnetCmdManager::initTopCmd()
 //-----------------------------------------------------------------------------
 
 TelnetCmdManager::TelnetCmdManager(const struct sockaddr_in& thePeerAddr,
-				Connection::SocketConnectionPtr theConnection,
+				SocketConnectionPtr theConnection,
 				IProtocol* theProtocol)
 	: bufferLenM(0)
     , peerAddrM(thePeerAddr)
@@ -86,7 +85,7 @@ void TelnetCmdManager::registCmd(
 
 void TelnetCmdManager::send(const char* const theStr, unsigned theLen)
 {
-    Net::Connection::SocketConnectionPtr connection = connectionM.lock();
+    SocketConnectionPtr connection = connectionM.lock();
     if (connection.get())
     {
         connection->sendn(theStr, theLen);
@@ -97,7 +96,7 @@ void TelnetCmdManager::send(const char* const theStr, unsigned theLen)
 
 void TelnetCmdManager::sendPrompt()
 {
-    Net::Connection::SocketConnectionPtr connection = connectionM.lock();
+    SocketConnectionPtr connection = connectionM.lock();
     if (connection.get())
     {
         const char* const prompt = subCmdStackM.empty() ? "> "
@@ -200,7 +199,7 @@ int TelnetCmdManager::handleCmd(const unsigned theStart, const unsigned theEnd)
 
 int TelnetCmdManager::handleInput()
 {
-    Net::Connection::SocketConnectionPtr connection = connectionM.lock();
+    SocketConnectionPtr connection = connectionM.lock();
     if (NULL == connection.get())
     {
         return -1;
@@ -277,7 +276,7 @@ void TelnetCmdManager::exitCurCmd()
     }
     else
     {
-        Net::Connection::SocketConnectionPtr connection = connectionM.lock();
+        SocketConnectionPtr connection = connectionM.lock();
         if (connection.get())
         {
             connection->close();

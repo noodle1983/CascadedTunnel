@@ -1,4 +1,4 @@
-#include "BoostProcessor.h"
+#include "Processor.h"
 #include "TcpServer.h"
 #include "SocketConnection.h"
 #include "Reactor.h"
@@ -13,8 +13,7 @@
 #include <arpa/inet.h>
 #include <string.h>
 
-using namespace Net::Server;
-using namespace Net::Connection;
+using namespace nd;
 
 //-----------------------------------------------------------------------------
 //libevent
@@ -31,8 +30,8 @@ void on_accept(int theFd, short theEvt, void *theArg)
 
 TcpServer::TcpServer(
         IProtocol* theProtocol,
-        Reactor::Reactor* theReactor,
-        Processor::BoostProcessor* theProcessor)
+        Reactor* theReactor,
+        CppProcessor* theProcessor)
     : protocolM(theProtocol)
     , reactorM(theReactor)
     , processorM(theProcessor)

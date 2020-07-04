@@ -3,9 +3,7 @@
 
 #include "ICmdHandler.h"
 
-namespace Net
-{
-namespace Protocol
+namespace nd
 {
     class QuitHandler: public ICmdHandler
     {
@@ -18,7 +16,6 @@ namespace Protocol
 		virtual void handle(TelnetCmdManager* theManager, CmdArgsList& theArgs);
 
     };
-}
 }
 
 #endif /* QUITHANDLER_H */

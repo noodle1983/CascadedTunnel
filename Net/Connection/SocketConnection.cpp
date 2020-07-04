@@ -1,4 +1,4 @@
-#include "BoostProcessor.h"
+#include "Processor.h"
 #include "SocketConnection.h"
 #include "TcpClient.h"
 #include "Reactor.h"
@@ -12,7 +12,7 @@
 #include <assert.h>
 
 
-using namespace Net::Connection;
+using namespace nd;
 using namespace std;
 
 //-----------------------------------------------------------------------------
@@ -35,8 +35,8 @@ void on_write(int theFd, short theEvt, void *theArg)
 
 SocketConnection::SocketConnection(
             IProtocol* theProtocol,
-            Reactor::Reactor* theReactor,
-            Processor::BoostProcessor* theProcessor,
+            Reactor* theReactor,
+            CppProcessor* theProcessor,
             evutil_socket_t theFd)
     : selfM(this)
     , heartbeatTimerEvtM(NULL)
@@ -67,10 +67,10 @@ SocketConnection::SocketConnection(
 
 SocketConnection::SocketConnection(
             IProtocol* theProtocol,
-            Reactor::Reactor* theReactor,
-            Processor::BoostProcessor* theProcessor,
+            Reactor* theReactor,
+            CppProcessor* theProcessor,
             evutil_socket_t theFd,
-            Client::TcpClient* theClient)
+            TcpClient* theClient)
     : selfM(this)
     , heartbeatTimerEvtM(NULL)
     , clientTimerEvtM(NULL)

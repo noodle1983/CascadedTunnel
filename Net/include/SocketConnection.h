@@ -11,27 +11,15 @@
 #include <event.h>
 
 struct timeval;
-namespace Processor
-{
-    class BoostProcessor;
-}
 
-namespace Net{
+namespace nd{
 
-class IProtocol;
-namespace Reactor
-{
+    class CppProcessor;
+    class IProtocol;
     class Reactor;
-}
-namespace Client
-{
     class TcpClient;
-}
-
-namespace Connection
-{
-
     class SocketConnection;
+
     typedef std::shared_ptr<SocketConnection> SocketConnectionPtr;
     typedef std::weak_ptr<SocketConnection> SocketConnectionWPtr;
     typedef std::function<void ()> Watcher;
@@ -42,8 +30,8 @@ namespace Connection
     public:
         SocketConnection(
             IProtocol* theProtocol,
-            Reactor::Reactor* theReactor,
-            Processor::BoostProcessor* theProcessor,
+            Reactor* theReactor,
+            CppProcessor* theProcessor,
             evutil_socket_t theFd);
         ~SocketConnection();
 
@@ -52,10 +40,10 @@ namespace Connection
          */
         SocketConnection(
             IProtocol* theProtocol,
-            Reactor::Reactor* theReactor,
-            Processor::BoostProcessor* theProcessor,
+            Reactor* theReactor,
+            CppProcessor* theProcessor,
             evutil_socket_t theFd,
-            Client::TcpClient* theClient);
+            TcpClient* theClient);
 
         //interface for reactor
         int asynRead(int theFd, short theEvt);
@@ -88,7 +76,7 @@ namespace Connection
 
 		//attribute
 		int getFd(){return fdM;}
-        Client::TcpClient* getClient(){return clientM;}
+        TcpClient* getClient(){return clientM;}
 		void setPeerAddr(const struct sockaddr_in* theAddr){peerAddrM = *theAddr;}
 		const struct sockaddr_in& getPeerAddr(){return peerAddrM;}
         IProtocol* getProtocol(){return protocolM;}
@@ -142,8 +130,8 @@ namespace Connection
         int heartbeatTimeoutCounterM;
 
         IProtocol* protocolM;
-        Reactor::Reactor* reactorM;
-        Processor::BoostProcessor* processorM;
+        Reactor* reactorM;
+        CppProcessor* processorM;
 
         evutil_socket_t fdM;
 
@@ -161,7 +149,7 @@ namespace Connection
         std::mutex watcherMutexM;
         WatcherMap watcherMapM;
 
-        Client::TcpClient* clientM;
+        TcpClient* clientM;
         std::mutex clientMutexM;
         bool isConnectedNotified;
 
@@ -175,8 +163,6 @@ namespace Connection
         //upper data
         void* uppperDataM;
     };
-
-}
 }
 
 #endif /*SOCKETCONNECTION_H*/

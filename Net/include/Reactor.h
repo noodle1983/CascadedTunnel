@@ -4,9 +4,7 @@
 #include <thread>
 #include <event.h>
 
-namespace Net
-{
-namespace Reactor
+namespace nd
 {
     class Reactor
     {
@@ -80,10 +78,8 @@ struct event* Reactor::newPersistTimer(
 }
 //-----------------------------------------------------------------------------
 }
-}
 
-
-#define g_reactor Net::Reactor::Reactor::instance()
+#define g_reactor nd::Reactor::instance()
 
 
 #endif /* REACTOR_H */

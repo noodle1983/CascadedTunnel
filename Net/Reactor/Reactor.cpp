@@ -4,7 +4,7 @@
 #include <mutex>
 #include <event.h>
 
-using namespace Net::Reactor;
+using namespace nd;
 using namespace std;
 
 //-----------------------------------------------------------------------------

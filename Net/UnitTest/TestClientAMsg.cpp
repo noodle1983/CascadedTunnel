@@ -1,12 +1,12 @@
-#include <BoostProcessor.h>
+#include <Processor.h>
 #include <TcpClient.h>
 #include <Reactor.h>
 #include <Protocol.h>
 #include <Log.h>
 #include "ConfigCenter.h"
 
-using namespace Config;
 using namespace std;
+using namespace nd;
 
 #include <event.h>
 #include <event2/thread.h>
@@ -26,7 +26,7 @@ void sig_stop(int sig)
     closedCondM.notify_one();
 }
 
-class SingleDataProtocol: public Net::IClientProtocol
+class SingleDataProtocol: public IClientProtocol
 {
 public:
     SingleDataProtocol()
@@ -53,7 +53,7 @@ public:
         tcpClientM.sendn("Hello", 5);
     }
 
-    void handleInput(Net::Connection::SocketConnectionPtr theConnection)
+    void handleInput(SocketConnectionPtr theConnection)
     {
         char buffer[1024];
         unsigned len = 1;
@@ -85,10 +85,10 @@ public:
     }
 
 private:
-    Net::Reactor::Reactor reactorM;
-    Processor::BoostProcessor proProcessorM;
-    Processor::BoostProcessor netProcessorM;
-    Net::Client::TcpClient tcpClientM;
+    Reactor reactorM;
+    CppProcessor proProcessorM;
+    CppProcessor netProcessorM;
+    TcpClient tcpClientM;
 };
 
 int main()

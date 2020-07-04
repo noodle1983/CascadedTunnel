@@ -2,7 +2,7 @@
 
 int main()
 {
-    Net::Pcap::Sniffer sniffer;
+    Pcap::Sniffer sniffer;
     sniffer.start();
 
     sleep(3);

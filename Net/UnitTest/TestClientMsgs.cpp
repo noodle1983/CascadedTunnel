@@ -1,4 +1,4 @@
-#include "BoostProcessor.h"
+#include "Processor.h"
 #include "TcpClient.h"
 #include "Reactor.h"
 #include "Protocol.h"
@@ -14,8 +14,8 @@
 #include <functional>
 #include <assert.h>
 
-using namespace Config;
 using namespace std;
+using namespace nd;
 using namespace std::placeholders;
 
 static int closed = false;
@@ -30,7 +30,7 @@ void sig_stop(int sig)
 }
 
 const uint64_t TEST_TIMES = 1024 * 1024 * 1/2;
-class BatchDataProtocol: public Net::IClientProtocol
+class BatchDataProtocol: public IClientProtocol
 {
 public:
     BatchDataProtocol()
@@ -62,7 +62,7 @@ public:
         tcpClientM.connect();
     }
 
-    void handleConnected(Net::Connection::SocketConnectionPtr theConnection)
+    void handleConnected(SocketConnectionPtr theConnection)
     {
         struct timeval tv;
         evutil_gettimeofday(&tv, NULL);
@@ -70,14 +70,14 @@ public:
         asynSend(theConnection->getFd(), theConnection);
     }
 
-    int asynSend(int theFd, Net::Connection::SocketConnectionPtr theConnection)
+    int asynSend(int theFd, SocketConnectionPtr theConnection)
     {
         proProcessorM.PROCESS(theFd + 1,
                 &BatchDataProtocol::send, this, theFd, theConnection);
         return 0;
     }
 
-    void send(int theFd, Net::Connection::SocketConnectionPtr theConnection)
+    void send(int theFd, SocketConnectionPtr theConnection)
     {
 		bool canWrite = true;
         while ((canWrite = theConnection->isWBufferHealthy()))
@@ -97,12 +97,12 @@ public:
         if (!canWrite)
         {
             theConnection->setLowWaterMarkWatcher(
-                    theFd, new Net::Connection::Watcher(bind(&BatchDataProtocol::asynSend, this, theFd, theConnection)));
+                    theFd, new Watcher(bind(&BatchDataProtocol::asynSend, this, theFd, theConnection)));
         }
         return;
     }
 
-    void handleInput(Net::Connection::SocketConnectionPtr theConnection)
+    void handleInput(SocketConnectionPtr theConnection)
     {
         char buffer[1024];
         while(1)
@@ -156,10 +156,10 @@ public:
     }
 
 private:
-    Net::Reactor::Reactor reactorM;
-    Processor::BoostProcessor proProcessorM;
-    Processor::BoostProcessor netProcessorM;
-    Net::Client::TcpClient tcpClientM;
+    Reactor reactorM;
+    CppProcessor proProcessorM;
+    CppProcessor netProcessorM;
+    TcpClient tcpClientM;
     uint64_t wBufferCountM;
     uint64_t readIndexM;
     char bufferM[10][1024];

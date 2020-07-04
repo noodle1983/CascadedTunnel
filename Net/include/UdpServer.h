@@ -10,21 +10,12 @@
 #include <event.h>
 
 struct timeval;
-namespace Processor
-{
-    class BoostProcessor;
-}
 
-namespace Net{
+namespace nd{
 
-class IUdpProtocol;
-namespace Reactor
-{
+    class CppProcessor;
+    class IUdpProtocol;
     class Reactor;
-}
-
-namespace Server
-{
 
     class UdpServer;
     typedef std::shared_ptr<UdpServer> UdpServerPtr;
@@ -34,8 +25,8 @@ namespace Server
     public:
         UdpServer(
             IUdpProtocol* theProtocol,
-            Reactor::Reactor* theReactor,
-            Processor::BoostProcessor* theProcessor);
+            Reactor* theReactor,
+            CppProcessor* theProcessor);
         ~UdpServer();
 
 
@@ -47,8 +38,8 @@ namespace Server
         int startAt(const int thePort);
         void close();
         inline bool isClose() {return statusM == CloseE;}
-        bool getAPackage(Net::UdpPacket* thePackage);
-        bool sendAPackage(Net::UdpPacket* thePackage);
+        bool getAPackage(UdpPacket* thePackage);
+        bool sendAPackage(UdpPacket* thePackage);
 
 
 
@@ -66,8 +57,8 @@ namespace Server
         struct event* readEvtM;
 
         IUdpProtocol* protocolM;
-        Reactor::Reactor* reactorM;
-        Processor::BoostProcessor* processorM;
+        Reactor* reactorM;
+        CppProcessor* processorM;
 
         evutil_socket_t fdM;
 
@@ -83,8 +74,6 @@ namespace Server
         bool stopReadingM;
 
     };
-
-}
 }
 
 #endif /*UDPSERVER_H*/

@@ -1,14 +1,12 @@
 #ifndef PCAPFILEDUMPER_H
 #define PCAPFILEDUMPER_H
 
-#include "BoostProcessor.h"
+#include "Processor.h"
 #include <pcap.h>
 #include <boost/shared_ptr.hpp>
 #include <boost/shared_array.hpp>
 
-namespace Net
-{
-namespace Pcap
+namespace nd
 {
     class FileDumper
     {
@@ -24,7 +22,7 @@ namespace Pcap
 				boost::shared_ptr<struct pcap_pkthdr> theHeader, 
 				boost::shared_array<u_char> thePacket);
 
-		friend class BoostProcessor;
+		friend class CppProcessor;
 		friend class BoostWorker;
 
 	private:
@@ -36,11 +34,10 @@ namespace Pcap
 				boost::shared_array<u_char> thePacket);
 
     private:    
-        Processor::BoostProcessor processorM;
+        CppProcessor processorM;
         pcap_t* pcapHandlerM;
         pcap_dumper_t* pcapDumperM;
     };
-}
 }
 
 #endif /* PCAPFILEDUMPER_H */

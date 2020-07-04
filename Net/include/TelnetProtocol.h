@@ -11,27 +11,21 @@
 #include <string>
 #include <mutex>
 
-namespace Processor
+namespace nd
 {
-	class BoostProcessor;
-}
-
-namespace Net
-{
-namespace Protocol
-{
+	class CppProcessor;
 	typedef std::map<int, TelnetCmdManager*> Con2CmdManagerMap;
 
-    class TelnetProtocol : public Net::IProtocol
+    class TelnetProtocol : public IProtocol
     {
     public:
-		TelnetProtocol(Processor::BoostProcessor* theProcessor);
+		TelnetProtocol(CppProcessor* theProcessor);
         TelnetProtocol();
         ~TelnetProtocol();
 
-        void handleInput(Connection::SocketConnectionPtr theConnection);
-        void handleClose(Net::Connection::SocketConnectionPtr theConnection); 
-        void handleConnected(Connection::SocketConnectionPtr theConnection);
+        void handleInput(SocketConnectionPtr theConnection);
+        void handleClose(SocketConnectionPtr theConnection); 
+        void handleConnected(SocketConnectionPtr theConnection);
 
         virtual const std::string getAddr();
         virtual int getPort();
@@ -41,8 +35,6 @@ namespace Protocol
 		Con2CmdManagerMap con2CmdManagerMapM;
         std::mutex manMapMutexM;
     };
-
-}
 }
 
 #endif

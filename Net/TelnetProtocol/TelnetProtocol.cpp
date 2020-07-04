@@ -3,15 +3,13 @@
 #include "SocketConnection.h"
 #include "Log.h"
 
-using namespace Net;
-using namespace Net::Protocol;
-using namespace Config;
+using namespace nd;
 using namespace std;
 
 
 //-----------------------------------------------------------------------------
 
-TelnetProtocol::TelnetProtocol(Processor::BoostProcessor* theProcessor)
+TelnetProtocol::TelnetProtocol(CppProcessor* theProcessor)
 	:IProtocol(theProcessor)
 {
 }
@@ -24,7 +22,7 @@ TelnetProtocol::~TelnetProtocol()
 
 //-----------------------------------------------------------------------------
 
-void TelnetProtocol::handleInput(Connection::SocketConnectionPtr theConnection)
+void TelnetProtocol::handleInput(SocketConnectionPtr theConnection)
 {
 	TelnetCmdManager* cmdManager = NULL;
     int fd = theConnection->getFd();
@@ -62,7 +60,7 @@ void TelnetProtocol::handleInput(Connection::SocketConnectionPtr theConnection)
 
 //-----------------------------------------------------------------------------
 
-void TelnetProtocol::handleClose(Net::Connection::SocketConnectionPtr theConnection)
+void TelnetProtocol::handleClose(SocketConnectionPtr theConnection)
 {
     LOG_DEBUG("telnet close. fd: " << theConnection->getFd());
     int fd = theConnection->getFd();
@@ -78,7 +76,7 @@ void TelnetProtocol::handleClose(Net::Connection::SocketConnectionPtr theConnect
 
 //-----------------------------------------------------------------------------
 
-void TelnetProtocol::handleConnected(Connection::SocketConnectionPtr theConnection)
+void TelnetProtocol::handleConnected(SocketConnectionPtr theConnection)
 {
     LOG_DEBUG("telnet connected. fd: " << theConnection->getFd());
 	TelnetCmdManager* cmdManager = NULL;

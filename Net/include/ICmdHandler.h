@@ -6,9 +6,7 @@
 
 #include <assert.h>
 
-namespace Net
-{
-namespace Protocol
+namespace nd
 {
     class TelnetCmdManager;
 	typedef std::list<std::string> CmdArgsList;
@@ -27,8 +25,6 @@ namespace Protocol
         virtual void freeCmdSessionData(void* theData){assert(0);} 
 		virtual void handle(TelnetCmdManager* theManager, CmdArgsList& theArgs, void* theSessionData) {assert(0);}
 	};
-
-}
 }
 
 #endif

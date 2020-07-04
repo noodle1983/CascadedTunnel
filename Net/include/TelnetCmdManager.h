@@ -13,15 +13,10 @@
 #include <mutex>
 #include <memory>
 
-namespace Processor
+namespace nd
 {
-	class BoostProcessor;
-}
+	class CppProcessor;
 
-namespace Net
-{
-namespace Protocol
-{
 	typedef std::list<ICmdHandler*> CmdHandlerStack;
 	typedef std::list<void*>        CmdSessionDataStack;
 	typedef std::map<std::string, ICmdHandler*> CmdMap;
@@ -30,7 +25,7 @@ namespace Protocol
 	{
 	public:
 		TelnetCmdManager(const struct sockaddr_in& thePeerAddr,
-				Connection::SocketConnectionPtr theConnection,
+				SocketConnectionPtr theConnection,
 				IProtocol* theProtocol);
 		~TelnetCmdManager();
 
@@ -76,12 +71,11 @@ namespace Protocol
         unsigned bufferLenM;
 
 		struct sockaddr_in peerAddrM;
-		Connection::SocketConnectionWPtr connectionM;
+		SocketConnectionWPtr connectionM;
 		int fdM;
 		IProtocol* protocolM;
 
 	};
-}
 }
 
 #endif

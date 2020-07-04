@@ -9,12 +9,11 @@
 #include <event.h>
 
 
-namespace Net
+namespace nd
 {
-class IClientProtocol;
-namespace Client
-{
+    class IClientProtocol;
     class TcpClient;
+
     typedef std::shared_ptr<TcpClient> TcpClientPtr;
     typedef std::weak_ptr<TcpClient> TcpClientWPtr;
     class TcpClient
@@ -22,12 +21,12 @@ namespace Client
     public:
         TcpClient(
             IClientProtocol* theProtocol,
-            Reactor::Reactor* theReactor,
-            Processor::BoostProcessor* theProcessor);
+            Reactor* theReactor,
+            CppProcessor* theProcessor);
         ~TcpClient();
         void deleteSelf();
         TcpClientPtr self(){return selfM;}
-        Connection::SocketConnectionPtr getConnection(){return connectionM;}
+        SocketConnectionPtr getConnection(){return connectionM;}
         IClientProtocol* getProtocol(){return protocolM;}
 
         /**
@@ -63,8 +62,8 @@ namespace Client
          * And do not rmClient in these functions
          */
         void onClientTimeout();
-        void onConnected(int theFd, Connection::SocketConnectionPtr theConnection);
-        void onError(Connection::SocketConnectionPtr theConnection);
+        void onConnected(int theFd, SocketConnectionPtr theConnection);
+        void onError(SocketConnectionPtr theConnection);
 
         void resetTimer(){reconnectTimerEvtM = NULL;}
 
@@ -73,8 +72,8 @@ namespace Client
         void reconnectLater();
 
         IClientProtocol* protocolM;
-        Reactor::Reactor* reactorM;
-        Processor::BoostProcessor* processorM;
+        Reactor* reactorM;
+        CppProcessor* processorM;
 
         std::string peerAddrM;
         int peerPortM;
@@ -83,7 +82,7 @@ namespace Client
 
         std::mutex connectionMutexM;
         bool isConnectedM;
-        Net::Connection::SocketConnectionPtr connectionM;
+        SocketConnectionPtr connectionM;
         TcpClientPtr selfM;
         min_heap_item_t* reconnectTimerEvtM;
 
@@ -119,7 +118,6 @@ namespace Client
             return 0;
         }
     }
-}
 }
 
 #endif /* TCPCLIENT_H */

@@ -7,9 +7,7 @@
 #include <boost/thread.hpp>
 #include <pcap.h>
 
-namespace Net
-{
-namespace Pcap
+namespace nd
 {
     class Sniffer
     {
@@ -36,7 +34,6 @@ namespace Pcap
 
 		FileDumper fileDumperM;
     };
-}
 }
 #endif /* SNIFFER_H */
 

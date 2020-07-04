@@ -3,42 +3,30 @@
 
 #include "Protocol.h"
 
-
-namespace Processor
+namespace nd
 {
-    class BoostProcessor;
-}
-namespace Net
-{
-    namespace Reactor
-    {
-        class Reactor;
-    }
-namespace Protocol
-{
-
-    class EchoProtocol:public Net::IProtocol
+    class Reactor;
+    class CppProcessor;
+    class EchoProtocol:public IProtocol
     {
     public:
         EchoProtocol(
-            Reactor::Reactor* theReactor,
-            Processor::BoostProcessor* theProcessor);
+            Reactor* theReactor,
+            CppProcessor* theProcessor);
         ~EchoProtocol();
 
-        void handleInput(Connection::SocketConnectionPtr connection);
+        void handleInput(SocketConnectionPtr connection);
 
         virtual const std::string getAddr();
         virtual int getPort();
         virtual int getRBufferSizePower();
         virtual int getWBufferSizePower();
         virtual int getHeartbeatInterval();
-        virtual void handleHeartbeat(Connection::SocketConnectionPtr theConnection); 
+        virtual void handleHeartbeat(SocketConnectionPtr theConnection); 
     private:
-        Reactor::Reactor* reactorM;
-        Processor::BoostProcessor* processorM;
+        Reactor* reactorM;
+        CppProcessor* processorM;
     };
-
-}
 }
 
 #endif /* ECHOPROTOCOL_H */
