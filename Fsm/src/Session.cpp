@@ -60,7 +60,7 @@ void Session::init(
     timerIdM = 0;
     if (fsmTimeoutEvtM)
     {
-        Processor::BoostProcessor::fsmInstance()->cancelLocalTimer(
+        g_fsm_processor->cancelLocalTimer(
                 sessionIdM, fsmTimeoutEvtM);
     }
     fsmTimeoutEvtM = NULL;
@@ -76,7 +76,7 @@ Session::~Session()
 
 int Session::asynHandleEvent(const int theEventId)
 {
-    Processor::BoostProcessor::fsmInstance()->PROCESS(sessionIdM,
+    g_fsm_processor->PROCESS(sessionIdM,
         &Session::handleEvent, this, theEventId);
     return 0;
 }
@@ -226,7 +226,7 @@ void Session::newTimer(const long long theUsec)
     struct timeval tv;
     tv.tv_sec = theUsec/1000000;
     tv.tv_usec = theUsec%1000000;
-    fsmTimeoutEvtM = Processor::BoostProcessor::fsmInstance()->addLocalTimer(
+    fsmTimeoutEvtM = g_fsm_processor->addLocalTimer(
                 sessionIdM, tv, onFsmTimeOut, (void*)this);
 }
 
@@ -236,7 +236,7 @@ void Session::cancelTimer()
 {
     if (fsmTimeoutEvtM)
     {
-        Processor::BoostProcessor::fsmInstance()->cancelLocalTimer(
+        g_fsm_processor->cancelLocalTimer(
                 sessionIdM, fsmTimeoutEvtM);
         fsmTimeoutEvtM = NULL;
     }
