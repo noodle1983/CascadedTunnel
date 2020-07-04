@@ -1,10 +1,10 @@
-#include "BoostWorker.h"
+#include "CppWorker.h"
 #include "Log.h"
 
 #include <event2/util.h>
 #include <assert.h>
 
-using namespace Processor;
+using namespace nd;
 using namespace std;
 
 thread_local unsigned g_threadGroupTotal = 0;
@@ -15,7 +15,7 @@ thread_local unsigned g_threadGroupIndex = 0;
 static const thread::id default_thread_id;
 #endif
 //-----------------------------------------------------------------------------
-BoostWorker::BoostWorker()
+CppWorker::CppWorker()
     : groupTotalM(0)
     , groupIndexM(-1)
     , isToStopM(false)
@@ -28,14 +28,14 @@ BoostWorker::BoostWorker()
 
 //-----------------------------------------------------------------------------
 
-BoostWorker::~BoostWorker()
+CppWorker::~CppWorker()
 {
     min_heap_dtor(&timerHeapM);	
 }
 
 //-----------------------------------------------------------------------------
 
-void BoostWorker::stop()
+void CppWorker::stop()
 {
     isToStopM = true;
     queueCondM.notify_one();
@@ -43,7 +43,7 @@ void BoostWorker::stop()
 
 //-----------------------------------------------------------------------------
 
-void BoostWorker::waitStop()
+void CppWorker::waitStop()
 {
     isWaitStopM = true;
     queueCondM.notify_one();
@@ -52,7 +52,7 @@ void BoostWorker::waitStop()
 //-----------------------------------------------------------------------------
 
 
-void BoostWorker::process(Job* theJob)
+void CppWorker::process(Job* theJob)
 {
     bool jobQueueEmpty = false;
     {
@@ -68,7 +68,7 @@ void BoostWorker::process(Job* theJob)
 
 //-----------------------------------------------------------------------------
 
-min_heap_item_t* BoostWorker::addLocalTimer(
+min_heap_item_t* CppWorker::addLocalTimer(
         const struct timeval& theInterval, 
 		TimerCallback theCallback,
 		void* theArg)
@@ -132,7 +132,7 @@ min_heap_item_t* BoostWorker::addLocalTimer(
 
 //-----------------------------------------------------------------------------
 
-void BoostWorker::cancelLocalTimer(min_heap_item_t*& theEvent)
+void CppWorker::cancelLocalTimer(min_heap_item_t*& theEvent)
 {
     min_heap_erase(&timerHeapM, theEvent);
     delete theEvent;
@@ -141,7 +141,7 @@ void BoostWorker::cancelLocalTimer(min_heap_item_t*& theEvent)
 
 //-----------------------------------------------------------------------------
 
-void BoostWorker::initThreadAttr()
+void CppWorker::initThreadAttr()
 {
     g_threadGroupTotal = groupTotalM;
     g_threadGroupIndex = groupIndexM;
@@ -149,7 +149,7 @@ void BoostWorker::initThreadAttr()
 
 //-----------------------------------------------------------------------------
 
-void BoostWorker::handleLocalTimer()
+void CppWorker::handleLocalTimer()
 {
     if (!min_heap_empty(&timerHeapM))
     {
@@ -175,7 +175,7 @@ void BoostWorker::handleLocalTimer()
 
 //-----------------------------------------------------------------------------
 
-void BoostWorker::run()
+void CppWorker::run()
 {
     initThreadAttr();
     Job* job;

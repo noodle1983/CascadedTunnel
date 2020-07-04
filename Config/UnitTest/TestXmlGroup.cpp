@@ -7,7 +7,7 @@
 #include <rapidxml_print.hpp>
 #include <XmlGroup.h>
  
-using namespace Config;
+using namespace nd;
 using namespace rapidxml;
 using namespace std;
 

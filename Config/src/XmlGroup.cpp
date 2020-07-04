@@ -1,7 +1,7 @@
 #include "XmlGroup.h"
 #include "Log.h"
 
-using namespace Config;
+using namespace nd;
 using namespace rapidxml;
 
 const std::string XmlGroup::GROUP_TAG = "Group";

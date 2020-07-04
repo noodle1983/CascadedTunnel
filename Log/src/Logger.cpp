@@ -2,12 +2,11 @@
 namespace nd { thread_local nd::ThreadLocalLogMeta tl_logmeta; }
 #include "Logger.h"
 #include "ConfigCenter.h"
-#include "BoostProcessor.h"
+#include "Processor.h"
 #include "FileSink.h"
 #include "ConsoleSink.h"
 
 using namespace nd;
-using namespace Config;
 using namespace std;
 
 
@@ -40,7 +39,7 @@ Logger::~Logger()
 void Logger::initCfgLog()
 {
     minSeverityM = Severity::Trace;
-    string prefix("cfg_");
+    string prefix("cfg");
     sinksM.push_back(new FileSink(prefix, 0, (Severity)minSeverityM));
     sinksM.push_back(new ConsoleSink((Severity)minSeverityM));
 }
@@ -50,7 +49,7 @@ void Logger::initNormalLog()
 {
     int logLevel = g_cfg->get("log.level", (int)Severity::Debug);
     bool runInBackground = g_cfg->get("process.background", 1);
-    std::string logFilename = g_cfg->get("log.filename", "trouble_shooting_");
+    std::string logFilename = g_cfg->get("log.filename", "trouble_shooting");
     int fileNum = g_cfg->get("log.fileNum", 10);
 
     minSeverityM = logLevel;

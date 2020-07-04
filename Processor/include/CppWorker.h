@@ -1,7 +1,5 @@
-#ifndef BOOSTWORKER_H
-#define BOOSTWORKER_H
-
-#include "ProcessorJob.hpp"
+#ifndef CPPWORKER_H
+#define CPPWORKER_H
 
 #include <functional>
 #include <condition_variable>
@@ -11,17 +9,16 @@
 #include <min_heap.h>
 
 typedef void (*TimerCallback)(void *arg);
-#define NEW_JOB(...) {new Processor::Job(std::bind(__VA_ARGS__))}
 
-namespace Processor
+namespace nd
 {
     typedef std::function<void ()> Job;
     typedef std::list<Job*> JobQueue;
-    class BoostWorker
+    class CppWorker
     {
     public:
-        BoostWorker();
-        ~BoostWorker();
+        CppWorker();
+        ~CppWorker();
         void setGroupInfo(const unsigned theTotal, const unsigned theIndex)
         {
             groupTotalM = theTotal;
@@ -76,5 +73,5 @@ namespace Processor
     };
 }
 
-#endif /* BOOSTWORKER_H */
+#endif /* CPPWORKER_H */
 

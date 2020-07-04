@@ -8,7 +8,7 @@
 #include <memory>
 #include <string>
 
-namespace Config
+namespace nd
 {
     class XmlGroup;
     class ConfigCenter;
@@ -83,7 +83,7 @@ namespace Config
     };
 }
 
-#define g_cfg Config::ConfigCenter::instance()
+#define g_cfg nd::ConfigCenter::instance()
 
 #endif /* CONFIGCENTER_H */
 

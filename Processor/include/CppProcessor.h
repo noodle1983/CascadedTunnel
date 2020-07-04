@@ -1,38 +1,30 @@
-#ifndef BOOSTPROCESSOR_H
-#define BOOSTPROCESSOR_H
+#ifndef CPPPROCESSOR_H
+#define CPPPROCESSOR_H
 
-#include "BoostWorker.h"
+#include "CppWorker.h"
 
 #include <string>
 #include <thread>
 #include <vector>
 
-namespace Net
-{
-namespace Protocol
+namespace nd
 {
 	class ProcessorSensor;
-}
-}
+    class CppWorker;
 
-#define PROCESS(fd, ...) process(fd, NEW_JOB(__VA_ARGS__))
-namespace Processor
-{
-    class BoostWorker;
-
-    class BoostProcessor
+    class CppProcessor
     {
     public:
-		friend class Net::Protocol::ProcessorSensor;
+		friend class nd::ProcessorSensor;
 
-        BoostProcessor(const unsigned theThreadCount);
-        BoostProcessor(const std::string& theName, const unsigned theThreadCount);
-        ~BoostProcessor();
+        CppProcessor(const unsigned theThreadCount);
+        CppProcessor(const std::string& theName, const unsigned theThreadCount);
+        ~CppProcessor();
 
-        static BoostProcessor* fsmInstance();
-        static BoostProcessor* netInstance();
-        static BoostProcessor* manInstance();
-        static BoostProcessor* ioInstance();
+        static CppProcessor* fsmInstance();
+        static CppProcessor* netInstance();
+        static CppProcessor* manInstance();
+        static CppProcessor* ioInstance();
 
         void start(bool toWaitStop = false);
         void waitStop();
@@ -65,20 +57,17 @@ namespace Processor
 
     private:
         unsigned threadCountM;
-        BoostWorker* workersM;
+        CppWorker* workersM;
         std::vector<std::thread> threadsM;
         std::string nameM;
         bool waitStopM; 
 
-        static BoostProcessor* fsmProcessorM;
-        static BoostProcessor* netProcessorM;
-        static BoostProcessor* manProcessorM;
-        static BoostProcessor* ioProcessorM;
+        static CppProcessor* fsmProcessorM;
+        static CppProcessor* netProcessorM;
+        static CppProcessor* manProcessorM;
+        static CppProcessor* ioProcessorM;
     };
 }
-#define g_net_processor Processor::BoostProcessor::netInstance()
-#define g_fsm_processor Processor::BoostProcessor::fsmInstance()
-#define g_io_processor Processor::BoostProcessor::ioInstance()
 
-#endif /* BOOSTPROCESSOR_H */
+#endif /* CPPPROCESSOR_H */
 

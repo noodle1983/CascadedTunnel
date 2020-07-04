@@ -6,7 +6,7 @@
 #include <vector>
 #include <string>
 
-namespace Config 
+namespace nd 
 {
     class XmlParameter
     {

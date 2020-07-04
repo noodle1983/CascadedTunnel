@@ -2,7 +2,7 @@
 #include "Log.h"
 #include <sstream>
 
-using namespace Config;
+using namespace nd;
 using namespace rapidxml;
 
 

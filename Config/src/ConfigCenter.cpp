@@ -6,7 +6,7 @@
 #include <rapidxml_utils.hpp>
 #include <rapidxml_print.hpp>
 
-using namespace Config;
+using namespace nd;
 using namespace rapidxml;
 using namespace std;
 

@@ -3,7 +3,7 @@
 
 #include <stdio.h>
 
-using namespace Config;
+using namespace nd;
 using namespace std;
 
 //-----------------------------------------------------------------------------

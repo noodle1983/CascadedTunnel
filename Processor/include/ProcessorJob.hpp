@@ -1,5 +1,0 @@
-#ifndef PROCESSORJOB_HPP
-#define PROCESSORJOB_HPP
-
-#endif /* PROCESSORJOB_HPP */
-

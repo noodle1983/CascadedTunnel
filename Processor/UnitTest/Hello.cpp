@@ -1,11 +1,11 @@
 #include <iostream>
 #include <functional>
 
-#include "BoostProcessor.h"
+#include "CppProcessor.h"
 #include "Log.h"
 
 using namespace std;
-using namespace Processor;
+using namespace nd;
 
 static int closed = false;
 static mutex closedMutexM;
@@ -25,7 +25,7 @@ void on_timeout(void *theArg)
     sig_stop(2);
 }
 
-void say(Processor::BoostProcessor* theProcessor)
+void say(CppProcessor* theProcessor)
 {
     std::cout << "Hello, I will exit after 1 second" << std::endl;
     struct timeval tv;
@@ -37,7 +37,7 @@ void say(Processor::BoostProcessor* theProcessor)
 
 int main()
 {
-    BoostProcessor processor(1);
+    CppProcessor processor(1);
     processor.start();
     processor.process(1, new Job(bind(say, &processor)));
 

@@ -1,15 +1,12 @@
-#include "BoostProcessor.h"
-#include "BoostWorker.h"
+#include "CppProcessor.h"
+#include "CppWorker.h"
 #include "ConfigCenter.h"
-#include "ProcessorJob.hpp"
-#include "ProcessorSensor.h"
 
 #include <functional>
 #include <chrono>
 
 using namespace std;
-using namespace Processor;
-using namespace Config;
+using namespace nd;
 
 //-----------------------------------------------------------------------------
 
@@ -17,17 +14,17 @@ static mutex fsmProcessorInstanceMutex;
 static mutex netProcessorInstanceMutex;
 static mutex manProcessorInstanceMutex;
 static mutex ioProcessorInstanceMutex;
-static shared_ptr<BoostProcessor> fsmProcessorInstanceReleaser;
-static shared_ptr<BoostProcessor> netProcessorInstanceReleaser;
-static shared_ptr<BoostProcessor> manProcessorInstanceReleaser;
-static shared_ptr<BoostProcessor> ioProcessorInstanceReleaser;
-BoostProcessor* BoostProcessor::fsmProcessorM = NULL;
-BoostProcessor* BoostProcessor::netProcessorM = NULL;
-BoostProcessor* BoostProcessor::manProcessorM = NULL;
-BoostProcessor* BoostProcessor::ioProcessorM = NULL;
+static shared_ptr<CppProcessor> fsmProcessorInstanceReleaser;
+static shared_ptr<CppProcessor> netProcessorInstanceReleaser;
+static shared_ptr<CppProcessor> manProcessorInstanceReleaser;
+static shared_ptr<CppProcessor> ioProcessorInstanceReleaser;
+CppProcessor* CppProcessor::fsmProcessorM = NULL;
+CppProcessor* CppProcessor::netProcessorM = NULL;
+CppProcessor* CppProcessor::manProcessorM = NULL;
+CppProcessor* CppProcessor::ioProcessorM = NULL;
 //-----------------------------------------------------------------------------
 
-BoostProcessor* BoostProcessor::fsmInstance()
+CppProcessor* CppProcessor::fsmInstance()
 {
     if (NULL == fsmProcessorM)
     {
@@ -35,7 +32,7 @@ BoostProcessor* BoostProcessor::fsmInstance()
         if (NULL == fsmProcessorM)
         {
             int threadCount = ConfigCenter::instance()->get("prc.fsmTno", 3);
-            BoostProcessor* fsmProcessor = new BoostProcessor(threadCount);
+            CppProcessor* fsmProcessor = new CppProcessor(threadCount);
             fsmProcessorInstanceReleaser.reset(fsmProcessor);
             fsmProcessor->start();
             fsmProcessorM = fsmProcessor;
@@ -47,7 +44,7 @@ BoostProcessor* BoostProcessor::fsmInstance()
 
 //-----------------------------------------------------------------------------
 
-BoostProcessor* BoostProcessor::netInstance()
+CppProcessor* CppProcessor::netInstance()
 {
     if (NULL == netProcessorM)
     {
@@ -55,7 +52,7 @@ BoostProcessor* BoostProcessor::netInstance()
         if (NULL == netProcessorM)
         {
             int threadCount = ConfigCenter::instance()->get("prc.netTno", 3);
-            BoostProcessor* netProcessor = new BoostProcessor(threadCount);
+            CppProcessor* netProcessor = new CppProcessor(threadCount);
             netProcessorInstanceReleaser.reset(netProcessor);
             netProcessor->start();
             netProcessorM = netProcessor;
@@ -66,7 +63,7 @@ BoostProcessor* BoostProcessor::netInstance()
 
 //-----------------------------------------------------------------------------
 
-BoostProcessor* BoostProcessor::manInstance()
+CppProcessor* CppProcessor::manInstance()
 {
     if (NULL == manProcessorM)
     {
@@ -74,7 +71,7 @@ BoostProcessor* BoostProcessor::manInstance()
         if (NULL == manProcessorM)
         {
             int threadCount = ConfigCenter::instance()->get("prc.manTno", 1);
-            BoostProcessor* manProcessor = new BoostProcessor(threadCount);
+            CppProcessor* manProcessor = new CppProcessor(threadCount);
             manProcessorInstanceReleaser.reset(manProcessor);
             manProcessor->start();
             manProcessorM = manProcessor;
@@ -85,7 +82,7 @@ BoostProcessor* BoostProcessor::manInstance()
 
 //-----------------------------------------------------------------------------
 
-BoostProcessor* BoostProcessor::ioInstance()
+CppProcessor* CppProcessor::ioInstance()
 {
     if (NULL == ioProcessorM)
     {
@@ -93,7 +90,7 @@ BoostProcessor* BoostProcessor::ioInstance()
         if (NULL == ioProcessorM)
         {
             int threadCount = 1; 
-            BoostProcessor* ioProcessor = new BoostProcessor(threadCount);
+            CppProcessor* ioProcessor = new CppProcessor(threadCount);
             ioProcessorInstanceReleaser.reset(ioProcessor);
             ioProcessor->start(true);
             ioProcessorM = ioProcessor;
@@ -104,7 +101,7 @@ BoostProcessor* BoostProcessor::ioInstance()
 
 //-----------------------------------------------------------------------------
 
-BoostProcessor::BoostProcessor(const unsigned theThreadCount)
+CppProcessor::CppProcessor(const unsigned theThreadCount)
     : threadCountM(theThreadCount)
     , workersM(NULL)
 {
@@ -112,7 +109,7 @@ BoostProcessor::BoostProcessor(const unsigned theThreadCount)
 
 //-----------------------------------------------------------------------------
 
-BoostProcessor::BoostProcessor(const std::string& theName, const unsigned theThreadCount)
+CppProcessor::CppProcessor(const std::string& theName, const unsigned theThreadCount)
     : threadCountM(theThreadCount)
     , workersM(NULL)
     , nameM(theName)
@@ -122,7 +119,7 @@ BoostProcessor::BoostProcessor(const std::string& theName, const unsigned theThr
 
 //-----------------------------------------------------------------------------
 
-BoostProcessor::~BoostProcessor()
+CppProcessor::~CppProcessor()
 {
     if (workersM) {
         if (waitStopM){
@@ -136,7 +133,7 @@ BoostProcessor::~BoostProcessor()
 
 //-----------------------------------------------------------------------------
 
-void BoostProcessor::start(bool toWaitStop)
+void CppProcessor::start(bool toWaitStop)
 {
     waitStopM = toWaitStop;
     if (0 == threadCountM)
@@ -145,18 +142,18 @@ void BoostProcessor::start(bool toWaitStop)
     if (NULL != workersM)
         return;
 
-    workersM = new BoostWorker[threadCountM];
+    workersM = new CppWorker[threadCountM];
     threadsM.reserve(threadCountM);
     for (unsigned i = 0; i < threadCountM; i++)
     {
         workersM[i].setGroupInfo(threadCountM, i);
-        threadsM.push_back(thread(&BoostWorker::run, &workersM[i]));
+        threadsM.push_back(thread(&CppWorker::run, &workersM[i]));
     }
 }
 
 //-----------------------------------------------------------------------------
 
-void BoostProcessor::waitStop()
+void CppProcessor::waitStop()
 {
     if (NULL == workersM)
         return;
@@ -189,7 +186,7 @@ void BoostProcessor::waitStop()
 
 //-----------------------------------------------------------------------------
 
-void BoostProcessor::stop()
+void CppProcessor::stop()
 {
     if (NULL == workersM)
         return;

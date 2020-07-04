@@ -6,7 +6,7 @@
 #include <map>
 #include <string>
 
-namespace Config
+namespace nd
 {
     class StringParameter
     {

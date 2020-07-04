@@ -11,7 +11,7 @@
 #include <string>
 #include <map>
 
-namespace Config
+namespace nd
 {
     class ConfigCenter;
 
