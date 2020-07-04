@@ -3,7 +3,7 @@
 
 #include "CppProcessor.h"
 
-#define NEW_JOB(...) {new nd::Job(std::bind(__VA_ARGS__))}
+#define NEW_JOB(...) (new nd::Job(std::bind(__VA_ARGS__)))
 #define PROCESS(fd, ...) process(fd, NEW_JOB(__VA_ARGS__))
 
 #define g_net_processor nd::CppProcessor::netInstance()

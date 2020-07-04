@@ -10,9 +10,7 @@ namespace nd
     class EchoProtocol:public IProtocol
     {
     public:
-        EchoProtocol(
-            Reactor* theReactor,
-            CppProcessor* theProcessor);
+        EchoProtocol(CppProcessor* theProcessor);
         ~EchoProtocol();
 
         void handleInput(SocketConnectionPtr connection);
@@ -24,8 +22,6 @@ namespace nd
         virtual int getHeartbeatInterval();
         virtual void handleHeartbeat(SocketConnectionPtr theConnection); 
     private:
-        Reactor* reactorM;
-        CppProcessor* processorM;
     };
 }
 

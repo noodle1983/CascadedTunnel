@@ -72,8 +72,11 @@ all:$(TARGET)
 test:$(TESTTARGET)
 
 $(STATIC_TARGET):$(AUTOTARGET) depend dependdir $(OUTDIR) $(OUTSUBDIR) $(OBJECTS)
-	$(AR) $(ARFLAGS) $(OUTDIR_PREFIX)/$(STATIC_TARGET) $(OBJECTS)
-	@echo " $(OBJECTS) " > $(OUTDIR_PREFIX)/$(MOD_NAME).objectlist
+	@if [ "" != "$(OBJECTS)" ]; then \
+		echo "$(AR) $(ARFLAGS) $(OUTDIR_PREFIX)/$(STATIC_TARGET) $(OBJECTS)"; \
+		$(AR) $(ARFLAGS) $(OUTDIR_PREFIX)/$(STATIC_TARGET) $(OBJECTS); \
+		echo " $(OBJECTS) " > $(OUTDIR_PREFIX)/$(MOD_NAME).objectlist ; \
+	fi;
 
 $(SHARED_TARGET):$(AUTOTARGET) depend dependdir $(OUTDIR) $(OUTSUBDIR) $(OBJECTS)
 	$(CC) $(SHAREDFLAG) -o $(OUTDIR_PREFIX)/$(SHARED_TARGET) $(OBJECTS)

@@ -52,7 +52,7 @@ int main()
     CppProcessor processor("NetProcessor", 4);
     processor.start();
     Reactor reactor;
-    EchoProtocol echoProtocol(&reactor, &processor);
+    EchoProtocol echoProtocol(&processor);
     TelnetProtocol telnetProtocol(g_man_processor);
     TcpServer server(&echoProtocol, &reactor, &processor);
     TcpServer telnetServer(&telnetProtocol, &reactor, &processor);

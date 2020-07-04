@@ -8,12 +8,12 @@ PROJBASE=$(CURDIR)
 #########################################
 TARGET=libBase
 SUBDIR= Log \
+		Utility \
 		Config \
 		Processor \
 		Net \
 		Message \
 		Fsm \
-		Utility \
 		TunnelServer \
 		TunnelClient \
 

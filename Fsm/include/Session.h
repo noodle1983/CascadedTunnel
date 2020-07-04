@@ -5,7 +5,6 @@
 #include "State.h"
 #include "min_heap.h"
 
-#include <event.h>
 #include <stdint.h>
 #include <string>
 #include <thread>

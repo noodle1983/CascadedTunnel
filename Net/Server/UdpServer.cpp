@@ -56,7 +56,7 @@ int UdpServer::startAt(const int thePort)
     myAddr.sin_family = AF_INET;
     myAddr.sin_port = htons(thePort);
     myAddr.sin_addr.s_addr = INADDR_ANY;
-    if (bind(fdM, (struct sockaddr*)&myAddr, sizeof(myAddr))<0) 
+    if (::bind(fdM, (struct sockaddr*)&myAddr, sizeof(myAddr))<0) 
     {
         LOG_FATAL("bind failed");
         exit(-1);

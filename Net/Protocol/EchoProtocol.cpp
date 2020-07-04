@@ -9,12 +9,8 @@ using namespace nd;
 using namespace std;
 
 //-----------------------------------------------------------------------------
-EchoProtocol::EchoProtocol(
-        Reactor* theReactor,
-        CppProcessor* theProcessor)
+EchoProtocol::EchoProtocol(CppProcessor* theProcessor)
     : IProtocol(theProcessor) 
-    , reactorM(theReactor)
-    , processorM(theProcessor)
 {
 }
 
