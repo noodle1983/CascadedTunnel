@@ -10,34 +10,27 @@
 #include <map>
 #include <string>
 
-using namespace Net::Client;
-namespace Processor
+namespace nd
 {
-	class BoostProcessor;
-}
-
-namespace Net
-{
-namespace Protocol
-{
+	class CppProcessor;
 	typedef std::map<int, TcpClient*> ProxyToConnectionMap;
 	typedef std::map<TcpClient*, int> ConnectionToProxyFdMap;
-    class TunnelClientProtocol : public Net::IClientProtocol
+    class TunnelClientProtocol : public IClientProtocol
     {
     public:
-		TunnelClientProtocol(Processor::BoostProcessor* theProcessor);
+		TunnelClientProtocol(CppProcessor* theProcessor);
         TunnelClientProtocol();
         ~TunnelClientProtocol();
 
-        void handleInput(Connection::SocketConnectionPtr theConnection);
-        void handleClose(Net::Connection::SocketConnectionPtr theConnection); 
-        void handleConnected(Connection::SocketConnectionPtr theConnection);
-        void handleHeartbeat(Connection::SocketConnectionPtr theConnection);
+        void handleInput(SocketConnectionPtr theConnection);
+        void handleClose(SocketConnectionPtr theConnection); 
+        void handleConnected(SocketConnectionPtr theConnection);
+        void handleHeartbeat(SocketConnectionPtr theConnection);
 
-        void handleProxyInput(Connection::SocketConnectionPtr theConnection);
-        void handleProxySent(Connection::SocketConnectionPtr theConnection);
-        void handleProxyClose(Net::Connection::SocketConnectionPtr theConnection); 
-        void handleProxyConnected(Connection::SocketConnectionPtr theConnection);
+        void handleProxyInput(SocketConnectionPtr theConnection);
+        void handleProxySent(SocketConnectionPtr theConnection);
+        void handleProxyClose(SocketConnectionPtr theConnection); 
+        void handleProxyConnected(SocketConnectionPtr theConnection);
 
         virtual const std::string getAddr();
         virtual int getPort();
@@ -50,8 +43,6 @@ namespace Protocol
         ConnectionToProxyFdMap connectionToProxyM;
         TunnelProxyClientProtocol proxyClientProtocolM;
     };
-
-}
 }
 
 #endif

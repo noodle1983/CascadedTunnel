@@ -8,17 +8,13 @@
 #include "Message.h"
 
 using namespace std;
-using namespace Net;
-using namespace Net::Protocol;
-using namespace Config;
+using namespace nd;
 using namespace Msg;
-using namespace Processor;
-using namespace Net::Connection;
 
 
 //-----------------------------------------------------------------------------
 
-TunnelClientProtocol::TunnelClientProtocol(Processor::BoostProcessor* theProcessor)
+TunnelClientProtocol::TunnelClientProtocol(CppProcessor* theProcessor)
 	: IClientProtocol(theProcessor)
     , proxyClientProtocolM(theProcessor, this)
 {
@@ -37,7 +33,7 @@ TunnelClientProtocol::~TunnelClientProtocol()
 
 //-----------------------------------------------------------------------------
 
-void TunnelClientProtocol::handleInput(Connection::SocketConnectionPtr theConnection)
+void TunnelClientProtocol::handleInput(SocketConnectionPtr theConnection)
 {
     char buffer[16 * 1024] = {0};
     while(true)
@@ -82,7 +78,7 @@ void TunnelClientProtocol::handleInput(Connection::SocketConnectionPtr theConnec
                 return;
             }
 
-            TcpClient* client = new TcpClient(&proxyClientProtocolM, g_reactor, BoostProcessor::netInstance()); 
+            TcpClient* client = new TcpClient(&proxyClientProtocolM, g_reactor, g_net_processor); 
             if (client->connect() < 0)
             {
                 RProxyConClose rsp(0);
@@ -178,7 +174,7 @@ void TunnelClientProtocol::handleInput(Connection::SocketConnectionPtr theConnec
 
 //-----------------------------------------------------------------------------
 
-void TunnelClientProtocol::handleClose(Net::Connection::SocketConnectionPtr theConnection)
+void TunnelClientProtocol::handleClose(SocketConnectionPtr theConnection)
 {
     LOG_DEBUG("disconnected from Tunnel server. fd: " << theConnection->getFd());
     ProxyToConnectionMap::iterator it = proxyToConnectionM.begin();
@@ -193,14 +189,14 @@ void TunnelClientProtocol::handleClose(Net::Connection::SocketConnectionPtr theC
 
 //-----------------------------------------------------------------------------
 
-void TunnelClientProtocol::handleConnected(Connection::SocketConnectionPtr theConnection)
+void TunnelClientProtocol::handleConnected(SocketConnectionPtr theConnection)
 {
     LOG_DEBUG("connected to Tunnel server. fd: " << theConnection->getFd());
 }
 
 //-----------------------------------------------------------------------------
 
-void TunnelClientProtocol::handleHeartbeat(Connection::SocketConnectionPtr theConnection)
+void TunnelClientProtocol::handleHeartbeat(SocketConnectionPtr theConnection)
 {
     int hbcounter = theConnection->getHeartbeatTimeoutCounter();
     if (hbcounter > 3){
@@ -221,7 +217,7 @@ void TunnelClientProtocol::handleHeartbeat(Connection::SocketConnectionPtr theCo
 
 //-----------------------------------------------------------------------------
 
-void TunnelClientProtocol::handleProxyInput(Connection::SocketConnectionPtr theConnection)
+void TunnelClientProtocol::handleProxyInput(SocketConnectionPtr theConnection)
 {
     TcpClient* client = theConnection->getClient();
     ConnectionToProxyFdMap::iterator it = connectionToProxyM.find(client);
@@ -267,7 +263,7 @@ void TunnelClientProtocol::handleProxyInput(Connection::SocketConnectionPtr theC
     }
 }
 
-void TunnelClientProtocol::handleProxySent(Connection::SocketConnectionPtr theConnection)
+void TunnelClientProtocol::handleProxySent(SocketConnectionPtr theConnection)
 {
     TcpClient* client = theConnection->getClient();
     ConnectionToProxyFdMap::iterator it = connectionToProxyM.find(client);
@@ -287,7 +283,7 @@ void TunnelClientProtocol::handleProxySent(Connection::SocketConnectionPtr theCo
 
 //-----------------------------------------------------------------------------
 
-void TunnelClientProtocol::handleProxyClose(Net::Connection::SocketConnectionPtr theConnection)
+void TunnelClientProtocol::handleProxyClose(SocketConnectionPtr theConnection)
 {
     LOG_DEBUG("proxy client close. fd: " << theConnection->getFd());
     theConnection->setUpperData((void*)0);
@@ -313,7 +309,7 @@ void TunnelClientProtocol::handleProxyClose(Net::Connection::SocketConnectionPtr
 
 //-----------------------------------------------------------------------------
 
-void TunnelClientProtocol::handleProxyConnected(Connection::SocketConnectionPtr theConnection)
+void TunnelClientProtocol::handleProxyConnected(SocketConnectionPtr theConnection)
 {
     LOG_DEBUG("proxy client connected. fd: " << theConnection->getFd());
     TcpClient* client = theConnection->getClient();
@@ -336,14 +332,14 @@ void TunnelClientProtocol::handleProxyConnected(Connection::SocketConnectionPtr 
 
 const std::string TunnelClientProtocol::getAddr()
 {
-    return ConfigCenter::instance()->get("inner.c.addr", "127.0.0.1");
+    return g_cfg->get("inner.c.addr", "127.0.0.1");
 }
 
 //-----------------------------------------------------------------------------
 
 int TunnelClientProtocol::getPort()
 {
-    return ConfigCenter::instance()->get("inner.c.port", 5461);
+    return g_cfg->get("inner.c.port", 5461);
 }
 
 //-----------------------------------------------------------------------------

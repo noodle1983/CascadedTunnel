@@ -5,15 +5,13 @@
 #include "Message.h"
 #include "Log.h"
 
-using namespace Net;
-using namespace Net::Protocol;
-using namespace Config;
+using namespace nd;
 using namespace Msg;
 
 
 //-----------------------------------------------------------------------------
 
-TunnelProxyClientProtocol::TunnelProxyClientProtocol(Processor::BoostProcessor* theProcessor, TunnelClientProtocol* clientProtocol)
+TunnelProxyClientProtocol::TunnelProxyClientProtocol(CppProcessor* theProcessor, TunnelClientProtocol* clientProtocol)
 	: IClientProtocol(theProcessor)
     , clientProtocolM(clientProtocol)
 {
@@ -27,7 +25,7 @@ TunnelProxyClientProtocol::~TunnelProxyClientProtocol()
 
 //-----------------------------------------------------------------------------
 
-void TunnelProxyClientProtocol::handleInput(Connection::SocketConnectionPtr theConnection)
+void TunnelProxyClientProtocol::handleInput(SocketConnectionPtr theConnection)
 {
     clientProtocolM->handleProxyInput(theConnection);
 	return ;
@@ -35,7 +33,7 @@ void TunnelProxyClientProtocol::handleInput(Connection::SocketConnectionPtr theC
 
 //-----------------------------------------------------------------------------
 
-void TunnelProxyClientProtocol::handleSent(Connection::SocketConnectionPtr theConnection)
+void TunnelProxyClientProtocol::handleSent(SocketConnectionPtr theConnection)
 {
     clientProtocolM->handleProxySent(theConnection);
 	return ;
@@ -44,14 +42,14 @@ void TunnelProxyClientProtocol::handleSent(Connection::SocketConnectionPtr theCo
 
 //-----------------------------------------------------------------------------
 
-void TunnelProxyClientProtocol::handleClose(Net::Connection::SocketConnectionPtr theConnection)
+void TunnelProxyClientProtocol::handleClose(SocketConnectionPtr theConnection)
 {
     clientProtocolM->handleProxyClose(theConnection);
 }
 
 //-----------------------------------------------------------------------------
 
-void TunnelProxyClientProtocol::handleConnected(Connection::SocketConnectionPtr theConnection)
+void TunnelProxyClientProtocol::handleConnected(SocketConnectionPtr theConnection)
 {
     clientProtocolM->handleProxyConnected(theConnection);
 }
@@ -62,14 +60,14 @@ void TunnelProxyClientProtocol::handleConnected(Connection::SocketConnectionPtr 
 
 const std::string TunnelProxyClientProtocol::getAddr()
 {
-    return ConfigCenter::instance()->get("proxy.c.addr", "127.0.0.1");
+    return g_cfg->get("proxy.c.addr", "127.0.0.1");
 }
 
 //-----------------------------------------------------------------------------
 
 int TunnelProxyClientProtocol::getPort()
 {
-    return ConfigCenter::instance()->get("proxy.c.port", 5466);
+    return g_cfg->get("proxy.c.port", 5466);
 }
 
 //-----------------------------------------------------------------------------

@@ -12,10 +12,8 @@
 #include <unistd.h>
 #include <signal.h>
 
-using namespace Processor;
-using namespace Net::Reactor;
-using namespace Net::Protocol;
 using namespace std;
+using namespace nd;
 
 static int closed = false;
 static mutex closedMutexM;

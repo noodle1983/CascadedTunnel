@@ -9,26 +9,20 @@
 #include <map>
 #include <string>
 
-namespace Processor
+namespace nd
 {
-	class BoostProcessor;
-}
-
-namespace Net
-{
-namespace Protocol
-{
-    class TunnelProxyProtocol : public Net::IProtocol
+	class CppProcessor;
+    class TunnelProxyProtocol : public IProtocol
     {
     public:
-		TunnelProxyProtocol(Processor::BoostProcessor* theProcessor, TunnelServerProtocol* theServerProtocol);
+		TunnelProxyProtocol(CppProcessor* theProcessor, TunnelServerProtocol* theServerProtocol);
         TunnelProxyProtocol();
         ~TunnelProxyProtocol();
 
-        void handleInput(Connection::SocketConnectionPtr theConnection);
-        void handleSent(Connection::SocketConnectionPtr theConnection);
-        void handleClose(Net::Connection::SocketConnectionPtr theConnection); 
-        void handleConnected(Connection::SocketConnectionPtr theConnection);
+        void handleInput(SocketConnectionPtr theConnection);
+        void handleSent(SocketConnectionPtr theConnection);
+        void handleClose(SocketConnectionPtr theConnection); 
+        void handleConnected(SocketConnectionPtr theConnection);
 
         virtual const std::string getAddr();
         virtual int getPort();
@@ -37,8 +31,6 @@ namespace Protocol
     private:
         TunnelServerProtocol* serverProtocolM;
     };
-
-}
 }
 
 #endif

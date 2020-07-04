@@ -3,14 +3,12 @@
 #include "SocketConnection.h"
 #include "Log.h"
 
-using namespace Net;
-using namespace Net::Protocol;
-using namespace Config;
+using namespace nd;
 
 
 //-----------------------------------------------------------------------------
 
-TunnelProxyProtocol::TunnelProxyProtocol(Processor::BoostProcessor* theProcessor, TunnelServerProtocol* theServerProtocol)
+TunnelProxyProtocol::TunnelProxyProtocol(CppProcessor* theProcessor, TunnelServerProtocol* theServerProtocol)
 	: IProtocol(theProcessor)
     , serverProtocolM(theServerProtocol)
 {
@@ -24,28 +22,28 @@ TunnelProxyProtocol::~TunnelProxyProtocol()
 
 //-----------------------------------------------------------------------------
 
-void TunnelProxyProtocol::handleInput(Connection::SocketConnectionPtr theConnection)
+void TunnelProxyProtocol::handleInput(SocketConnectionPtr theConnection)
 {
     serverProtocolM->handleProxyInput(theConnection);
 }
 
 //-----------------------------------------------------------------------------
 
-void TunnelProxyProtocol::handleSent(Connection::SocketConnectionPtr theConnection)
+void TunnelProxyProtocol::handleSent(SocketConnectionPtr theConnection)
 {
     serverProtocolM->handleProxySent(theConnection);
 }
 
 //-----------------------------------------------------------------------------
 
-void TunnelProxyProtocol::handleClose(Net::Connection::SocketConnectionPtr theConnection)
+void TunnelProxyProtocol::handleClose(SocketConnectionPtr theConnection)
 {
     serverProtocolM->handleProxyClose(theConnection);
 }
 
 //-----------------------------------------------------------------------------
 
-void TunnelProxyProtocol::handleConnected(Connection::SocketConnectionPtr theConnection)
+void TunnelProxyProtocol::handleConnected(SocketConnectionPtr theConnection)
 {
     serverProtocolM->handleProxyConnected(theConnection);
 }
@@ -54,14 +52,14 @@ void TunnelProxyProtocol::handleConnected(Connection::SocketConnectionPtr theCon
 
 const std::string TunnelProxyProtocol::getAddr()
 {
-    return ConfigCenter::instance()->get("proxy.s.addr", "127.0.0.1");
+    return g_cfg->get("proxy.s.addr", "127.0.0.1");
 }
 
 //-----------------------------------------------------------------------------
 
 int TunnelProxyProtocol::getPort()
 {
-    return ConfigCenter::instance()->get("proxy.s.port", 5460);
+    return g_cfg->get("proxy.s.port", 5460);
 }
 
 //-----------------------------------------------------------------------------

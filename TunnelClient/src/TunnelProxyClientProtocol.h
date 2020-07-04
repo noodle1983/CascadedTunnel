@@ -8,27 +8,21 @@
 #include <map>
 #include <string>
 
-namespace Processor
+namespace nd
 {
-	class BoostProcessor;
-}
-
-namespace Net
-{
-namespace Protocol
-{
+	class CppProcessor;
     class TunnelClientProtocol;
-    class TunnelProxyClientProtocol : public Net::IClientProtocol
+    class TunnelProxyClientProtocol : public IClientProtocol
     {
     public:
-		TunnelProxyClientProtocol(Processor::BoostProcessor* theProcessor, TunnelClientProtocol* clientProtocol);
+		TunnelProxyClientProtocol(CppProcessor* theProcessor, TunnelClientProtocol* clientProtocol);
         TunnelProxyClientProtocol();
         ~TunnelProxyClientProtocol();
 
-        void handleInput(Connection::SocketConnectionPtr theConnection);
-        void handleSent(Connection::SocketConnectionPtr theConnection);
-        void handleClose(Net::Connection::SocketConnectionPtr theConnection); 
-        void handleConnected(Connection::SocketConnectionPtr theConnection);
+        void handleInput(SocketConnectionPtr theConnection);
+        void handleSent(SocketConnectionPtr theConnection);
+        void handleClose(SocketConnectionPtr theConnection); 
+        void handleConnected(SocketConnectionPtr theConnection);
 
         virtual const std::string getAddr();
         virtual int getPort();
@@ -38,8 +32,6 @@ namespace Protocol
     private:
         TunnelClientProtocol* clientProtocolM;
     };
-
-}
 }
 
 #endif

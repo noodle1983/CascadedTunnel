@@ -8,41 +8,35 @@
 #include <map>
 #include <string>
 
-namespace Processor
+namespace nd
 {
-	class BoostProcessor;
-}
-
-namespace Net
-{
-namespace Protocol
-{
+	class CppProcessor;
     struct ConnectionPair
     {
-        Connection::SocketConnectionPtr proxyConnectionM;
-        Connection::SocketConnectionPtr peerConnectionM;
+        SocketConnectionPtr proxyConnectionM;
+        SocketConnectionPtr peerConnectionM;
     };
 
     class TunnelProxyProtocol;
-	typedef std::set<Connection::SocketConnectionPtr> ConnectionSet;
+	typedef std::set<SocketConnectionPtr> ConnectionSet;
 	typedef std::map<int, ConnectionPair> ConnectionMap;
-    class TunnelServerProtocol : public Net::IProtocol
+    class TunnelServerProtocol : public IProtocol
     {
     public:
-		TunnelServerProtocol(Processor::BoostProcessor* theProcessor);
+		TunnelServerProtocol(CppProcessor* theProcessor);
         TunnelServerProtocol();
         ~TunnelServerProtocol();
 
-        void handleInput(Connection::SocketConnectionPtr theConnection);
-        void handleClose(Net::Connection::SocketConnectionPtr theConnection); 
-        void handleConnected(Connection::SocketConnectionPtr theConnection);
-        void handleHeartbeat(Connection::SocketConnectionPtr theConnection);
+        void handleInput(SocketConnectionPtr theConnection);
+        void handleClose(SocketConnectionPtr theConnection); 
+        void handleConnected(SocketConnectionPtr theConnection);
+        void handleHeartbeat(SocketConnectionPtr theConnection);
 
         void setProxyProtocol(TunnelProxyProtocol* theProtocol){proxyProtocolM = theProtocol;}
-        void handleProxyInput(Connection::SocketConnectionPtr theConnection);
-        void handleProxySent(Connection::SocketConnectionPtr theConnection);
-        void handleProxyClose(Net::Connection::SocketConnectionPtr theConnection); 
-        void handleProxyConnected(Connection::SocketConnectionPtr theConnection);
+        void handleProxyInput(SocketConnectionPtr theConnection);
+        void handleProxySent(SocketConnectionPtr theConnection);
+        void handleProxyClose(SocketConnectionPtr theConnection); 
+        void handleProxyConnected(SocketConnectionPtr theConnection);
 
         virtual const std::string getAddr();
         virtual int getPort();
@@ -54,8 +48,6 @@ namespace Protocol
         ConnectionMap proxyFd2InfoMapM; 
         TunnelProxyProtocol* proxyProtocolM;
     };
-
-}
 }
 
 #endif

@@ -8,16 +8,12 @@
 #include <vector>
 
 using namespace std;
-using namespace Net;
-using namespace Protocol;
-using namespace Config;
+using namespace nd;
 using namespace Msg;
-using namespace Connection;
-
 
 //-----------------------------------------------------------------------------
 
-TunnelServerProtocol::TunnelServerProtocol(Processor::BoostProcessor* theProcessor)
+TunnelServerProtocol::TunnelServerProtocol(CppProcessor* theProcessor)
 	:IProtocol(theProcessor)
     , proxyProtocolM(NULL)
 {
@@ -287,14 +283,14 @@ void TunnelServerProtocol::handleProxyConnected(SocketConnectionPtr theConnectio
 
 const std::string TunnelServerProtocol::getAddr()
 {
-    return ConfigCenter::instance()->get("inner.s.addr", "127.0.0.1");
+    return g_cfg->get("inner.s.addr", "127.0.0.1");
 }
 
 //-----------------------------------------------------------------------------
 
 int TunnelServerProtocol::getPort()
 {
-    return ConfigCenter::instance()->get("inner.s.port", 5461);
+    return g_cfg->get("inner.s.port", 5461);
 }
 
 //-----------------------------------------------------------------------------

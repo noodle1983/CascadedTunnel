@@ -13,8 +13,7 @@
 #include <signal.h>
 
 using namespace std;
-using namespace Processor;
-using namespace Net::Reactor;
+using namespace nd;
 
 static int closed = false;
 static mutex closedMutexM;
@@ -51,11 +50,11 @@ int main()
     signal(SIGTERM, sig_stop);
     signal(SIGINT, sig_stop);
     evthread_use_pthreads();
-    Net::Protocol::TunnelServerProtocol serverProtocol(BoostProcessor::netInstance());
-    Net::Protocol::TunnelProxyProtocol proxyProtocol(BoostProcessor::netInstance(), &serverProtocol);
+    TunnelServerProtocol serverProtocol(g_net_processor);
+    TunnelProxyProtocol proxyProtocol(g_net_processor, &serverProtocol);
     serverProtocol.setProxyProtocol(&proxyProtocol);
-    Net::Server::TcpServer innerServer(&serverProtocol, Reactor::instance(), BoostProcessor::netInstance());
-    Net::Server::TcpServer proxyServer(&proxyProtocol, Reactor::instance(), BoostProcessor::netInstance());
+    TcpServer innerServer(&serverProtocol, g_reactor, g_net_processor);
+    TcpServer proxyServer(&proxyProtocol, g_reactor, g_net_processor);
     innerServer.start();
     proxyServer.start();
 
