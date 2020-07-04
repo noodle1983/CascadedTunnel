@@ -3,7 +3,7 @@
 
 #include <string>
 
-namespace Utility
+namespace nd
 {
     void createDir(const std::string& thePath);
 }

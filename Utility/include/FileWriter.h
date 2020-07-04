@@ -1,19 +1,19 @@
 #ifndef FILEWRITER_H
 #define FILEWRITER_H
 
-#include "BoostProcessor.h"
+#include "Processor.h"
 #include <fstream>
 #include <string>
 #include <stdint.h>
 #include <unistd.h>
 
-namespace Utility
+namespace nd
 {
     class FileWriter
     {
     public:
         FileWriter(
-                Processor::BoostProcessor* theProcessor,
+                CppProcessor* theProcessor,
                 const std::string& theModelName, 
                 const int64_t theIndex, 
                 const std::string& theHeaderLine = "");
@@ -48,7 +48,7 @@ namespace Utility
         std::string dbTableNameM;
         std::string outDirM;
 
-        Processor::BoostProcessor* processorM;
+        CppProcessor* processorM;
         min_heap_item_t* timerHandlerM;
 
     };

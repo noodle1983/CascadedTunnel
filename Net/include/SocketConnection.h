@@ -137,9 +137,9 @@ namespace nd{
 
         //we ensure there is only 1 thread read/write the input queue
         //std::mutex inputQueueMutexM;
-        Utility::KfifoBuffer inputQueueM;
+        KfifoBuffer inputQueueM;
         std::mutex outputQueueMutexM;
-        Utility::KfifoBuffer outputQueueM;
+        KfifoBuffer outputQueueM;
 
         enum Status{ActiveE = 0, CloseE = 1};
         mutable int statusM;

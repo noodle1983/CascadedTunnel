@@ -6,10 +6,10 @@
 #include <dirent.h>
 #include <errno.h>
 
-using namespace Utility;
+using namespace nd;
 
 //-----------------------------------------------------------------------------
-void Utility::createDir(const std::string& thePath)
+void createDir(const std::string& thePath)
 {
     if (thePath.empty())
         return;

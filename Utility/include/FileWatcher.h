@@ -5,7 +5,7 @@
 #include <time.h>
 #include <event.h>
 
-namespace Utility
+namespace nd
 {
     typedef void (*FileWatcherCallback)(std::string theFileName);
     class FileWatcher 

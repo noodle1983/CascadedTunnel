@@ -6,13 +6,12 @@
 #include <DirCreator.h>
 #include <string.h>
 
-using namespace Utility;
-using namespace Config;
+using namespace nd;
 
 //-----------------------------------------------------------------------------
 
 FileWriter::FileWriter(
-        Processor::BoostProcessor* theProcessor,
+        CppProcessor* theProcessor,
         const std::string& theModelName, 
         const int64_t theIndex, 
         const std::string& theHeaderLine)
@@ -26,10 +25,10 @@ FileWriter::FileWriter(
     , processorM(theProcessor)
     , timerHandlerM(NULL)
 {
-    switchTimeM = ConfigCenter::instance()->get(modelNameM+ ".swtTime", 3600);
-    switchSizeM = ConfigCenter::instance()->get(modelNameM+ ".swtSize", 100);
+    switchTimeM = g_cfg->get(modelNameM+ ".swtTime", 3600);
+    switchSizeM = g_cfg->get(modelNameM+ ".swtSize", 100);
     switchSizeM *= 1024 * 1024;
-    outDirM = ConfigCenter::instance()->get(modelNameM+ ".outDir", "./OutputFiles");
+    outDirM = g_cfg->get(modelNameM+ ".outDir", "./OutputFiles");
     createDir(outDirM);
 }
 
@@ -49,10 +48,10 @@ FileWriter::FileWriter(
     , processorM(NULL)
     , timerHandlerM(NULL)
 {
-    switchTimeM = ConfigCenter::instance()->get(modelNameM+ ".swtTime", 3600);
-    switchSizeM = ConfigCenter::instance()->get(modelNameM+ ".swtSize", 100);
+    switchTimeM = g_cfg->get(modelNameM+ ".swtTime", 3600);
+    switchSizeM = g_cfg->get(modelNameM+ ".swtSize", 100);
     switchSizeM *= 1024 * 1024;
-    outDirM = ConfigCenter::instance()->get(modelNameM+ ".outDir", "./OutputFiles");
+    outDirM = g_cfg->get(modelNameM+ ".outDir", "./OutputFiles");
     createDir(outDirM);
 }
 

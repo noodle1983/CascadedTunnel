@@ -1,19 +1,19 @@
 #include "FileWatcher.h"
 #include "Log.h"
 #include "Reactor.h"
-#include "BoostProcessor.h"
+#include "Processor.h"
 
 #include <sys/stat.h>
 #include <unistd.h>
 
-using namespace Utility;
+using namespace nd;
 
 //-----------------------------------------------------------------------------
 
 static void onFilewatcherTimeout(int theFd, short theEvt, void *theArg)
 {
     FileWatcher* theWatcher = (FileWatcher*) theArg;
-    Processor::BoostProcessor::manInstance()->PROCESS(
+    g_man_processor->PROCESS(
             0, 
             &FileWatcher::checkFile, theWatcher);
 }
@@ -40,7 +40,7 @@ FileWatcher::FileWatcher(
         lastModTimeM = 0;
     }
 
-    timerEventM = Net::Reactor::Reactor::instance()->newTimer(
+    timerEventM = g_reactor->newTimer(
                             onFilewatcherTimeout, 
                             this); 
     struct timeval tv;
@@ -55,7 +55,7 @@ FileWatcher::~FileWatcher()
 {
     if (timerEventM)
     {
-        Net::Reactor::Reactor::instance()->delEvent(timerEventM);
+        g_reactor->delEvent(timerEventM);
         timerEventM = NULL;
     }
 }
@@ -69,7 +69,7 @@ void FileWatcher::checkFile()
     {
         if (lastModTimeM != fileStat.st_mtime)
         {
-            Processor::BoostProcessor::manInstance()->PROCESS(
+            g_man_processor->PROCESS(
                     0, callbackM, filePathM);
             lastModTimeM = fileStat.st_mtime;
             CFG_DEBUG("reload file:" << filePathM);

@@ -179,8 +179,8 @@ void SocketConnection::onRead(int theFd, short theEvt)
     unsigned putLen = inputQueueM.put(buffer, len);
     assert(putLen == (unsigned)len);
 
-    while(len > 0 && (Utility::BufferOkE == inputQueueM.getStatus()
-                    || Utility::BufferLowE == inputQueueM.getStatus() ))
+    while(len > 0 && (BufferOkE == inputQueueM.getStatus()
+                    || BufferLowE == inputQueueM.getStatus() ))
     {
         readBufferLeft = inputQueueM.unusedSize();
         readLen = (readBufferLeft < sizeof(buffer)) ? readBufferLeft : sizeof(buffer);
@@ -193,8 +193,8 @@ void SocketConnection::onRead(int theFd, short theEvt)
         assert(putLen == (unsigned)len);
     }
 
-    if (Utility::BufferHighE == inputQueueM.getStatus()
-            || Utility::BufferNotEnoughE == inputQueueM.getStatus())
+    if (BufferHighE == inputQueueM.getStatus()
+            || BufferNotEnoughE == inputQueueM.getStatus())
     {
         //TRACE("Flow Control:Socket " << fdM << " stop reading.", fdM);
         lock_guard<mutex> lock(stopReadingMutexM);
@@ -217,8 +217,8 @@ unsigned SocketConnection::getInput(char* const theBuffer, const unsigned theLen
     unsigned len = inputQueueM.get(theBuffer, theLen);
     if (stopReadingM && CloseE != statusM)
     {
-        Utility::BufferStatus postBufferStatus = inputQueueM.getStatus();
-        if (postBufferStatus == Utility::BufferLowE)
+        BufferStatus postBufferStatus = inputQueueM.getStatus();
+        if (postBufferStatus == BufferLowE)
         {
             {
                 lock_guard<mutex> lock(stopReadingMutexM);
@@ -242,8 +242,8 @@ unsigned SocketConnection::getnInput(char* const theBuffer, const unsigned theLe
     unsigned len = inputQueueM.getn(theBuffer, theLen);
     if (stopReadingM && CloseE != statusM)
     {
-        Utility::BufferStatus postBufferStatus = inputQueueM.getStatus();
-        if (postBufferStatus == Utility::BufferLowE)
+        BufferStatus postBufferStatus = inputQueueM.getStatus();
+        if (postBufferStatus == BufferLowE)
         {
             {
                 lock_guard<mutex> lock(stopReadingMutexM);
@@ -306,8 +306,8 @@ int SocketConnection::asynWrite(int theFd, short theEvt)
 void SocketConnection::setLowWaterMarkWatcher(int theFd, Watcher* theWatcher)
 {
 	//if it is already writable
-    Utility::BufferStatus bufferStatus = outputQueueM.getStatus();
-	if (bufferStatus == Utility::BufferLowE)
+    BufferStatus bufferStatus = outputQueueM.getStatus();
+	if (bufferStatus == BufferLowE)
 	{
 		(*theWatcher)();
 		return;
@@ -398,8 +398,8 @@ void SocketConnection::onWrite(int theFd, short theEvt)
     }
     protocolM->asynHandleSent(fdM, selfM);
 
-    Utility::BufferStatus bufferStatus = outputQueueM.getStatus();
-    if (bufferStatus == Utility::BufferLowE)
+    BufferStatus bufferStatus = outputQueueM.getStatus();
+    if (bufferStatus == BufferLowE)
     {
         lock_guard<mutex> lock(watcherMutexM);
         WatcherMap::iterator it = watcherMapM.find(theFd);

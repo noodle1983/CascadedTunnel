@@ -1,10 +1,10 @@
 #ifndef APP_H
 #define APP_H
 
-#include "BoostProcessor.h"
+#include "Processor.h"
 #include "Singleton.hpp"
 
-namespace Utility
+namespace nd
 {
     class App 
     {

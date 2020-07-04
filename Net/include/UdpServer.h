@@ -64,7 +64,7 @@ namespace nd{
 
         //we ensure there is only 1 thread read/write the input queue
         //boost::mutex inputQueueMutexM;
-        Utility::KfifoBuffer inputQueueM;
+        KfifoBuffer inputQueueM;
         std::mutex outputQueueMutexM;
 
         enum Status{ActiveE = 0, CloseE = 1};

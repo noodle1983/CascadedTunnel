@@ -8,7 +8,7 @@
 #include <vector>
 #include <string>
 
-namespace Utility
+namespace nd
 {
     struct PhoneInfo
     {

@@ -3,7 +3,7 @@
 
 #include <sys/types.h>
 
-namespace Utility 
+namespace nd 
 {
     enum BufferStatus
     {

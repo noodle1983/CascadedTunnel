@@ -5,8 +5,7 @@
 #include <ConfigCenter.h>
 #include <DirCreator.h>
 
-using namespace Utility;
-using namespace Config;
+using namespace nd;
 
 //-----------------------------------------------------------------------------
 
@@ -17,8 +16,8 @@ AsynFileWriter::AsynFileWriter(
     ioThreadCntM = ConfigCenter::instance()->get("prc.ioTno", 1);
     for(unsigned i = 0; i < ioThreadCntM; i++)
     {   
-        fileWriterVectorM.push_back(new Utility::FileWriter(
-                    Processor::BoostProcessor::ioInstance(),
+        fileWriterVectorM.push_back(new FileWriter(
+                    g_io_processor,
                     theModelName, 
                     i,
                     theHeaderLine));
@@ -40,9 +39,9 @@ AsynFileWriter::~AsynFileWriter()
 
 void AsynFileWriter::write(const uint64_t theId, const std::string& theContent, const time_t theTime)
 {
-    Utility::FileWriter* fileWriter = fileWriterVectorM[theId%ioThreadCntM];
+    FileWriter* fileWriter = fileWriterVectorM[theId%ioThreadCntM];
     const std::string* content = new std::string(theContent);
-    Processor::BoostProcessor::ioInstance()->PROCESS(theId, &FileWriter::_write,
+    g_io_processor->PROCESS(theId, &FileWriter::_write,
             fileWriter, content, theTime);
 }
 
