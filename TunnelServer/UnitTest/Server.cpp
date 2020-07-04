@@ -10,7 +10,7 @@
 #include <event.h>
 #include <event2/thread.h>
 #include <unistd.h>
-#include <signal.h>
+#include <csignal>
 
 using namespace std;
 using namespace nd;
@@ -58,6 +58,7 @@ int main()
     innerServer.start();
     proxyServer.start();
 
+    raise(SIGINT);
     unique_lock<mutex> lock(closedMutexM);
     while(!closed)
     {

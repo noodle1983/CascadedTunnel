@@ -9,6 +9,7 @@ STATIC_LIB+= \
 	$(PROJBASE)/.lib/libLog.a \
 	$(PROJBASE)/.lib/libConfig.a \
     $(PROJBASE)/.lib/libProcessor.a \
+    $(PROJBASE)/.lib/libUtility.a \
 
 SHARED_LIB_DIR+=
 SHARED_LIB+=  -pthread -lrt

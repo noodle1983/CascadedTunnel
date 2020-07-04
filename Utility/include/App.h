@@ -1,8 +1,10 @@
 #ifndef APP_H
 #define APP_H
 
-#include "Processor.h"
 #include "Singleton.hpp"
+#include <condition_variable>
+#include <mutex>
+#include <string>
 
 namespace nd
 {
@@ -10,14 +12,18 @@ namespace nd
     {
     public:
         friend class DesignPattern::Singleton<App>;
-        ~App();
+        virtual ~App() = default;
 
-        void setRunInBackground();
-        void setDumpWhenCrash();
-        static void wait();
+        void parseAndInit(int argc, char *argv[]);
+        void wait();
+        //void setDumpWhenCrash();
+        
+        bool runInBackground(){return isBackgroundM;} 
 
     private:
         App();
+        void init();
+        void setRunInBackground();
         static bool dumpCallback(
             const char* dump_path,
             const char* minidump_id,
@@ -26,14 +32,18 @@ namespace nd
         static void sigStop(int sig);
 
     private:
-        google_breakpad::ExceptionHandler* crashDumpHandlerM;
+        //google_breakpad::ExceptionHandler* crashDumpHandlerM;
+        bool isBackgroundM;
+        std::string cfgFileM;
+
         static int closedM;
-        static boost::mutex closedMutexM;
-        static boost::condition_variable closedCondM;
+        static std::mutex closedMutexM;
+        static std::condition_variable closedCondM;
     };
 
     typedef DesignPattern::Singleton<App> AppSingleton;
 }
+#define g_app nd::AppSingleton::instance()
 
 #endif /* APP_H */
 

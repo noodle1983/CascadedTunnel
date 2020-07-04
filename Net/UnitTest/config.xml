@@ -148,7 +148,7 @@
 			<ValueType>Int</ValueType>
 			<ValueRange>0-6</ValueRange>
 			<DefaultValue>3</DefaultValue>
-			<Value>3</Value>
+			<Value>1</Value>
 		</Parameter>
 		<Parameter name="Log pattern" id="log.pattern">
 			<Description>specify how to log a message. please refer to log4plus' manual.</Description>
@@ -159,8 +159,8 @@
 		<Parameter name="Log File Name" id="log.filename">
 			<Description>specify the file which will be logged to</Description>
 			<ValueType>String</ValueType>
-			<DefaultValue>trouble_shooting.log</DefaultValue>
-			<Value>trouble_shooting.log</Value>
+			<DefaultValue>trouble_shooting</DefaultValue>
+			<Value>trouble_shooting</Value>
 		</Parameter>
 		<Parameter name="Log File Size" id="log.fileSize">
             <Description>specify the max size(MB) for a single file.</Description>
@@ -174,7 +174,7 @@
 			<ValueType>Int</ValueType>
 			<ValueRange>1-100</ValueRange>
 			<DefaultValue>10</DefaultValue>
-			<Value>10</Value>
+			<Value>0</Value>
 		</Parameter>
 	</Group>
 </Configuration>

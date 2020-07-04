@@ -10,8 +10,6 @@
 
 namespace nd
 {
-    const int LOG_TYPE_CFG = 0;
-    const int LOG_TYPE_NORMAL = 1;
     extern thread_local ThreadLocalLogMeta tl_logmeta;
     class Logger
     {
@@ -25,8 +23,10 @@ namespace nd
 
         void handleLogMeta(LogMeta* meta);
 
+        int logType(){return logTypeM;}
     private:
         int minSeverityM;
+        int logTypeM;
         std::vector<Sink*> sinksM;
     };
 

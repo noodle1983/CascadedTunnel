@@ -14,7 +14,7 @@
             <Description>specify the address which the client will connect to</Description>
 			<ValueType>String</ValueType>
 			<DefaultValue>0.0.0.0</DefaultValue>
-			<Value>0.0.0.0</Value>
+			<Value>127.0.0.1</Value>
 		</Parameter>
 		<Parameter name="Inner Client Connect Port" id="inner.s.port">
             <Description>specify the port which the client will connect to</Description>
@@ -30,14 +30,14 @@
             <Description>specify the address which the client will connect to</Description>
 			<ValueType>String</ValueType>
 			<DefaultValue>0.0.0.0</DefaultValue>
-			<Value>0.0.0.0</Value>
+			<Value>127.0.0.1</Value>
 		</Parameter>
 		<Parameter name="Proxy Client Listen Port" id="proxy.c.port">
             <Description>specify the port which the client will connect to</Description>
 			<ValueType>Int</ValueType>
 			<ValueRange>1-65535</ValueRange>
 			<DefaultValue>5466</DefaultValue>
-			<Value>22</Value>
+			<Value>10022</Value>
 		</Parameter>
 	</Group>
 
@@ -72,7 +72,7 @@
 			<ValueType>Int</ValueType>
 			<ValueRange>0-6</ValueRange>
 			<DefaultValue>3</DefaultValue>
-			<Value>3</Value>
+			<Value>1</Value>
 		</Parameter>
 		<Parameter name="Log pattern" id="log.pattern">
 			<Description>specify how to log a message. please refer to log4plus' manual.</Description>

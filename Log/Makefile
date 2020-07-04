@@ -14,6 +14,7 @@ SUBDIR=src
 INC_DIR=-I. \
      -I./include \
      -I./src \
+	 -I$(PROJBASE)/Utility/include \
 	 -I$(PROJBASE)/Config/include \
 	 -I$(PROJBASE)/Processor/include \
 	 -I$(PROJBASE)/DesignPattern/include

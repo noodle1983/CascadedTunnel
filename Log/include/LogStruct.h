@@ -8,6 +8,9 @@
 
 namespace nd
 {
+    const int LOG_TYPE_CFG = 0;
+    const int LOG_TYPE_NORMAL = 1;
+
     enum Severity
     {
         Trace = 0,
@@ -99,6 +102,7 @@ namespace nd
 
         time_point_sys_clock timepointM;
         Severity severityM; 
+        int logTypeM;
         SrcLine lineInfoM;
         std::stringstream streamM;
     };

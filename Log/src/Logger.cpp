@@ -5,6 +5,7 @@ namespace nd { thread_local nd::ThreadLocalLogMeta tl_logmeta; }
 #include "Processor.h"
 #include "FileSink.h"
 #include "ConsoleSink.h"
+#include "App.h"
 
 using namespace nd;
 using namespace std;
@@ -14,6 +15,7 @@ using namespace std;
 
 Logger::Logger(int logType)
     : minSeverityM((int)Severity::Trace)
+    , logTypeM(logType)
 {
     if (logType == LOG_TYPE_CFG){
         initCfgLog();
@@ -41,19 +43,23 @@ void Logger::initCfgLog()
     minSeverityM = Severity::Trace;
     string prefix("cfg");
     sinksM.push_back(new FileSink(prefix, 0, (Severity)minSeverityM));
-    sinksM.push_back(new ConsoleSink((Severity)minSeverityM));
+
+    bool runInBackground = g_app->runInBackground();
+    if (!runInBackground){
+        sinksM.push_back(new ConsoleSink((Severity)minSeverityM));
+    }
 }
 
 //-----------------------------------------------------------------------------
 void Logger::initNormalLog()
 {
     int logLevel = g_cfg->get("log.level", (int)Severity::Debug);
-    bool runInBackground = g_cfg->get("process.background", 1);
     std::string logFilename = g_cfg->get("log.filename", "trouble_shooting");
     int fileNum = g_cfg->get("log.fileNum", 10);
 
     minSeverityM = logLevel;
     sinksM.push_back(new FileSink(logFilename, fileNum, (Severity)logLevel));
+    bool runInBackground = g_app->runInBackground();
     if (!runInBackground){
         sinksM.push_back(new ConsoleSink((Severity)logLevel));
     }
@@ -106,6 +112,7 @@ Logger& nd::operator<<(Logger& theLogger, const LogEnd& end) {
     }
 
     LogMeta* meta = new LogMeta(std::move(tl_logmeta));
+    meta->logTypeM = theLogger.logType();
     g_io_processor->PROCESS(0, &Logger::handleLogMeta, &theLogger, meta);
     return theLogger;
 }

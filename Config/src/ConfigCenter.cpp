@@ -26,10 +26,6 @@ ConfigCenterPtr ConfigCenter::instance()
         if (NULL == configCenterM.get())
         {
             configCenterM.reset(new ConfigCenter());
-            if (0 == configCenterM->loadXml("config.xml"))
-            {
-                CFG_DEBUG("loaded config file:config.xml");
-            }
         }
     }
     lock_guard<mutex> lock(configCenterMutexM);
