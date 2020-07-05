@@ -10,7 +10,9 @@ namespace nd
     class FileSink: public Sink
     {
     public:
-        FileSink(std::string& prefix, int keepno, Severity severity);
+        FileSink(std::string& prefix, Severity severity);
+        void setKeepNo(int keepno){ keepHisNoM = keepno; };
+        void setSwitchDays(int days){ switchDaysM = days; }
         virtual ~FileSink() = default;
         virtual void log(const LogMeta* theMeta);
 
@@ -18,10 +20,13 @@ namespace nd
 
     private:
         std::string prefixM;
-        int keepHisNoM;
         std::string timeFormatM;
         Severity severityM;
         std::ofstream fileHandleM;
+
+        int keepHisNoM;
+        int switchDaysM;
+        uint64_t curDaysM;
     };
 
 }

@@ -42,7 +42,11 @@ void Logger::initCfgLog()
 {
     minSeverityM = Severity::Trace;
     string prefix("cfg");
-    sinksM.push_back(new FileSink(prefix, 0, (Severity)minSeverityM));
+    FileSink* fileSink = new FileSink(prefix, Severity::Trace);
+    fileSink->setKeepNo(0);
+    fileSink->setSwitchDays(0);
+
+    sinksM.push_back(fileSink);
 
     bool runInBackground = g_app->runInBackground();
     if (!runInBackground){
@@ -56,9 +60,14 @@ void Logger::initNormalLog()
     int logLevel = g_cfg->get("log.level", (int)Severity::Debug);
     std::string logFilename = g_cfg->get("log.filename", "trouble_shooting");
     int fileNum = g_cfg->get("log.fileNum", 10);
+    int switchDays = g_cfg->get("log.switchday", 1);
 
     minSeverityM = logLevel;
-    sinksM.push_back(new FileSink(logFilename, fileNum, (Severity)logLevel));
+    FileSink* fileSink = new FileSink(logFilename, (Severity)logLevel);
+    fileSink->setKeepNo(fileNum);
+    fileSink->setSwitchDays(switchDays);
+
+    sinksM.push_back(fileSink);
     bool runInBackground = g_app->runInBackground();
     if (!runInBackground){
         sinksM.push_back(new ConsoleSink((Severity)logLevel));

@@ -23,11 +23,13 @@ static inline std::tm localtime_nd(std::time_t timer)
 }
 //-----------------------------------------------------------------------------
 
-FileSink::FileSink(std::string& prefix, int keepno, Severity severity)
+FileSink::FileSink(std::string& prefix, Severity severity)
     : prefixM(prefix)
-    , keepHisNoM(keepno)
     , timeFormatM("%Y-%m-%d_%H-%M-%S")
     , severityM(severity)
+    , keepHisNoM(0)
+    , switchDaysM(1)
+    , curDaysM(0)
 {
 }
 
@@ -38,9 +40,16 @@ void FileSink::log(const LogMeta* theMeta)
     if (theMeta->severityM < severityM) {return ;}
 
     std::time_t now = std::chrono::system_clock::to_time_t(theMeta->timepointM);
+    uint64_t curDays = now / (24 * 3600);
     struct ::tm nowTm = localtime_nd(now);
     char fileTimeStr[128];
     strftime(fileTimeStr, sizeof(fileTimeStr), timeFormatM.c_str(), &nowTm);
+
+    if (curDaysM == 0){curDaysM = curDays;}
+    int daysDiff = (int)(curDays - curDaysM);
+    if (switchDaysM > 0 && daysDiff >= switchDaysM && fileHandleM.is_open()){
+        fileHandleM.close();
+    }
 
     if (!fileHandleM.is_open())
     {
