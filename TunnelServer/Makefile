@@ -28,7 +28,7 @@ STATIC_LIB= \
     $(PROJBASE)/.lib/libUtility.a \
 
 SHARED_LIB_DIR=
-SHARED_LIB=-lrt
+SHARED_LIB=
 
 include $(PROJBASE)/build/makefile.staticlib.configAndLog.linux
 include $(PROJBASE)/build/makefile.staticlib.libevent.linux

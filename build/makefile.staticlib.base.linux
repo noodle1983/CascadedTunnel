@@ -7,7 +7,7 @@ STATIC_LIB+= \
     $(PROJBASE)/base/release/lib/libBase.a \
 
 SHARED_LIB_DIR+=
-SHARED_LIB+=  -pthread -lrt
+SHARED_LIB+=  -pthread
 
 include $(PROJBASE)/base/build/makefile.boost.header
 include $(PROJBASE)/base/build/makefile.staticlib.boost.thread.linux

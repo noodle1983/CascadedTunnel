@@ -12,7 +12,7 @@ STATIC_LIB+= \
     $(PROJBASE)/.lib/libUtility.a \
 
 SHARED_LIB_DIR+=
-SHARED_LIB+=  -pthread -lrt
+SHARED_LIB+=  -pthread
 
 #include $(PROJBASE)/build/makefile.staticlib.boost.thread.linux
 #include $(PROJBASE)/build/makefile.staticlib.boost.log.linux

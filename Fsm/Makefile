@@ -27,7 +27,7 @@ STATIC_LIB= \
     $(PROJBASE)/.lib/libConfig.a
 
 SHARED_LIB_DIR=
-SHARED_LIB=-pthread -lrt
+SHARED_LIB=-pthread
 
 include $(PROJBASE)/build/makefile.staticlib.libevent.linux
 #########################################

@@ -9,5 +9,12 @@ CXXFLAGS=-DDEBUG -Wall -Wno-write-strings -std=gnu++17 -g $(INC_DIR)
 CFLAGs=-DDEBUG -Wall -Wno-write-strings -g $(INC_DIR)
 #CXXFLAGS=-Wall -Wno-write-strings -g -O2 $(INC_DIR) 
 #CFLAGs=-Wall -Wno-write-strings -g -O2 $(INC_DIR)
-LDFLAGS=$(SHARED_LIB_DIR) $(SHARED_LIB) $(STATIC_LIB)
 
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S),Linux)
+	SHARED_LIB += -rt
+endif
+ifeq ($(UNAME_S),Darwin)
+	SHARED_LIB +=
+endif
+LDFLAGS=$(SHARED_LIB_DIR) $(SHARED_LIB) $(STATIC_LIB)
