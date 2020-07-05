@@ -19,13 +19,13 @@ INC_DIR=-I. \
 	 -I$(PROJBASE)/Processor/include \
 	 -I$(PROJBASE)/DesignPattern/include
 
-STATIC_LIB= $(PROJBASE)/.lib/libConfig.a \
-	$(PROJBASE)/.lib/libProcessor.a \
+STATIC_LIB=
 
 SHARED_LIB_DIR=
-SHARED_LIB= -pthread
+SHARED_LIB=
 
 include $(PROJBASE)/build/makefile.rapidxml.header
+include $(PROJBASE)/build/makefile.staticlib.configAndLog.linux
 
 #########################################
 #              compiler                 #
