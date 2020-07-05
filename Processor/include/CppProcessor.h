@@ -27,6 +27,7 @@ namespace nd
         static CppProcessor* ioInstance();
 
         void start(bool toWaitStop = false);
+        // must not call stop in its worker
         void waitStop();
         void stop();
 
@@ -61,6 +62,7 @@ namespace nd
         std::vector<std::thread> threadsM;
         std::string nameM;
         bool waitStopM; 
+        std::mutex stopMutexM;
 
         static CppProcessor* fsmProcessorM;
         static CppProcessor* netProcessorM;

@@ -155,6 +155,7 @@ void CppProcessor::start(bool toWaitStop)
 
 void CppProcessor::waitStop()
 {
+    lock_guard<mutex> lock(stopMutexM);
     if (NULL == workersM)
         return;
 
@@ -188,6 +189,7 @@ void CppProcessor::waitStop()
 
 void CppProcessor::stop()
 {
+    lock_guard<mutex> lock(stopMutexM);
     if (NULL == workersM)
         return;
 
