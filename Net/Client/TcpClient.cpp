@@ -37,12 +37,15 @@ TcpClient::TcpClient(
     : protocolM(theProtocol)
     , reactorM(theReactor)
     , processorM(theProcessor)
+    , peerAddrM(theProtocol->getAddr())
+    , peerPortM(theProtocol->getPort())
     , isClosedM(0)
     , isConnectedM(0)
     , selfM(this)
     , reconnectTimerEvtM(NULL)
     , connectTimesM(0)
 {
+    processorIdM = (uint64_t)this >> 3;
 }
 
 //-----------------------------------------------------------------------------
@@ -57,14 +60,14 @@ TcpClient::~TcpClient()
 void TcpClient::deleteSelf()
 {
     close();
-    processorM->PROCESS(protocolM->getPort(), &TcpClient::_deleteSelf, this); 
+    processorM->PROCESS(processorIdM, &TcpClient::_deleteSelf, this); 
 }
 
 //-----------------------------------------------------------------------------
 
 void TcpClient::_deleteSelf()
 {
-    if (reconnectTimerEvtM){processorM->cancelLocalTimer(protocolM->getPort(), reconnectTimerEvtM);}
+    if (reconnectTimerEvtM){processorM->cancelLocalTimer(processorIdM, reconnectTimerEvtM);}
     reconnectTimerEvtM = NULL;
     selfM.reset();
 }
@@ -92,16 +95,13 @@ int TcpClient::connect()
 {
     lock_guard<mutex> lock(connectionMutexM);
     //connect
-    peerAddrM = protocolM->getAddr();
-    peerPortM = protocolM->getPort();
 
     if (isClosedM)
     {
         LOG_ERROR("TcpClient to[" << peerAddrM << ":" << peerPortM << "is already closed");
         return -1;
     }
-    LOG_DEBUG("connecting to " << peerAddrM
-            << ":" << peerPortM);
+    LOG_DEBUG("connecting to " << peerAddrM << ":" << peerPortM);
 
     //init attr
     isConnectedM = false;
@@ -159,8 +159,7 @@ int TcpClient::connect()
 
 void TcpClient::onConnected(int theFd, SocketConnectionPtr theConnection)
 {
-    LOG_DEBUG("connected to " << peerAddrM
-            << ":" << peerPortM);
+    LOG_DEBUG("connected to " << peerAddrM << ":" << peerPortM);
     {
         lock_guard<mutex> lock(connectionMutexM);
         isConnectedM = true;
@@ -181,8 +180,8 @@ void TcpClient::reconnectLater()
     struct timeval tv;
     tv.tv_sec = protocolM->getReConnectInterval(); 
     tv.tv_usec = 0;
-    if (reconnectTimerEvtM){processorM->cancelLocalTimer(protocolM->getPort(), reconnectTimerEvtM);}
-    reconnectTimerEvtM = processorM->addLocalTimer(protocolM->getPort(), tv, reconnect, this); 
+    if (reconnectTimerEvtM){processorM->cancelLocalTimer(processorIdM, reconnectTimerEvtM);}
+    reconnectTimerEvtM = processorM->addLocalTimer(processorIdM, tv, reconnect, this); 
 }
 
 //-----------------------------------------------------------------------------
@@ -190,8 +189,7 @@ void TcpClient::reconnectLater()
 void TcpClient::onError(SocketConnectionPtr theConnection)
 {
     if (connectionM.get() != theConnection.get()) { return; }
-    LOG_WARN("connection lost from " << peerAddrM
-            << ":" << peerPortM);
+    LOG_WARN("connection lost from " << peerAddrM << ":" << peerPortM);
     {
         lock_guard<mutex> lock(connectionMutexM);
         connectionM.reset();
@@ -202,7 +200,7 @@ void TcpClient::onError(SocketConnectionPtr theConnection)
 
     if (protocolM->getReConnectInterval() > 0)
     {
-        processorM->PROCESS(protocolM->getPort(), &TcpClient::reconnectLater, this); 
+        processorM->PROCESS(processorIdM, &TcpClient::reconnectLater, this); 
     }
 
 }
@@ -217,7 +215,7 @@ void TcpClient::onClientTimeout()
     }
     if (!isConnectedM)
     {
-        processorM->PROCESS(protocolM->getPort(), &reconnect, (void*)this); 
+        processorM->PROCESS(processorIdM, &reconnect, (void*)this); 
     }
 }
 

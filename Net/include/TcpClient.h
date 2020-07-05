@@ -87,6 +87,7 @@ namespace nd
         min_heap_item_t* reconnectTimerEvtM;
 
         size_t connectTimesM;
+        uint64_t processorIdM;
     };
 
     inline unsigned
