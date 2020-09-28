@@ -1,12 +1,12 @@
 #!/bin/bash
 
 rm -rf libevent && \
-tar -xf libevent-2.1.11-stable.tar.gz && \
-cd libevent-2.1.11-stable && \
+tar -xf libevent-2.1.12-stable.tar.gz && \
+cd libevent-2.1.12-stable && \
 ./configure --prefix=$PWD/../libevent && \
 make && make install && \
 cd - && \
-rm -rf libevent-2.1.11-stable
+rm -rf libevent-2.1.12-stable
 
 # rm -rf libboost && \
 # tar -xf boost_1_73_0.tar.bz2 && \
