@@ -10,18 +10,18 @@
 	</Group>
 
     <Group name="Inner Client Protocol Group">
-		<Parameter name="Inner Client Connect Address" id="inner.s.addr">
+		<Parameter name="Inner Client Connect Address" id="inner.c.addr">
             <Description>specify the address which the client will connect to</Description>
 			<ValueType>String</ValueType>
 			<DefaultValue>0.0.0.0</DefaultValue>
 			<Value>127.0.0.1</Value>
 		</Parameter>
-		<Parameter name="Inner Client Connect Port" id="inner.s.port">
+		<Parameter name="Inner Client Connect Port" id="inner.c.port">
             <Description>specify the port which the client will connect to</Description>
 			<ValueType>Int</ValueType>
 			<ValueRange>1-65535</ValueRange>
 			<DefaultValue>5461</DefaultValue>
-			<Value>5461</Value>
+			<Value>20021</Value>
 		</Parameter>
 	</Group>
 
@@ -37,7 +37,7 @@
 			<ValueType>Int</ValueType>
 			<ValueRange>1-65535</ValueRange>
 			<DefaultValue>5466</DefaultValue>
-			<Value>10022</Value>
+			<Value>22</Value>
 		</Parameter>
 	</Group>
 

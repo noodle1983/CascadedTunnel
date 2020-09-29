@@ -20,8 +20,8 @@
             <Description>specify the port which the protocol will listen to</Description>
 			<ValueType>Int</ValueType>
 			<ValueRange>1-65535</ValueRange>
-			<DefaultValue>5461</DefaultValue>
-			<Value>5461</Value>
+			<DefaultValue>20021</DefaultValue>
+			<Value>20021</Value>
 		</Parameter>
 	</Group>
 
@@ -36,8 +36,8 @@
             <Description>specify the port which the protocol will listen to</Description>
 			<ValueType>Int</ValueType>
 			<ValueRange>1-65535</ValueRange>
-			<DefaultValue>5460</DefaultValue>
-			<Value>5460</Value>
+			<DefaultValue>20022</DefaultValue>
+			<Value>20022</Value>
 		</Parameter>
 	</Group>
 
