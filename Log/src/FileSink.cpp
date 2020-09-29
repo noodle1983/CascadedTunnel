@@ -70,6 +70,7 @@ void FileSink::log(const LogMeta* theMeta)
         << "(" << theMeta->lineInfoM.filenameM << ":" << theMeta->lineInfoM.linenoM << ")" 
         << theMeta->streamM.str() << endl << flush;
 
+    curDaysM = curDays;
 }
 
 //-----------------------------------------------------------------------------
