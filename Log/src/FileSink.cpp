@@ -49,6 +49,7 @@ void FileSink::log(const LogMeta* theMeta)
     int daysDiff = (int)(curDays - curDaysM);
     if (switchDaysM > 0 && daysDiff >= switchDaysM && fileHandleM.is_open()){
         fileHandleM.close();
+        curDaysM = curDays;
     }
 
     if (!fileHandleM.is_open())
@@ -70,7 +71,6 @@ void FileSink::log(const LogMeta* theMeta)
         << "(" << theMeta->lineInfoM.filenameM << ":" << theMeta->lineInfoM.linenoM << ")" 
         << theMeta->streamM.str() << endl << flush;
 
-    curDaysM = curDays;
 }
 
 //-----------------------------------------------------------------------------
@@ -102,7 +102,7 @@ void FileSink::checkDelHisFile()
     sort(all_log_files.begin(), all_log_files.end());
     int delNumber = all_log_files.size() - keepHisNoM;
     for(int i = 0; i < delNumber && i < (int)all_log_files.size(); i++){
-        CFG_DEBUG("remove file:" << all_log_files[i]);
+        CFG_DEBUG("remove file:" << all_log_files[i] << ", cur day:" << curDaysM);
         remove(all_log_files[i]);
     }
 }
