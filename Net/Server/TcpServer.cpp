@@ -39,6 +39,7 @@ TcpServer::TcpServer(
     , portM(0)
     , fdM(0)
 {
+    LOG_DEBUG("new server: 0x" << std::hex << this << ".");
 }
 
 //-----------------------------------------------------------------------------
@@ -46,6 +47,7 @@ TcpServer::TcpServer(
 
 TcpServer::~TcpServer()
 {
+    LOG_DEBUG("release server: 0x" << std::hex << this << ". listen port:" << std::dec << portM);
     stop();
 }
 

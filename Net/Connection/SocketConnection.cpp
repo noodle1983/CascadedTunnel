@@ -61,6 +61,7 @@ SocketConnection::SocketConnection(
     addReadEvent();
     protocolM->asynHandleConnected(fdM, selfM);
     processorM->PROCESS(fdM, &SocketConnection::startHeartbeatTimer, this);
+    LOG_DEBUG("new connection: 0x" << std::hex << this << ". fd:" << std::dec << fdM);
 }
 
 //-----------------------------------------------------------------------------
@@ -93,6 +94,7 @@ SocketConnection::SocketConnection(
     writeEvtM = reactorM->newEvent(fdM, EV_WRITE, on_write, this);
     addWriteEvent();
     addReadEvent();
+    LOG_DEBUG("new connection: 0x" << std::hex << this << ". fd:" << std::dec << fdM);
 }
 //-----------------------------------------------------------------------------
 
@@ -104,7 +106,7 @@ SocketConnection::~SocketConnection()
     {
         LOG_WARN("uppperDataM is not NULL and may leek, please free it and set to NULL in upper handling while connection is closed.");
     }
-    LOG_DEBUG("close fd:" << fdM);
+    LOG_DEBUG("release connection: 0x" << std::hex << this << ". fd:" << std::dec << fdM);
 }
 
 //-----------------------------------------------------------------------------
