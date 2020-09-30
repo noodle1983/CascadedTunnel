@@ -199,6 +199,7 @@ void CppWorker::run()
         if (job != NULL)
         {
             (*job)();
+            delete job;
         }
 
         //handle timer
