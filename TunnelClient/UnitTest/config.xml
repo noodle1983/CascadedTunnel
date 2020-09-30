@@ -14,13 +14,13 @@
             <Description>specify the address which the client will connect to</Description>
 			<ValueType>String</ValueType>
 			<DefaultValue>0.0.0.0</DefaultValue>
-			<Value>127.0.0.1</Value>
+			<Value>111.231.246.65</Value>
 		</Parameter>
 		<Parameter name="Inner Client Connect Port" id="inner.c.port">
             <Description>specify the port which the client will connect to</Description>
 			<ValueType>Int</ValueType>
 			<ValueRange>1-65535</ValueRange>
-			<DefaultValue>5461</DefaultValue>
+			<DefaultValue>20021</DefaultValue>
 			<Value>20021</Value>
 		</Parameter>
 	</Group>
@@ -36,7 +36,7 @@
             <Description>specify the port which the client will connect to</Description>
 			<ValueType>Int</ValueType>
 			<ValueRange>1-65535</ValueRange>
-			<DefaultValue>5466</DefaultValue>
+			<DefaultValue>22</DefaultValue>
 			<Value>22</Value>
 		</Parameter>
 	</Group>
