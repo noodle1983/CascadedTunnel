@@ -21,6 +21,7 @@ namespace nd{
     class SocketConnection;
 
     typedef std::shared_ptr<SocketConnection> SocketConnectionPtr;
+    typedef std::shared_ptr<TcpClient> TcpClientPtr;
     typedef std::weak_ptr<SocketConnection> SocketConnectionWPtr;
     typedef std::function<void ()> Watcher;
     typedef std::map<int, Watcher*> WatcherMap;
@@ -76,7 +77,7 @@ namespace nd{
 
 		//attribute
 		int getFd(){return fdM;}
-        TcpClient* getClient(){return clientM;}
+        TcpClient* getClient(){return clientM.get();}
 		void setPeerAddr(const struct sockaddr_in* theAddr){peerAddrM = *theAddr;}
 		const struct sockaddr_in& getPeerAddr(){return peerAddrM;}
         IProtocol* getProtocol(){return protocolM;}
@@ -142,15 +143,14 @@ namespace nd{
         KfifoBuffer outputQueueM;
 
         enum Status{ActiveE = 0, CloseE = 1};
-        mutable int statusM;
+        volatile size_t statusM;
 
         std::mutex stopReadingMutexM;
         bool stopReadingM;
         std::mutex watcherMutexM;
         WatcherMap watcherMapM;
 
-        TcpClient* clientM;
-        std::mutex clientMutexM;
+        TcpClientPtr clientM;
         bool isConnectedNotified;
 
 		struct sockaddr_in peerAddrM;

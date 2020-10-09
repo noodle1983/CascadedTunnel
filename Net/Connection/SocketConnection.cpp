@@ -84,7 +84,7 @@ SocketConnection::SocketConnection(
     , outputQueueM(theProtocol->getWBufferSizePower())
     , statusM(ActiveE)
     , stopReadingM(false)
-    , clientM(theClient)
+    , clientM(theClient->self())
     , isConnectedNotified(false)
     , writenBytesM(0)
     , readedBytesM(0)
@@ -113,8 +113,7 @@ SocketConnection::~SocketConnection()
 
 void SocketConnection::rmClient()
 {
-    lock_guard<mutex> lock(clientMutexM);
-    clientM = NULL;
+    clientM.reset();
 }
 
 //-----------------------------------------------------------------------------
@@ -366,15 +365,12 @@ bool SocketConnection::hasWatcher(int theFd)
 
 void SocketConnection::onWrite(int theFd, short theEvt)
 {
-    if (!isConnectedNotified && clientM && CloseE != statusM)
+    auto client = clientM;
+    if (!isConnectedNotified && client.get() && CloseE != statusM)
     {
-        lock_guard<mutex> lock(clientMutexM);
-        if (clientM)
-        {
-            clientM->onConnected(theFd, selfM);
-            isConnectedNotified = true;
-            startHeartbeatTimer();
-        }
+        client->onConnected(theFd, selfM);
+        isConnectedNotified = true;
+        startHeartbeatTimer();
     }
     char buffer[1024]= {0};
     unsigned peekLen = outputQueueM.peek(buffer, sizeof(buffer));
@@ -460,7 +456,7 @@ void SocketConnection::addClientTimer(unsigned theSec)
 
 void SocketConnection::_addClientTimer(unsigned theSec)
 {
-    if (NULL == clientM || 0 == theSec)
+    if (NULL == clientM.get() || 0 == theSec)
     {
         LOG_DEBUG("client is null or timeout = 0, ignore, fd:" << fdM);
         return;
@@ -483,11 +479,11 @@ void SocketConnection::_addClientTimer(unsigned theSec)
 void SocketConnection::onClientTimeout(void *theArg)
 {
     SocketConnection* connection = (SocketConnection*) theArg;
-    lock_guard<mutex> lock(connection->clientMutexM);
     connection->clientTimerEvtM = NULL;
-    if (connection->clientM)
+    auto client = connection->clientM;
+    if (client.get())
     {
-        connection->clientM->onClientTimeout();
+        client->onClientTimeout();
     }
 
 }
@@ -526,13 +522,10 @@ void SocketConnection::_close()
         processorM->cancelLocalTimer(fdM, clientTimerEvtM);
     }
 	protocolM->asynHandleClose(fdM, selfM);
-    if (clientM)
+    auto client = clientM;
+    if (client.get())
     {
-        lock_guard<mutex> lock(clientMutexM);
-        if (clientM)
-        {
-            clientM->onError(selfM);
-        }
+        client->onError(selfM);
     }
     reactorM->delEvent(readEvtM);
     reactorM->delEvent(writeEvtM);
