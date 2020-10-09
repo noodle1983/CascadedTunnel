@@ -79,7 +79,7 @@ void TunnelClientProtocol::handleInput(SocketConnectionPtr theConnection)
             }
 
             TcpClient* client = new TcpClient(&proxyClientProtocolM, g_reactor, g_net_processor); 
-            if (client->connect() < 0)
+            if (client->connect((void*)(uintptr_t)msg.winOffset) < 0)
             {
                 RProxyConClose rsp(0);
                 rsp.proxyFd = msg.proxyFd;
@@ -88,8 +88,6 @@ void TunnelClientProtocol::handleInput(SocketConnectionPtr theConnection)
             }
 
             LOG_DEBUG("NewConnection, winOffset:" << msg.winOffset.valueM << ", proxyFd:" << msg.proxyFd.valueM);
-            SocketConnectionPtr connection = client->getConnection();
-            connection->setUpperData((void*)(uintptr_t)msg.winOffset);
 
             ProxyToConnectionMap::iterator it = proxyToConnectionM.find(msg.proxyFd);
             if (it != proxyToConnectionM.end()){

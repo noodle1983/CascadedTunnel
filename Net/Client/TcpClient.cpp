@@ -99,7 +99,7 @@ void TcpClient::_close()
 
 //-----------------------------------------------------------------------------
 
-int TcpClient::connect()
+int TcpClient::connect(void* theUpperData)
 {
     if (isClosedM)
     {
@@ -108,13 +108,13 @@ int TcpClient::connect()
     }
     //init attr
     isConnectedM = false;
-    processorM->PROCESS(processorIdM, &TcpClient::_connect, this); 
+    processorM->PROCESS(processorIdM, &TcpClient::_connect, this, theUpperData); 
     return 0;
 }
 
 //-----------------------------------------------------------------------------
 
-void TcpClient::_connect()
+void TcpClient::_connect(void* theUpperData)
 {
     if (isClosedM) { return; }
     LOG_DEBUG("connecting to " << peerAddrM << ":" << peerPortM);
@@ -165,6 +165,7 @@ void TcpClient::_connect()
     }
     SocketConnection* connection =
         new SocketConnection(protocolM, reactorM, processorM, sock, this);
+    connection->setUpperData(theUpperData);
     connectionM = connection->self();
     if (!isConnectedM)
     {

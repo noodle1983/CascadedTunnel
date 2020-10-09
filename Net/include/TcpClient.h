@@ -31,11 +31,8 @@ namespace nd
 
         /**
          * connect in a async way.
-         * return:
-         *         -1 : there is an error.
-         *         0  : connected or blocked
          */
-        int connect();
+        int connect(void* theUpperData = NULL);
         int close();
         bool isClose()
         {
@@ -69,7 +66,7 @@ namespace nd
 
     private:
         void _close();
-        void _connect();
+        void _connect(void* theUpperData);
         void _deleteSelf();
         void _reconnectLater();
 
