@@ -45,7 +45,7 @@ TcpClient::TcpClient(
     , reconnectTimerEvtM(NULL)
     , connectTimesM(0)
 {
-    LOG_DEBUG("new client: 0x" << std::hex << this << ". " << peerAddrM << ":" << std::dec << peerPortM);
+    LOG_DEBUG("new client: " << std::hex << this << ". " << peerAddrM << ":" << std::dec << peerPortM);
     processorIdM = (uint64_t)this >> 3;
 }
 
@@ -53,7 +53,7 @@ TcpClient::TcpClient(
 
 TcpClient::~TcpClient()
 {
-    LOG_DEBUG("release client: 0x" << std::hex << this << ". " << peerAddrM << ":" << std::dec << peerPortM);
+    LOG_DEBUG("release client: " << std::hex << this << ". " << peerAddrM << ":" << std::dec << peerPortM);
     close();
 }
 
