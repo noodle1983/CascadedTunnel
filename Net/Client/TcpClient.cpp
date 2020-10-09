@@ -81,29 +81,45 @@ int TcpClient::close()
     isClosedM = true;
     isConnectedM = false;
 
-    lock_guard<mutex> lock(connectionMutexM);
+    processorM->PROCESS(processorIdM, &TcpClient::_close, this); 
+    return 0;
+}
+
+//-----------------------------------------------------------------------------
+
+void TcpClient::_close()
+{
     if (connectionM.get())
     {
         connectionM->rmClient();
         connectionM->close();
         connectionM.reset();
     }
-    return 0;
 }
 
 //-----------------------------------------------------------------------------
 
 int TcpClient::connect()
 {
-    lock_guard<mutex> lock(connectionMutexM);
-    //connect
-
     if (isClosedM)
     {
         LOG_ERROR("TcpClient to[" << peerAddrM << ":" << peerPortM << "is already closed");
         return -1;
     }
+    //init attr
+    isConnectedM = false;
+    processorM->PROCESS(processorIdM, &TcpClient::_connect, this); 
+    return 0;
+}
+
+//-----------------------------------------------------------------------------
+
+void TcpClient::_connect()
+{
+    if (isClosedM) { return; }
     LOG_DEBUG("connecting to " << peerAddrM << ":" << peerPortM);
+
+    _close();
 
     //init attr
     isConnectedM = false;
@@ -119,14 +135,14 @@ int TcpClient::connect()
     {
         LOG_ERROR("failed to do socket(AF_INET,...)!"
                     << ", errstr:" << evutil_socket_error_to_string(errno));
-        return -1;
+        return;
     }
     if (evutil_make_socket_nonblocking(sock) < 0)
     {
         LOG_ERROR("failed to make socket monblocking!"
                     << ", errstr:" << evutil_socket_error_to_string(errno));
         evutil_closesocket(sock);
-        return -1;
+        return;
     }
     connectTimesM++;
     if (::connect(sock, (struct sockaddr*)&sin, sizeof(sin)) < 0)
@@ -139,7 +155,7 @@ int TcpClient::connect()
                     << ", errstr:" << evutil_socket_error_to_string(e));
             evutil_closesocket(sock);
             onError(connectionM);
-            return -1;
+            return;
         }
     }
     else
@@ -154,19 +170,19 @@ int TcpClient::connect()
     {
         connectionM->addClientTimer(protocolM->getReConnectInterval());
     }
-    return 0;
 }
+
 
 //-----------------------------------------------------------------------------
 
 void TcpClient::onConnected(int theFd, SocketConnectionPtr theConnection)
 {
-    LOG_DEBUG("connected to " << peerAddrM << ":" << peerPortM);
-    {
-        lock_guard<mutex> lock(connectionMutexM);
-        isConnectedM = true;
-    }
+    if (isClosedM) { return ; }
+
+    isConnectedM = true;
     protocolM->asynHandleConnected(theFd, theConnection);
+
+    LOG_DEBUG("connected to " << peerAddrM << ":" << peerPortM);
 }
 
 //-----------------------------------------------------------------------------
@@ -177,8 +193,14 @@ static void reconnect(void* client)
     self->connect();
 }
 
-void TcpClient::reconnectLater()
+void TcpClient::_reconnectLater()
 {
+    if (isClosedM) { return; }
+
+    //reconnect
+    _close();
+    isConnectedM = false;
+
     struct timeval tv;
     tv.tv_sec = protocolM->getReConnectInterval(); 
     tv.tv_usec = 0;
@@ -192,17 +214,12 @@ void TcpClient::onError(SocketConnectionPtr theConnection)
 {
     if (connectionM.get() != theConnection.get()) { return; }
     LOG_WARN("connection lost from " << peerAddrM << ":" << peerPortM);
-    {
-        lock_guard<mutex> lock(connectionMutexM);
-        connectionM.reset();
-        //reconnect
-        isConnectedM = false;
-    }
+
     if (isClosedM) { return; }
 
     if (protocolM->getReConnectInterval() > 0)
     {
-        processorM->PROCESS(processorIdM, &TcpClient::reconnectLater, this); 
+        processorM->PROCESS(processorIdM, &TcpClient::_reconnectLater, this); 
     }
 
 }
@@ -211,10 +228,7 @@ void TcpClient::onError(SocketConnectionPtr theConnection)
 
 void TcpClient::onClientTimeout()
 {
-    if (isClosedM)
-    {
-        return;
-    }
+    if (isClosedM) { return; }
     if (!isConnectedM)
     {
         processorM->PROCESS(processorIdM, &reconnect, (void*)this); 

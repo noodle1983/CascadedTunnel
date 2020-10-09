@@ -39,17 +39,17 @@ namespace nd
         int close();
         bool isClose()
         {
-            std::lock_guard<std::mutex> lock(connectionMutexM);
-            if (connectionM.get())
+            auto connection = connectionM;
+            if (connection.get())
             {
-                return connectionM->isClose();
+                return connection->isClose();
             }
             return true;
         }
         bool isConnected()
         {
-            std::lock_guard<std::mutex> lock(connectionMutexM);
-            return connectionM.get() && isConnectedM;
+            auto connection = connectionM;
+            return connection.get() && isConnectedM;
         }
         unsigned sendn(const char* theBuffer, const unsigned theLen);
         template<typename Msg>
@@ -68,8 +68,10 @@ namespace nd
         void resetTimer(){reconnectTimerEvtM = NULL;}
 
     private:
+        void _close();
+        void _connect();
         void _deleteSelf();
-        void reconnectLater();
+        void _reconnectLater();
 
         IClientProtocol* protocolM;
         Reactor* reactorM;
@@ -78,10 +80,9 @@ namespace nd
         std::string peerAddrM;
         int peerPortM;
 
-        mutable bool isClosedM;
+        volatile size_t isClosedM;
+        volatile size_t isConnectedM;
 
-        std::mutex connectionMutexM;
-        bool isConnectedM;
         SocketConnectionPtr connectionM;
         TcpClientPtr selfM;
         min_heap_item_t* reconnectTimerEvtM;
@@ -94,10 +95,10 @@ namespace nd
     TcpClient::sendn(const char* theBuffer, const unsigned theLen)
     {
         if (isClosedM) {return 0;}
-        std::lock_guard<std::mutex> lock(connectionMutexM);
-        if (connectionM.get() && (isConnectedM || connectTimesM == 1))
+        auto connection = connectionM;
+        if (connection.get() && (isConnectedM || connectTimesM == 1))
         {
-            return connectionM->sendn(theBuffer, theLen);
+            return connection->sendn(theBuffer, theLen);
         }
         else
         {
@@ -109,10 +110,10 @@ namespace nd
     unsigned TcpClient::sendMsg(Msg& msg)
     {
         if (isClosedM) {return 0;}
-        std::lock_guard<std::mutex> lock(connectionMutexM);
-        if (connectionM.get() && (isConnectedM || connectTimesM == 1))
+        auto connection = connectionM;
+        if (connection.get() && (isConnectedM || connectTimesM == 1))
         {
-            return connectionM->sendMsg(msg);
+            return connection->sendMsg(msg);
         }
         else
         {
