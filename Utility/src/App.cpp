@@ -12,6 +12,7 @@
 #include <signal.h>
 #include <iostream>
 #include <filesystem>
+#include <chrono>
 
 using namespace nd;
 using namespace std;
@@ -138,6 +139,13 @@ void App::wait()
     {
         closedCondM.wait(lock);
     }
+}
+
+//-----------------------------------------------------------------------------
+
+void App::sleep(size_t ms)
+{
+    this_thread::sleep_for(chrono::milliseconds(ms));
 }
 
 //-----------------------------------------------------------------------------

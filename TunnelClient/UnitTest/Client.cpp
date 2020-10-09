@@ -23,9 +23,13 @@ int main(int argc, char *argv[])
     TunnelClientProtocol clientProtocol(g_net_processor);
 
     g_app->wait();
-    g_reactor->stop();
 
-    //LOG_DEBUG("TunnelClient stopped.");
+    clientProtocol.release();
+    g_reactor->stop();
+    LOG_DEBUG("TunnelClient stopping...");
+
+    g_app->sleep(100);
+    LOG_DEBUG("TunnelClient stopped.");
     return 0;
 }
 

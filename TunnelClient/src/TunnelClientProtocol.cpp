@@ -27,6 +27,12 @@ TunnelClientProtocol::TunnelClientProtocol(CppProcessor* theProcessor)
 
 TunnelClientProtocol::~TunnelClientProtocol()
 {
+}
+
+//-----------------------------------------------------------------------------
+
+void TunnelClientProtocol::release()
+{
     client2ServerM->deleteSelf();
     client2ServerM.reset();
 }

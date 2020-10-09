@@ -16,6 +16,7 @@ namespace nd
 
         void parseAndInit(int argc, char *argv[]);
         void wait();
+        void sleep(size_t ms);
         //void setDumpWhenCrash();
         
         bool runInBackground(){return isBackgroundM;} 

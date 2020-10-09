@@ -20,6 +20,7 @@ namespace nd
     public:
 		TunnelClientProtocol(CppProcessor* theProcessor);
         TunnelClientProtocol();
+        void release();
         ~TunnelClientProtocol();
 
         void handleInput(SocketConnectionPtr theConnection);
