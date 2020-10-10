@@ -59,7 +59,8 @@ void TunnelClientProtocol::handleInput(SocketConnectionPtr theConnection)
 
         uint32_t length = header.length;
         if (length > 10 * 1024 || length < Msg::MsgHeader::MIN_BYTES){
-            LOG_ERROR("Msg is invalid:" << length << ". the msg's edge may be lost, close connection!");
+            LOG_ERROR("Msg: "  << header.messageType.valueM << " is with invalid len:" << length
+                    << ". the msg's edge may be lost, close connection!");
             theConnection->close();
             return ;
         }
