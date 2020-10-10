@@ -39,7 +39,7 @@ TcpServer::TcpServer(
     , portM(0)
     , fdM(0)
 {
-    LOG_DEBUG("new server: " << std::hex << this << ".");
+    LOG_DEBUG("new server: " << std::hex << this << "." << std::dec);
 }
 
 //-----------------------------------------------------------------------------
@@ -96,7 +96,8 @@ void TcpServer::onAccept(int theFd, short theEvt)
         LOG_DEBUG("Accepted connection on " << portM
                 << " from "<< inet_ntop(AF_INET, &clientAddr.sin_addr, addrBuffer, sizeof(addrBuffer)) << ":" << clientAddr.sin_port
                 << ", fd:" << clientFd
-                << ", con addr:" << std::hex << (size_t)connection);
+                << ", con addr:" << std::hex << (size_t)connection
+                << std::dec);
 
         clientFd = accept(theFd, (struct sockaddr *)&clientAddr, &clientLen);
     }
