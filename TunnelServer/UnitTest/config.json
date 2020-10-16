@@ -3,6 +3,7 @@
         "desc" : "0:not run in background; 1: run in background;",
         "val" : 0
     },
+
     "inner.s.addr" : {
         "desc" : "specify the address which the protocol will listen to",
         "val" : "0.0.0.0"
@@ -11,14 +12,16 @@
         "desc" : "specify the port which the protocol will listen to",
         "val" : 20021
     },
+
     "proxy.s.addr" : {
         "desc" : "specify the address which the protocol will listen to",
         "val" : "0.0.0.0"
     },
     "proxy.s.port" : {
         "desc" : "specify the port which the protocol will listen to",
-        "val" : 20022
+        "val" : [19999, 10000]
     },
+
     "prc.netTno" : {
         "desc" : "specify the thread number for Net Processor/ThreadPool",
         "val" : 3

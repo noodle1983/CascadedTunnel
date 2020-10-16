@@ -10,6 +10,14 @@
     "test.str" : {
         "desc" : "the description",
         "val" : "abcc"
+    },
+    "test.intvector" : {
+        "desc" : "the description",
+        "val" : [1, 2]
+    },
+    "test.strvector" : {
+        "desc" : "the description",
+        "val" : ["a", "b"]
     }
 }
 

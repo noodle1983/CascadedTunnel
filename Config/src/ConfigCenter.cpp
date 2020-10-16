@@ -123,4 +123,37 @@ const std::string ConfigCenter::get(const std::string& theKey, const std::string
 
 //-----------------------------------------------------------------------------
 
+StrVector ConfigCenter::getStrVector(const std::string& theKey)
+{
+    shared_lock<shared_mutex> lock(mapMutexM);
+    ParamMap::iterator it = paramMapM.find(theKey);
+    StrVector v;
+    if (it == paramMapM.end()) {
+        return v;
+    }
+
+    Value& val = *it->second;
+    for (SizeType i = 0; i < val.Size(); i++){
+        v.push_back(val[i].GetString());
+    }
+    return v;
+}
+
+//-----------------------------------------------------------------------------
+
+IntVector ConfigCenter::getIntVector(const std::string& theKey)
+{
+    shared_lock<shared_mutex> lock(mapMutexM);
+    ParamMap::iterator it = paramMapM.find(theKey);
+    IntVector v;
+    if (it == paramMapM.end()) {
+        return v;
+    }
+
+    Value& val = *it->second;
+    for (SizeType i = 0; i < val.Size(); i++){
+        v.push_back(val[i].GetInt());
+    }
+    return v;
+}
 

@@ -14,6 +14,15 @@ int main()
     std::string str = g_cfg->get("test.str", "notexist");
     cout << "str:" << str << endl;
 
+    auto iv = g_cfg->getIntVector("test.intvector");
+    cout << "int vector:";
+    for(auto i : iv){cout << i << ", ";}
+    cout << endl;
+
+    auto sv = g_cfg->getStrVector("test.strvector");
+    cout << "str vector:";
+    for(auto s : sv){cout << s << ", ";}
+    cout << endl;
     return 0;
 }
 
