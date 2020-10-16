@@ -33,9 +33,9 @@ void Sniffer::start()
     
     //std::string devNameM;               /* Device to sniff on */
     //std::string filterExpM; /* The filter expression */
-    devNameM = ConfigCenter::instance()->get("pcap.dev", "eth0");
-    filterExpM = ConfigCenter::instance()->get("pcap.filter", "tcp port 22");
-    isInPromiscuousModeM = ConfigCenter::instance()->get("pcap.promiscuous", 0);
+    devNameM = g_cfg->get("pcap.dev", "eth0");
+    filterExpM = g_cfg->get("pcap.filter", "tcp port 22");
+    isInPromiscuousModeM = g_cfg->get("pcap.promiscuous", 0);
 
     if (pcap_lookupnet(devNameM.c_str(), &net, &mask, errbuf) == -1) 
     {

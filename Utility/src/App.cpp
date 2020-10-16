@@ -27,7 +27,7 @@ std::condition_variable App::closedCondM;
 
 App::App()
     : isBackgroundM(false)
-    , cfgFileM("config.xml")
+    , cfgFileM("config.json")
 {
     signal(SIGPIPE, SIG_IGN);
     signal(SIGALRM, SIG_IGN);
@@ -88,7 +88,7 @@ void App::init()
     g_io_processor; // init before logs and others
 
     if (fs::exists(cfgFileM)) {
-        if (0 != g_cfg->loadXml(cfgFileM)) {
+        if (0 != g_cfg->load(cfgFileM)) {
             CFG_FATAL("fail to load config file:" << cfgFileM << "!");
             exit(0);
         }

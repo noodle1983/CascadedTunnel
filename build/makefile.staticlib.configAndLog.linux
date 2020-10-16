@@ -4,6 +4,7 @@
 INC_DIR+= \
      -I$(PROJBASE)/Config/include \
      -I$(PROJBASE)/Log/include \
+     -I$(PROJBASE)/3PP \
 
 STATIC_LIB+= \
 	$(PROJBASE)/.lib/libLog.a \

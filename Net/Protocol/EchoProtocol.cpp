@@ -44,42 +44,42 @@ void EchoProtocol::handleInput(SocketConnectionPtr connection)
 
 const std::string EchoProtocol::getAddr()
 {
-    return ConfigCenter::instance()->get("echo.s.addr", "0.0.0.0");
+    return g_cfg->get("echo.s.addr", "0.0.0.0");
 }
 
 //-----------------------------------------------------------------------------
 
 int EchoProtocol::getPort()
 {
-    return ConfigCenter::instance()->get("echo.s.port", 5460);
+    return g_cfg->get("echo.s.port", 5460);
 }
 
 //-----------------------------------------------------------------------------
 
 int EchoProtocol::getRBufferSizePower()
 {
-    return ConfigCenter::instance()->get("echo.s.rpower", 20);
+    return g_cfg->get("echo.s.rpower", 20);
 }
 
 //-----------------------------------------------------------------------------
 
 int EchoProtocol::getWBufferSizePower()
 {
-    return ConfigCenter::instance()->get("echo.s.wpower", 20);
+    return g_cfg->get("echo.s.wpower", 20);
 }
 
 //-----------------------------------------------------------------------------
 
 int EchoProtocol::getHeartbeatInterval()
 { 
-    return ConfigCenter::instance()->get("echo.s.hbi", 10);
+    return g_cfg->get("echo.s.hbi", 10);
 }
 
 //-----------------------------------------------------------------------------
 
 int getMaxHeartbeatTimeout()
 {
-    return ConfigCenter::instance()->get("echo.s.hbm", 3);
+    return g_cfg->get("echo.s.hbm", 3);
 }
 
 //-----------------------------------------------------------------------------

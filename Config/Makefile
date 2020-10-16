@@ -23,7 +23,7 @@ SHARED_LIB_DIR=
 SHARED_LIB= -pthread
 
 include $(PROJBASE)/build/makefile.staticlib.configAndLog.linux
-include $(PROJBASE)/build/makefile.rapidxml.header
+include $(PROJBASE)/build/makefile.rapidjson.header
 
 #########################################
 #              compiler                 #

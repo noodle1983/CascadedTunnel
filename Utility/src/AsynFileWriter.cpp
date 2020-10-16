@@ -13,7 +13,7 @@ AsynFileWriter::AsynFileWriter(
         const std::string& theModelName, 
         const std::string& theHeaderLine)
 {
-    ioThreadCntM = ConfigCenter::instance()->get("prc.ioTno", 1);
+    ioThreadCntM = g_cfg->get("prc.ioTno", 1);
     for(unsigned i = 0; i < ioThreadCntM; i++)
     {   
         fileWriterVectorM.push_back(new FileWriter(

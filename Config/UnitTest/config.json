@@ -1,0 +1,15 @@
+{
+    "test.test0" : {
+        "desc" : "the description",
+        "val" : 0
+    },
+    "test.test1" : {
+        "desc":"the description",
+        "val" : 2
+    },
+    "test.str" : {
+        "desc" : "the description",
+        "val" : "abcc"
+    }
+}
+

@@ -100,7 +100,7 @@ void FileDumper::handlePackage(
 
 std::string FileDumper::getFileName()
 {
-	std::string filePre = ConfigCenter::instance()->get("pcap.file.pre", "./Test");
+	std::string filePre = g_cfg->get("pcap.file.pre", "./Test");
 	std::string fileFormat = filePre + "%Y%m%d_%H%M%S.pcap";
 	struct tm tm;
 	char filename[256] = {0};

@@ -31,7 +31,7 @@ CppProcessor* CppProcessor::fsmInstance()
         lock_guard<mutex> lock(fsmProcessorInstanceMutex);
         if (NULL == fsmProcessorM)
         {
-            int threadCount = ConfigCenter::instance()->get("prc.fsmTno", 3);
+            int threadCount = g_cfg->get("prc.fsmTno", 3);
             CppProcessor* fsmProcessor = new CppProcessor(threadCount);
             fsmProcessorInstanceReleaser.reset(fsmProcessor);
             fsmProcessor->start();
@@ -51,7 +51,7 @@ CppProcessor* CppProcessor::netInstance()
         lock_guard<mutex> lock(netProcessorInstanceMutex);
         if (NULL == netProcessorM)
         {
-            int threadCount = ConfigCenter::instance()->get("prc.netTno", 3);
+            int threadCount = g_cfg->get("prc.netTno", 3);
             CppProcessor* netProcessor = new CppProcessor(threadCount);
             netProcessorInstanceReleaser.reset(netProcessor);
             netProcessor->start();
@@ -70,7 +70,7 @@ CppProcessor* CppProcessor::manInstance()
         lock_guard<mutex> lock(manProcessorInstanceMutex);
         if (NULL == manProcessorM)
         {
-            int threadCount = ConfigCenter::instance()->get("prc.manTno", 1);
+            int threadCount = g_cfg->get("prc.manTno", 1);
             CppProcessor* manProcessor = new CppProcessor(threadCount);
             manProcessorInstanceReleaser.reset(manProcessor);
             manProcessor->start();

@@ -36,11 +36,11 @@ int MysqlConnection::connect()
         return -1;
     }
     
-    std::string host = ConfigCenter::instance()->get(cfgGroupM+".host", "127.0.0.1");
-    std::string user = ConfigCenter::instance()->get(cfgGroupM+".user", "test");
-    std::string pswd = ConfigCenter::instance()->get(cfgGroupM+".pswd", "test");
-    std::string dbname = ConfigCenter::instance()->get(cfgGroupM+".db", "test");
-    int dbport = ConfigCenter::instance()->get(cfgGroupM+".port", 3306);
+    std::string host = g_cfg->get(cfgGroupM+".host", "127.0.0.1");
+    std::string user = g_cfg->get(cfgGroupM+".user", "test");
+    std::string pswd = g_cfg->get(cfgGroupM+".pswd", "test");
+    std::string dbname = g_cfg->get(cfgGroupM+".db", "test");
+    int dbport = g_cfg->get(cfgGroupM+".port", 3306);
     if (!mysql_real_connect(mysqlM, host.c_str(), user.c_str(), pswd.c_str(), 
                 dbname.c_str(), dbport, NULL, 0))
     {
