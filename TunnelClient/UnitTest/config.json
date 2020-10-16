@@ -1,0 +1,58 @@
+{
+    "process.background" : { "desc" : "0:not run in background; 1: run in background;",
+        "val" : 0
+    },
+
+    "inner.c.addr" : {
+        "desc" : "specify the address which the client will connect to",
+        "val" : "111.231.246.65"
+    },
+    "inner.c.port" : {
+        "desc" : "specify the port which the client will connect to",
+        "val" : 20021
+    },
+
+    "proxy.c.addr" : {
+        "desc" : "specify the address which the client will connect to",
+        "val" : "127.0.0.1"
+    },
+    "proxy.c.port" : {
+        "desc" : "specify the port which the client will connect to",
+        "val" : 22
+    },
+
+    "prc.netTno" : {
+        "desc" : "specify the thread number for Net Processor/ThreadPool",
+        "val" : 3
+    },
+    "prc.fsmTno" : {
+        "desc" : "specify the thread number for Fsm Processor/ThreadPool",
+        "val" : 3
+    },
+    "prc.ioTno" : {
+        "desc" : "specify the thread number for I/O Processor/ThreadPool",
+        "val" : 1
+    },
+
+    "log.level" : {
+        "desc" : "specify the log level: 0:TRACE/ALL; 1:DEBUG; 2:INFO; 3:WARN; 4:ERROR; 5:FATAL; 6:NONE",
+        "val" : 1
+    },
+    "log.pattern" : {
+        "desc" : "specify how to log a message. please refer to log4plus' manual.",
+        "val" : "%D{%y-%m-%d %H:%M:%S.%q} %-5p [%l] %m%n"
+    },
+    "log.filename" : {
+        "desc" : "specify the file which will be logged to",
+        "val" : "trouble_shooting"
+    },
+    "log.fileSize" : {
+        "desc" : "specify the max size(MB) for a single file.",
+        "val" : 10
+    },
+    "log.fileNum" : {
+        "desc" : "specify the max file number which the log files should keep.",
+        "val" : 10
+    }
+}
+
