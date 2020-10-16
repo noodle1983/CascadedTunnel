@@ -149,7 +149,6 @@ void App::wait()
     {
         closedCondM.wait(lock);
     }
-    fini();
 }
 
 //-----------------------------------------------------------------------------
@@ -180,3 +179,12 @@ void App::sigStop(int sig)
     closedCondM.notify_one();
 }
 
+//-----------------------------------------------------------------------------
+
+void App::manualStop()
+{
+    LOG_DEBUG("manually stopping...");
+    lock_guard<mutex> lock(closedMutexM);
+    closedM = true;
+    closedCondM.notify_one();
+}

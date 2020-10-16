@@ -19,6 +19,7 @@ namespace nd
         void sleep(size_t ms);
         //void setDumpWhenCrash();
 
+        void manualStop();
         void fini();
         
         bool runInBackground(){return isBackgroundM;} 

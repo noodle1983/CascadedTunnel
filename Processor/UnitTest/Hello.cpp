@@ -1,28 +1,17 @@
 #include <iostream>
 #include <functional>
 
-#include "CppProcessor.h"
+#include "Processor.h"
 #include "Log.h"
+#include "App.h"
 
 using namespace std;
 using namespace nd;
 
-static int closed = false;
-static mutex closedMutexM;
-static condition_variable closedCondM;
-
-void sig_stop(int sig)
-{
-    cout << "receive signal " << sig << ". stopping..." << endl;
-    lock_guard<mutex> lock(closedMutexM);
-    closed = true;
-    closedCondM.notify_one();
-}
-
 void on_timeout(void *theArg)
 {
     std::cout << "time end" << endl;
-    sig_stop(2);
+    g_app->manualStop();
 }
 
 void say(CppProcessor* theProcessor)
@@ -35,18 +24,15 @@ void say(CppProcessor* theProcessor)
     std::cout << "time begin" << std::endl;
 }
 
-int main()
+int main(int argc, char *argv[])
 {
-    CppProcessor processor(1);
-    processor.start();
-    processor.process(1, new Job(bind(say, &processor)));
+    g_app->parseAndInit(argc, argv);
+    g_net_processor->process(1, new Job(bind(say, g_net_processor)));
 
-    unique_lock<mutex> lock(closedMutexM);
-    while(!closed)
-    {
-        closedCondM.wait(lock);
-    }
-    processor.waitStop();
+    g_app->wait();
+    g_net_processor->waitStop();
+
+    g_app->fini();
     return 0;
 }
 
