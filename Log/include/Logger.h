@@ -16,6 +16,7 @@ namespace nd
     public:
         Logger(int logType);
         ~Logger();
+        void fini();
 
         void initCfgLog();
         void initNormalLog();

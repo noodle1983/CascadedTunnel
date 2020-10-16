@@ -18,6 +18,8 @@ namespace nd
         void wait();
         void sleep(size_t ms);
         //void setDumpWhenCrash();
+
+        void fini();
         
         bool runInBackground(){return isBackgroundM;} 
 

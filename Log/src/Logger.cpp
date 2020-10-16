@@ -28,7 +28,13 @@ Logger::Logger(int logType)
 
 Logger::~Logger()
 {
-    g_io_processor->waitStop();
+    fini();
+}
+
+//-----------------------------------------------------------------------------
+
+void Logger::fini()
+{
     for (Sink* sink : sinksM)
     {
         delete sink;

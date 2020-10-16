@@ -100,6 +100,16 @@ void App::init()
 
 //-----------------------------------------------------------------------------
 
+void App::fini()
+{
+    LOG_DEBUG("process stop...");
+    g_io_processor->waitStop();
+    g_logger->fini();
+    g_cfg_logger->fini();
+}
+
+//-----------------------------------------------------------------------------
+
 void App::setRunInBackground()
 {
     if (isBackgroundM)
@@ -139,6 +149,7 @@ void App::wait()
     {
         closedCondM.wait(lock);
     }
+    fini();
 }
 
 //-----------------------------------------------------------------------------
