@@ -1,0 +1,59 @@
+{
+    "mysql.host" : {
+        "desc" : "specify the hostname/address of mysql server",
+        "val" : "127.0.0.1"
+    },
+    "mysql.port" : {
+        "desc" : "specify the mysql server's port which  the client should connect to",
+        "val" : 3306
+    },
+    "mysql.user" : {
+        "desc" : "specify the user's name the client should connect with",
+        "val" : "test"
+    },
+    "mysql.pswd" : {
+        "desc" : "specify the user's password the client should connect with",
+        "val" : "test"
+    },
+    "mysql.db" : {
+        "desc" : "specify the database the client should use",
+        "val" : "test"
+    },
+    "cmd.s.addr" : {
+        "desc" : "specify the address which the protocol will listen to",
+        "val" : "127.0.0.1"
+    },
+    "cmd.s.port" : {
+        "desc" : "specify the port which the protocol will listen to",
+        "val" : 7510
+    },
+    "prc.netTno" : {
+        "desc" : "specify the thread number for Net Processor/ThreadPool",
+        "val" : 3
+    },
+    "prc.fsmTno" : {
+        "desc" : "specify the thread number for Fsm Processor/ThreadPool",
+        "val" : 3
+    },
+    "log.level" : {
+        "desc" : "specify the log level: 0:TRACE/ALL; 1:DEBUG; 2:INFO; 3:WARN; 4:ERROR; 5:FATAL; 6:NONE",
+        "val" : 3
+    },
+    "log.pattern" : {
+        "desc" : "specify how to log a message. please refer to log4plus' manual.",
+        "val" : "%D{%y-%m-%d %H:%M:%S.%q} %-5p [%l] %m%n"
+    },
+    "log.filename" : {
+        "desc" : "specify the file which will be logged to",
+        "val" : "trouble_shooting_"
+    },
+    "log.fileSize" : {
+        "desc" : "specify the max size(MB) for a single file.",
+        "val" : 10
+    },
+    "log.fileNum" : {
+        "desc" : "specify the max file number which the log files should keep.",
+        "val" : 10
+    }
+}
+
