@@ -4,6 +4,7 @@
 #include "Protocol.h"
 #include "Log.h"
 #include "ConfigCenter.h"
+#include "App.h"
 
 #include <event.h>
 #include <event2/thread.h>
@@ -18,17 +19,6 @@ using namespace std;
 using namespace nd;
 using namespace std::placeholders;
 
-static int closed = false;
-static mutex closedMutexM;
-static condition_variable closedCondM;
-void sig_stop(int sig)
-{
-    LOG_DEBUG("receive signal " << sig << ". stopping...");
-    lock_guard<mutex> lock(closedMutexM);
-    closed = true;
-    closedCondM.notify_one();
-}
-
 const uint64_t TEST_TIMES = 1024 * 1024 * 1/2;
 class BatchDataProtocol: public IClientProtocol
 {
@@ -37,10 +27,10 @@ public:
         : IClientProtocol(&netProcessorM)
         , proProcessorM(1)
         , netProcessorM(1)
-        , tcpClientM(this, &reactorM, &netProcessorM)
         , wBufferCountM(0)
         , readIndexM(0)
     {
+        tcpClientM = new TcpClient(this, &reactorM, &netProcessorM);
         proProcessorM.start();
         netProcessorM.start();
         reactorM.start();
@@ -52,14 +42,19 @@ public:
 
     ~BatchDataProtocol()
     {
-        proProcessorM.stop();
-        netProcessorM.stop();
+    }
+
+    void stop()
+    {
+        tcpClientM->deleteSelf();
+        proProcessorM.waitStop();
+        netProcessorM.waitStop();
         reactorM.stop();
     }
 
     void startTest()
     {
-        tcpClientM.connect();
+        tcpClientM->connect();
     }
 
     void handleConnected(SocketConnectionPtr theConnection)
@@ -129,8 +124,8 @@ public:
                 std::cout << "send " << TEST_TIMES << " request in "
                     << interval << " msec. tps:" << (TEST_TIMES * 1000 / interval) << std::endl;
                 std::cout << "exit" << std::endl;
-                tcpClientM.close();
-                sig_stop(0);
+                tcpClientM->close();
+                g_app->manualStop();
             }
         }
     }
@@ -159,31 +154,26 @@ private:
     Reactor reactorM;
     CppProcessor proProcessorM;
     CppProcessor netProcessorM;
-    TcpClient tcpClientM;
+    TcpClient* tcpClientM;
     uint64_t wBufferCountM;
     uint64_t readIndexM;
     char bufferM[10][1024];
     long long starttimeM;
 };
 
-int main()
+int main(int argc, char *argv[])
 {
-    signal(SIGPIPE, SIG_IGN);
-    signal(SIGALRM, SIG_IGN);
-    signal(SIGTERM, sig_stop);
-    signal(SIGINT, sig_stop);
-    evthread_use_pthreads();
+    g_app->parseAndInit(argc, argv);
 
-    BatchDataProtocol singleDataProtocol;
-    singleDataProtocol.startTest();
+    BatchDataProtocol dataProtocol;
+    dataProtocol.startTest();
 
-    unique_lock<mutex> lock(closedMutexM);
-    while(!closed)
-    {
-        closedCondM.wait(lock);
-    }
+    g_app->wait();
 
-    LOG_DEBUG("TestClient stopped.");
+    dataProtocol.stop();
+    g_app->sleep(10);
+    g_app->fini();
+
     return 0;
 }
 

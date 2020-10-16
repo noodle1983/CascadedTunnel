@@ -37,6 +37,7 @@ namespace nd
 				TimerCallback theCallback,
 				void* theArg)
         {
+            if (NULL == workersM) {return NULL;}
             unsigned workerId = theId % threadCountM;
             return workersM[workerId].addLocalTimer(theInterval, theCallback, theArg);
         }
@@ -44,6 +45,7 @@ namespace nd
                 const unsigned long long theId, 
                 min_heap_item_t*& theEvent)
         {
+            if (NULL == workersM) {return;}
             unsigned workerId = theId % threadCountM;
             return workersM[workerId].cancelLocalTimer(theEvent);
         }
@@ -52,6 +54,7 @@ namespace nd
                 const unsigned long long theId, 
                 Job* theJob)
         {
+            if (NULL == workersM) {return;}
             unsigned workerId = theId % threadCountM;
             workersM[workerId].process(theJob);
         }

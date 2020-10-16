@@ -1,0 +1,103 @@
+{
+    "pcap.dev" : {
+        "desc" : "specify the network device which pcap should listen to",
+        "val" : "em1"
+    },
+    "pcap.filter" : {
+        "desc" : "specify the package filter",
+        "val" : "udp or sctp"
+    },
+    "pcap.promiscuous" : {
+        "desc" : "specify if the pcap works on promiscuous mode. 0:no; 1:yes",
+        "val" : 0
+    },
+    "pcap.file.pre" : {
+        "desc" : "specify the dumped file's directory and the prefix.",
+        "val" : "./Test_"
+    },
+
+    "echo.c.addr" : {
+        "desc" : "specify the address which the protocol will connect to",
+        "val" : "127.0.0.1"
+    },
+    "echo.c.port" : {
+        "desc" : "specify the port which the protocol will connect to",
+        "val" : 5460
+    },
+    "echo.c.rpower" : {
+        "desc" : "specify the receive buffer size: power(2, echo.rpower).",
+        "val" : 20
+    },
+    "echo.c.wpower" : {
+        "desc" : "specify the write buffer size: power(2, echo.rpower).",
+        "val" : 20
+    },
+
+    "echo.s.addr" : {
+        "desc" : "specify the address which the protocol will listen to",
+        "val" : "0.0.0.0"
+    },
+    "echo.s.port" : {
+        "desc" : "specify the port which the protocol will listen to",
+        "val" : 5460
+    },
+    "echo.s.rpower" : {
+        "desc" : "specify the receive buffer size: power(2, echo.rpower).",
+        "val" : 20
+    },
+    "echo.s.wpower" : {
+        "desc" : "specify the write buffer size: power(2, echo.rpower).",
+        "val" : 20
+    },
+    "echo.s.hbi" : {
+        "desc" : "specify the seconds of connection's Heartbeat Interval.",
+        "val" : 10
+    },
+    "echo.s.hbm" : {
+        "desc" : "specify the max times of connection's Heartbeat Timeout.",
+        "val" : 3
+    },
+
+    "cmd.s.addr" : {
+        "desc" : "specify the address which the protocol will listen to",
+        "val" : "127.0.0.1"
+    },
+    "cmd.s.port" : {
+        "desc" : "specify the port which the protocol will listen to",
+        "val" : 7510
+    },
+
+    "prc.netTno" : {
+        "desc" : "specify the thread number for Net Processor/ThreadPool",
+        "val" : 3
+    },
+    "prc.fsmTno" : {
+        "desc" : "specify the thread number for Fsm Processor/ThreadPool",
+        "val" : 3
+    },
+    "prc.ioTno" : {
+        "desc" : "specify the thread number for I/O Processor/ThreadPool",
+        "val" : 1
+    },
+
+    "log.level" : {
+        "desc" : "specify the log level: 0:TRACE/ALL; 1:DEBUG; 2:INFO; 3:WARN; 4:ERROR; 5:FATAL; 6:NONE",
+        "val" : 1
+    },
+    "log.pattern" : {
+        "desc" : "specify how to log a message. please refer to log4plus' manual.",
+        "val" : "%D{%y-%m-%d %H:%M:%S.%q} %-5p [%l] %m%n"
+    },
+    "log.filename" : {
+        "desc" : "specify the file which will be logged to",
+        "val" : "trouble_shooting"
+    },
+    "log.fileSize" : {
+        "desc" : "specify the max size(MB) for a single file.",
+        "val" : 10
+    },
+    "log.fileNum" : {
+        "desc" : "specify the max file number which the log files should keep.",
+        "val" : 0
+    }
+}

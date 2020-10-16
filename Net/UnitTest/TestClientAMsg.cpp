@@ -4,6 +4,7 @@
 #include <Protocol.h>
 #include <Log.h>
 #include "ConfigCenter.h"
+#include "App.h"
 
 using namespace std;
 using namespace nd;
@@ -15,16 +16,6 @@ using namespace nd;
 #include <string.h>
 #include <assert.h>
 
-static int closed = false;
-static mutex closedMutexM;
-static condition_variable closedCondM;
-void sig_stop(int sig)
-{
-    LOG_DEBUG("receive signal " << sig << ". stopping...");
-    lock_guard<mutex> lock(closedMutexM);
-    closed = true;
-    closedCondM.notify_one();
-}
 
 class SingleDataProtocol: public IClientProtocol
 {
@@ -33,8 +24,8 @@ public:
         : IClientProtocol(&netProcessorM)
         , proProcessorM(1)
         , netProcessorM(1)
-        , tcpClientM(this, &reactorM, &netProcessorM)
     {
+        tcpClientM = new TcpClient(this, &reactorM, &netProcessorM);
         proProcessorM.start();
         netProcessorM.start();
         reactorM.start();
@@ -42,15 +33,24 @@ public:
 
     ~SingleDataProtocol()
     {
-        proProcessorM.stop();
-        netProcessorM.stop();
-        reactorM.stop();
     }
 
     void startTest()
     {
-        tcpClientM.connect();
-        tcpClientM.sendn("Hello", 5);
+        tcpClientM->connect();
+    }
+
+    void stop()
+    {
+        tcpClientM->deleteSelf();
+        proProcessorM.waitStop();
+        netProcessorM.waitStop();
+        reactorM.stop();
+    }
+
+    void handleConnected(SocketConnectionPtr theConnection)
+    {
+        tcpClientM->sendn("Hello", 5);
     }
 
     void handleInput(SocketConnectionPtr theConnection)
@@ -60,8 +60,8 @@ public:
         len = theConnection->getInput(buffer, sizeof(buffer));
         assert(len == strlen("Hello"));
         assert(0 == memcmp("Hello", buffer, strlen("Hello")));
-        tcpClientM.close();
-        sig_stop(0);
+        tcpClientM->close();
+        g_app->manualStop();
     }
 
     const std::string getAddr()
@@ -88,27 +88,21 @@ private:
     Reactor reactorM;
     CppProcessor proProcessorM;
     CppProcessor netProcessorM;
-    TcpClient tcpClientM;
+    TcpClient* tcpClientM;
 };
 
-int main()
+int main(int argc, char *argv[])
 {
-    signal(SIGPIPE, SIG_IGN);
-    signal(SIGALRM, SIG_IGN);
-    signal(SIGTERM, sig_stop);
-    signal(SIGINT, sig_stop);
-    evthread_use_pthreads();
+    g_app->parseAndInit(argc, argv);
 
     SingleDataProtocol singleDataProtocol;
     singleDataProtocol.startTest();
 
-    unique_lock<mutex> lock(closedMutexM);
-    while(!closed)
-    {
-        closedCondM.wait(lock);
-    }
+    g_app->wait();
 
-    LOG_DEBUG("TestClient stopped.");
+    singleDataProtocol.stop();
+    g_app->sleep(10);
+    g_app->fini();
     return 0;
 }
 
