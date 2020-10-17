@@ -18,7 +18,7 @@
     },
     "proxy.c.port" : {
         "desc" : "specify the port which the client will connect to",
-        "val" : 22
+        "val" : [22]
     },
 
     "prc.netTno" : {
