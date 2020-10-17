@@ -9,7 +9,7 @@
     },
     "inner.c.port" : {
         "desc" : "specify the port which the client will connect to",
-        "val" : 20021
+        "val" : 20023
     },
 
     "proxy.c.addr" : {
@@ -18,7 +18,7 @@
     },
     "proxy.c.port" : {
         "desc" : "specify the port which the client will connect to",
-        "val" : [22]
+        "val" : [19999, 80]
     },
 
     "prc.netTno" : {
