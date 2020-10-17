@@ -109,7 +109,7 @@ void TunnelServerProtocol::handleInput(SocketConnectionPtr theConnection)
                 return;
             }
 
-            LOG_DEBUG("upflow SyncWinSize, winOffset:" << msg.winOffset.valueM << ", proxyFd:" << proxyFd);
+            LOG_TRACE("upflow SyncWinSize, winOffset:" << msg.winOffset.valueM << ", proxyFd:" << proxyFd);
             SocketConnectionPtr con = it->second.proxyConnectionM;
             con->setUpperData((void*)(uintptr_t)msg.winOffset.valueM);
             con->getProtocol()->asynHandleInput(proxyFd, con);
@@ -122,7 +122,7 @@ void TunnelServerProtocol::handleInput(SocketConnectionPtr theConnection)
             continue;
         }
         else if (ProxyRsp::ID == header.messageType) {
-            LOG_DEBUG("ProxyRsp, len:" << length << ", proxyFd:" << proxyFd);
+            LOG_TRACE("ProxyRsp, len:" << length << ", proxyFd:" << proxyFd);
             ProxyRsp msg;
             decodeLength = 0;
             if (msg.decode(buffer, length, decodeLength) != SUCCESS_E) {
@@ -207,7 +207,7 @@ void TunnelServerProtocol::handleHeartbeat(SocketConnectionPtr theConnection)
 void TunnelServerProtocol::handleProxyInput(SocketConnectionPtr theConnection)
 {
     int proxyFd = theConnection->getFd();
-    LOG_DEBUG("proxy client input. fd: " << proxyFd);
+    LOG_TRACE("proxy client input. fd: " << proxyFd);
     ConnectionMap::iterator it = proxyFd2InfoMapM.find(proxyFd);
     if (it == proxyFd2InfoMapM.end()){
         theConnection->close();
@@ -238,9 +238,9 @@ void TunnelServerProtocol::handleProxyInput(SocketConnectionPtr theConnection)
         msg.payload.valueM.assign(buffer, len);
         peerConnection->sendMsg(msg);
         canWrite = peerConnection->isWBufferHealthy();
-        LOG_DEBUG("ProxyReq len:" << msg.length.valueM << ", winSize:" << winSize << ". fd: " << proxyFd);
+        LOG_TRACE("ProxyReq len:" << msg.length.valueM << ", winSize:" << winSize << ". fd: " << proxyFd);
     }
-    LOG_DEBUG("upflow SyncWinSize after sent, winSize:" << winSize << ", proxyFd:" << proxyFd);
+    LOG_TRACE("upflow SyncWinSize after sent, winSize:" << winSize << ", proxyFd:" << proxyFd);
 
     if (!canWrite && !peerConnection->hasWatcher(proxyFd))
     {
@@ -263,7 +263,7 @@ void TunnelServerProtocol::handleProxySent(SocketConnectionPtr theConnection)
     msg.proxyFd = theConnection->getFd();
     msg.winOffset = theConnection->getWBufferSpace() + theConnection->getWritenBytes();
     it->second.peerConnectionM->sendMsg(msg);
-    LOG_DEBUG("update downflow SyncWinSize, winOffset:" << msg.winOffset.valueM << ", proxyFd:" << theConnection->getFd());
+    LOG_TRACE("update downflow SyncWinSize, winOffset:" << msg.winOffset.valueM << ", proxyFd:" << theConnection->getFd());
 }
 
 //-----------------------------------------------------------------------------
