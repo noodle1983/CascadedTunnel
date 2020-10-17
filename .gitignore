@@ -4,7 +4,6 @@ release
 */AutoMsg/*.h
 */LuaObject/*.cpp
 .lib
-*.swp
 *.log
 *.bz2
 cscope.*
