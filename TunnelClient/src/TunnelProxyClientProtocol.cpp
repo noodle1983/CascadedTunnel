@@ -58,16 +58,17 @@ void TunnelProxyClientProtocol::handleConnected(SocketConnectionPtr theConnectio
 
 //-----------------------------------------------------------------------------
 
-const std::string TunnelProxyClientProtocol::getAddr()
+const std::string TunnelProxyClientProtocol::getAddr(size_t param)
 {
     return g_cfg->get("proxy.c.addr", "127.0.0.1");
 }
 
 //-----------------------------------------------------------------------------
 
-int TunnelProxyClientProtocol::getPort()
+int TunnelProxyClientProtocol::getPort(size_t param)
 {
-    return g_cfg->get("proxy.c.port", 5466);
+    auto cfgPortVector = g_cfg->getIntVector("proxy.c.port");
+    return cfgPortVector[param]; 
 }
 
 //-----------------------------------------------------------------------------

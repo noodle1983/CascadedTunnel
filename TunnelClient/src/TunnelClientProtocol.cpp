@@ -85,7 +85,7 @@ void TunnelClientProtocol::handleInput(SocketConnectionPtr theConnection)
                 return;
             }
 
-            TcpClient* client = new TcpClient(&proxyClientProtocolM, g_reactor, g_net_processor); 
+            TcpClient* client = new TcpClient(&proxyClientProtocolM, g_reactor, g_net_processor, (uint32_t)msg.protoParam); 
             if (client->connect((void*)(uintptr_t)msg.winOffset) < 0)
             {
                 RProxyConClose rsp(0);
@@ -335,14 +335,14 @@ void TunnelClientProtocol::handleProxyConnected(SocketConnectionPtr theConnectio
 
 //-----------------------------------------------------------------------------
 
-const std::string TunnelClientProtocol::getAddr()
+const std::string TunnelClientProtocol::getAddr(size_t param)
 {
     return g_cfg->get("inner.c.addr", "127.0.0.1");
 }
 
 //-----------------------------------------------------------------------------
 
-int TunnelClientProtocol::getPort()
+int TunnelClientProtocol::getPort(size_t param)
 {
     return g_cfg->get("inner.c.port", 5461);
 }

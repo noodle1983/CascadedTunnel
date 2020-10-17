@@ -25,6 +25,8 @@ namespace nd
         void asynAccept(int theFd, short theEvt);
         void onAccept(int theFd, short theEvt);
 
+        void setProtocolParam(size_t param){protocolParamM = param;}
+
     private:
         IProtocol* protocolM;
         Reactor* reactorM;
@@ -33,6 +35,8 @@ namespace nd
         struct event* acceptEvtM;
         int portM;
         evutil_socket_t fdM;
+
+        size_t protocolParamM;
     };
 }
 

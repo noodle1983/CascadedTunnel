@@ -82,8 +82,8 @@ namespace nd
         virtual void handleHeartbeat(SocketConnectionPtr theConnection) {}
 
         //Config
-        virtual const std::string getAddr(){ return "0.0.0.0"; }
-        virtual int getPort(){ return 5460; }
+        virtual const std::string getAddr(size_t param = 0){ return "0.0.0.0"; }
+        virtual int getPort(size_t param = 0){ return 5460; }
         virtual int getRBufferSizePower(){ return 20; }
         virtual int getWBufferSizePower(){ return 20; }
         virtual int getHeartbeatInterval(){ return 0; }
@@ -103,8 +103,8 @@ namespace nd
         virtual ~IClientProtocol() {};
 
         //Config
-        virtual unsigned getReConnectInterval(){ return 5; }
-        virtual const std::string getAddr(){ return "127.0.0.1"; }
+        virtual unsigned getReConnectInterval() { return 5; }
+        const std::string getAddr(size_t param = 0) override { return "127.0.0.1"; }
     };
 
     class IUdpProtocol

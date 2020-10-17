@@ -33,11 +33,11 @@ namespace nd
         void handleProxyClose(SocketConnectionPtr theConnection); 
         void handleProxyConnected(SocketConnectionPtr theConnection);
 
-        virtual const std::string getAddr();
-        virtual int getPort();
-        virtual int getRBufferSizePower();
-        virtual int getWBufferSizePower();
-        virtual int getHeartbeatInterval(){ return 5; }
+        const std::string getAddr(size_t param) override;
+        int getPort(size_t param) override;
+        int getRBufferSizePower() override;
+        int getWBufferSizePower() override;
+        int getHeartbeatInterval() override { return 5; }
     private:
         TcpClientPtr client2ServerM;
         ProxyToConnectionMap proxyToConnectionM;

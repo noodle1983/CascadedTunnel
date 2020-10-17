@@ -102,14 +102,14 @@ void TelnetProtocol::handleConnected(SocketConnectionPtr theConnection)
 
 //-----------------------------------------------------------------------------
 
-const std::string TelnetProtocol::getAddr()
+const std::string TelnetProtocol::getAddr(size_t param)
 {
     return g_cfg->get("cmd.s.addr", "127.0.0.1");
 }
 
 //-----------------------------------------------------------------------------
 
-int TelnetProtocol::getPort()
+int TelnetProtocol::getPort(size_t param)
 {
     return g_cfg->get("cmd.s.port", 7510);
 }

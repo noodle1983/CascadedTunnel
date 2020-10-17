@@ -4,6 +4,7 @@
 #include "Reactor.h"
 #include "Log.h"
 #include "Protocol.h"
+#include "App.h"
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -38,6 +39,7 @@ TcpServer::TcpServer(
     , acceptEvtM(NULL)
     , portM(0)
     , fdM(0)
+    , protocolParamM(-1)
 {
     LOG_DEBUG("new server: " << std::hex << this << "." << std::dec);
 }
@@ -92,6 +94,7 @@ void TcpServer::onAccept(int theFd, short theEvt)
         }
         SocketConnection* connection = new SocketConnection(protocolM, reactorM, processorM, clientFd);
 		connection->setPeerAddr(&clientAddr);
+        connection->setProtocolParam(protocolParamM);
         char addrBuffer[16] = {0};
         LOG_DEBUG("Accepted connection on " << portM
                 << " from "<< inet_ntop(AF_INET, &clientAddr.sin_addr, addrBuffer, sizeof(addrBuffer)) << ":" << clientAddr.sin_port
@@ -135,17 +138,18 @@ int TcpServer::start()
     struct sockaddr_in listenAddr;
     memset(&listenAddr, 0, sizeof(listenAddr));
     listenAddr.sin_family = AF_INET;
-    evutil_inet_pton(AF_INET, protocolM->getAddr().c_str(), &listenAddr.sin_addr);
-    portM = protocolM->getPort();
+    evutil_inet_pton(AF_INET, protocolM->getAddr(protocolParamM).c_str(), &listenAddr.sin_addr);
+    portM = protocolM->getPort(protocolParamM);
     listenAddr.sin_port = htons(portM);
     //listenAddr.sin_addr.s_addr = INADDR_ANY;
     //listenAddr.sin_port = htons(portM);
     if (bind(fdM, (struct sockaddr *)&listenAddr,
         sizeof(listenAddr)) < 0)
     {
-        LOG_FATAL("bind failed on " << protocolM->getAddr() 
-                << ":" << protocolM->getPort()
+        LOG_FATAL("bind failed on " << protocolM->getAddr(protocolParamM) 
+                << ":" << protocolM->getPort(protocolParamM)
                 << ", errno:" << errno);
+        g_app->fini();
         exit(-1);
     }
 

@@ -24,10 +24,10 @@ namespace nd
         void handleClose(SocketConnectionPtr theConnection); 
         void handleConnected(SocketConnectionPtr theConnection);
 
-        virtual const std::string getAddr();
-        virtual int getPort();
-        virtual int getRBufferSizePower();
-        virtual int getWBufferSizePower();
+        const std::string getAddr(size_t param) override;
+        int getPort(size_t param) override;
+        int getRBufferSizePower() override;
+        int getWBufferSizePower() override;
     private:
         TunnelServerProtocol* serverProtocolM;
     };

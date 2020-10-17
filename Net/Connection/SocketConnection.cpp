@@ -55,6 +55,7 @@ SocketConnection::SocketConnection(
     , writenBytesM(0)
     , readedBytesM(0)
     , uppperDataM(NULL)
+    , protocolParamM(-1)
 {
     readEvtM = reactorM->newEvent(fdM, EV_READ, on_read, this);
     writeEvtM = reactorM->newEvent(fdM, EV_WRITE, on_write, this);
@@ -89,6 +90,7 @@ SocketConnection::SocketConnection(
     , writenBytesM(0)
     , readedBytesM(0)
     , uppperDataM(NULL)
+    , protocolParamM(-1)
 {
     readEvtM = reactorM->newEvent(fdM, EV_READ, on_read, this);
     writeEvtM = reactorM->newEvent(fdM, EV_WRITE, on_write, this);

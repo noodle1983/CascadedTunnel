@@ -42,14 +42,14 @@ void EchoProtocol::handleInput(SocketConnectionPtr connection)
 
 //-----------------------------------------------------------------------------
 
-const std::string EchoProtocol::getAddr()
+const std::string EchoProtocol::getAddr(size_t param)
 {
     return g_cfg->get("echo.s.addr", "0.0.0.0");
 }
 
 //-----------------------------------------------------------------------------
 
-int EchoProtocol::getPort()
+int EchoProtocol::getPort(size_t param)
 {
     return g_cfg->get("echo.s.port", 5460);
 }

@@ -22,12 +22,15 @@ namespace nd
         TcpClient(
             IClientProtocol* theProtocol,
             Reactor* theReactor,
-            CppProcessor* theProcessor);
+            CppProcessor* theProcessor,
+            size_t theProtocolParam = -1);
         ~TcpClient();
         void deleteSelf();
         TcpClientPtr self(){return selfM;}
         SocketConnectionPtr getConnection(){return connectionM;}
         IClientProtocol* getProtocol(){return protocolM;}
+        size_t getPtotocolParam(){return protocolParamM;}
+        void setProtocolParam(size_t protocolParam){protocolParamM = protocolParam;}
 
         /**
          * connect in a async way.
@@ -86,6 +89,8 @@ namespace nd
 
         size_t connectTimesM;
         uint64_t processorIdM;
+
+        size_t protocolParamM;
     };
 
     inline unsigned

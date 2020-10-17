@@ -52,6 +52,7 @@ Message  HeartbeatRsp
 Message NewConnection 
     include Header
     WinOffset Uint32      M
+    ProtoParam Uint32      M
 
 Message ConnectionClosed
     include Header

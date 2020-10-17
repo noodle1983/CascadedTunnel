@@ -15,12 +15,12 @@ namespace nd
 
         void handleInput(SocketConnectionPtr connection);
 
-        virtual const std::string getAddr();
-        virtual int getPort();
-        virtual int getRBufferSizePower();
-        virtual int getWBufferSizePower();
-        virtual int getHeartbeatInterval();
-        virtual void handleHeartbeat(SocketConnectionPtr theConnection); 
+        const std::string getAddr(size_t param = 0) override;
+        int getPort(size_t param = 0) override;
+        int getRBufferSizePower() override;
+        int getWBufferSizePower() override;
+        int getHeartbeatInterval() override;
+        void handleHeartbeat(SocketConnectionPtr theConnection) override; 
     private:
     };
 }

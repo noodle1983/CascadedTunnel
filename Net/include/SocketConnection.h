@@ -89,6 +89,8 @@ namespace nd{
 
         void* getUpperData(){return uppperDataM;}
         void setUpperData(void* theUpperData){uppperDataM = theUpperData;}
+        size_t getProtocolParam(){return protocolParamM;}
+        void setProtocolParam(size_t protocolParam){protocolParamM = protocolParam;}
 
         template<typename Msg>
         unsigned sendMsg(Msg& msg){
@@ -162,6 +164,7 @@ namespace nd{
 
         //upper data
         void* uppperDataM;
+        size_t protocolParamM;
     };
 }
 

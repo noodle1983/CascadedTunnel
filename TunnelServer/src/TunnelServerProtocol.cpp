@@ -4,6 +4,8 @@
 #include "Message.h"
 #include "Log.h"
 #include "TunnelProxyProtocol.h"
+#include "TcpServer.h"
+#include "Reactor.h"
 
 #include <vector>
 
@@ -15,14 +17,40 @@ using namespace Msg;
 
 TunnelServerProtocol::TunnelServerProtocol(CppProcessor* theProcessor)
 	:IProtocol(theProcessor)
-    , proxyProtocolM(NULL)
 {
+    proxyProtocolM = new TunnelProxyProtocol(g_net_processor, this);
 }
 
 //-----------------------------------------------------------------------------
 
 TunnelServerProtocol::~TunnelServerProtocol()
 {
+    delete proxyProtocolM;
+    proxyProtocolM = NULL;
+}
+
+//-----------------------------------------------------------------------------
+
+void TunnelServerProtocol::startProxyServers()
+{
+    auto cfgPortVector = g_cfg->getIntVector("proxy.s.port");
+    for(unsigned i = 0; i < cfgPortVector.size(); i++){
+        TcpServer* server = new TcpServer(proxyProtocolM, g_reactor, g_net_processor);
+        server->setProtocolParam(i);
+        server->start();
+        proxyServersM.push_back(server);
+    }
+}
+
+//-----------------------------------------------------------------------------
+
+void TunnelServerProtocol::stopProxyServers()
+{
+    for(auto server : proxyServersM){
+        server->stop();
+        delete server;
+    }
+    proxyServersM.clear();
 }
 
 //-----------------------------------------------------------------------------
@@ -217,7 +245,7 @@ void TunnelServerProtocol::handleProxyInput(SocketConnectionPtr theConnection)
     if (!canWrite && !peerConnection->hasWatcher(proxyFd))
     {
         peerConnection->setLowWaterMarkWatcher(proxyFd, new Watcher(bind(
-            &TunnelProxyProtocol::asynHandleInput, proxyProtocolM, proxyFd, theConnection)));
+            &TunnelProxyProtocol::asynHandleInput, theConnection->getProtocol(), proxyFd, theConnection)));
     }
 }
 
@@ -276,20 +304,21 @@ void TunnelServerProtocol::handleProxyConnected(SocketConnectionPtr theConnectio
     NewConnection msg(0);
     msg.proxyFd = theConnection->getFd();
     msg.winOffset = theConnection->getWBufferSpace();
+    msg.protoParam = (uint32_t)theConnection->getProtocolParam();
     conPair.peerConnectionM->sendMsg(msg);
 }
 
 
 //-----------------------------------------------------------------------------
 
-const std::string TunnelServerProtocol::getAddr()
+const std::string TunnelServerProtocol::getAddr(size_t param)
 {
     return g_cfg->get("inner.s.addr", "127.0.0.1");
 }
 
 //-----------------------------------------------------------------------------
 
-int TunnelServerProtocol::getPort()
+int TunnelServerProtocol::getPort(size_t param)
 {
     return g_cfg->get("inner.s.port", 5461);
 }

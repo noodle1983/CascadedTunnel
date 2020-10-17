@@ -33,17 +33,19 @@ using namespace std;
 TcpClient::TcpClient(
             IClientProtocol* theProtocol,
             Reactor* theReactor,
-            CppProcessor* theProcessor)
+            CppProcessor* theProcessor,
+            size_t theProtocolParam)
     : protocolM(theProtocol)
     , reactorM(theReactor)
     , processorM(theProcessor)
-    , peerAddrM(theProtocol->getAddr())
-    , peerPortM(theProtocol->getPort())
+    , peerAddrM(theProtocol->getAddr(theProtocolParam))
+    , peerPortM(theProtocol->getPort(theProtocolParam))
     , isClosedM(0)
     , isConnectedM(0)
     , selfM(this)
     , reconnectTimerEvtM(NULL)
     , connectTimesM(0)
+    , protocolParamM(theProtocolParam)
 {
     LOG_DEBUG("new client: " << std::hex << this << ". " << peerAddrM << ":" << std::dec << peerPortM);
     processorIdM = (uint64_t)this >> 3;
@@ -166,6 +168,7 @@ void TcpClient::_connect(void* theUpperData)
     SocketConnection* connection =
         new SocketConnection(protocolM, reactorM, processorM, sock, this);
     connection->setUpperData(theUpperData);
+    connection->setProtocolParam(protocolParamM);
     connectionM = connection->self();
     if (!isConnectedM)
     {

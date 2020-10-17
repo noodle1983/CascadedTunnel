@@ -24,11 +24,11 @@ namespace nd
         void handleClose(SocketConnectionPtr theConnection); 
         void handleConnected(SocketConnectionPtr theConnection);
 
-        virtual const std::string getAddr();
-        virtual int getPort();
-        virtual int getRBufferSizePower();
-        virtual int getWBufferSizePower();
-        virtual unsigned getReConnectInterval(){ return 0; }
+        const std::string getAddr(size_t param) override;
+        int getPort(size_t param) override;
+        int getRBufferSizePower() override;
+        int getWBufferSizePower() override;
+        unsigned getReConnectInterval() override { return 0; }
     private:
         TunnelClientProtocol* clientProtocolM;
     };

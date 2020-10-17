@@ -7,10 +7,13 @@
 #include <set>
 #include <map>
 #include <string>
+#include <vector>
 
 namespace nd
 {
 	class CppProcessor;
+	class TcpServer;
+	class TunnelProxyProtocol;
     struct ConnectionPair
     {
         SocketConnectionPtr proxyConnectionM;
@@ -20,6 +23,7 @@ namespace nd
     class TunnelProxyProtocol;
 	typedef std::set<SocketConnectionPtr> ConnectionSet;
 	typedef std::map<int, ConnectionPair> ConnectionMap;
+	typedef std::vector<TcpServer*> ProxyServerVector;
     class TunnelServerProtocol : public IProtocol
     {
     public:
@@ -32,20 +36,24 @@ namespace nd
         void handleConnected(SocketConnectionPtr theConnection);
         void handleHeartbeat(SocketConnectionPtr theConnection);
 
-        void setProxyProtocol(TunnelProxyProtocol* theProtocol){proxyProtocolM = theProtocol;}
+        void startProxyServers();
+        void stopProxyServers();
+
         void handleProxyInput(SocketConnectionPtr theConnection);
         void handleProxySent(SocketConnectionPtr theConnection);
         void handleProxyClose(SocketConnectionPtr theConnection); 
         void handleProxyConnected(SocketConnectionPtr theConnection);
 
-        virtual const std::string getAddr();
-        virtual int getPort();
-        virtual int getRBufferSizePower();
-        virtual int getWBufferSizePower();
-        virtual int getHeartbeatInterval(){ return 5; }
+        const std::string getAddr(size_t param) override;
+        int getPort(size_t param) override;
+        int getRBufferSizePower() override;
+        int getWBufferSizePower() override;
+        int getHeartbeatInterval() override { return 5; }
     private:
         ConnectionSet peerConnectionSetM; 
         ConnectionMap proxyFd2InfoMapM; 
+
+        ProxyServerVector proxyServersM;
         TunnelProxyProtocol* proxyProtocolM;
     };
 }

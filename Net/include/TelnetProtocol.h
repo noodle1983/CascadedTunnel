@@ -27,10 +27,10 @@ namespace nd
         void handleClose(SocketConnectionPtr theConnection); 
         void handleConnected(SocketConnectionPtr theConnection);
 
-        virtual const std::string getAddr();
-        virtual int getPort();
-        virtual int getRBufferSizePower();
-        virtual int getWBufferSizePower();
+        const std::string getAddr(size_t param = 0) override;
+        int getPort(size_t param = 0) override;
+        int getRBufferSizePower() override;
+        int getWBufferSizePower() override;
     private:
 		Con2CmdManagerMap con2CmdManagerMapM;
         std::mutex manMapMutexM;
