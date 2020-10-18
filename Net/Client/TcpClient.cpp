@@ -110,7 +110,7 @@ int TcpClient::connect(void* theUpperData)
     }
     //init attr
     isConnectedM = false;
-    processorM->PROCESS(processorIdM, &TcpClient::_connect, this, theUpperData); 
+    _connect(theUpperData);
     return 0;
 }
 
