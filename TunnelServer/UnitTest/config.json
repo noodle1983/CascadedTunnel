@@ -10,7 +10,7 @@
     },
     "inner.s.port" : {
         "desc" : "specify the port which the protocol will listen to",
-        "val" : 1999 
+        "val" : 20023 
     },
 
     "proxy.s.addr" : {

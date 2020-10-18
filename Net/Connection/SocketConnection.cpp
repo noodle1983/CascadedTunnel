@@ -49,7 +49,7 @@ SocketConnection::SocketConnection(
     , inputQueueM(theProtocol->getRBufferSizePower())
     , outputQueueM(theProtocol->getWBufferSizePower())
     , statusM(ActiveE)
-    , stopReadingM(false)
+    , closeAfterSentM(false)
     , clientM(NULL)
     , isConnectedNotified(true)
     , writenBytesM(0)
@@ -84,6 +84,7 @@ SocketConnection::SocketConnection(
     , inputQueueM(theProtocol->getRBufferSizePower())
     , outputQueueM(theProtocol->getWBufferSizePower())
     , statusM(ActiveE)
+    , closeAfterSentM(false)
     , stopReadingM(false)
     , clientM(theClient->self())
     , isConnectedNotified(false)
@@ -415,6 +416,9 @@ void SocketConnection::onWrite(int theFd, short theEvt)
         addWriteEvent();
     }
 
+    if (CloseE != statusM && outputQueueM.empty() && closeAfterSentM){
+        close();
+    }
 }
 
 //-----------------------------------------------------------------------------

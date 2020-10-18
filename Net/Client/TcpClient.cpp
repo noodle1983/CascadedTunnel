@@ -94,7 +94,7 @@ void TcpClient::_close()
     if (connectionM.get())
     {
         connectionM->rmClient();
-        connectionM->close();
+        connectionM->setCloseAfterSent();
         connectionM.reset();
     }
 }

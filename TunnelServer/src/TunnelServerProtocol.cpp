@@ -118,7 +118,7 @@ void TunnelServerProtocol::handleInput(SocketConnectionPtr theConnection)
         else if (RProxyConClose::ID == header.messageType) {
             LOG_DEBUG("RProxyConClose:" << proxyFd);
             it->second.proxyConnectionM->setUpperData((void*)0);
-            it->second.proxyConnectionM->close();
+            it->second.proxyConnectionM->setCloseAfterSent();
             continue;
         }
         else if (ProxyRsp::ID == header.messageType) {

@@ -57,6 +57,7 @@ namespace nd{
         void rmClient();
         SocketConnectionPtr self(){return selfM;}
         void close();
+        void setCloseAfterSent(){closeAfterSentM = true;}
         inline bool isClose() {return statusM == CloseE;}
         inline bool isRBufferHealthy(){return inputQueueM.isHealthy();};
         inline bool isWBufferHealthy(){return outputQueueM.isHealthy();};
@@ -146,6 +147,7 @@ namespace nd{
 
         enum Status{ActiveE = 0, CloseE = 1};
         volatile size_t statusM;
+        volatile size_t closeAfterSentM;
 
         std::mutex stopReadingMutexM;
         bool stopReadingM;
