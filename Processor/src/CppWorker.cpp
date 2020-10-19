@@ -210,7 +210,7 @@ void CppWorker::run()
 
         if (!isToStopM && !isWaitStopM && jobQueueM.empty() && !min_heap_empty(&timerHeapM))
         {
-            queueCondM.wait_for(queueLock, chrono::microseconds(500));
+            queueCondM.wait_for(queueLock, chrono::microseconds(10000));
         }
         else
         {
