@@ -23,7 +23,7 @@
 
     "prc.netTno" : {
         "desc" : "specify the thread number for Net Processor/ThreadPool",
-        "val" : 3
+        "val" : 1
     },
     "prc.fsmTno" : {
         "desc" : "specify the thread number for Fsm Processor/ThreadPool",
