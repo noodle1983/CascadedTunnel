@@ -111,7 +111,7 @@ void TunnelClientProtocol::handleInput(SocketConnectionPtr theConnection)
         int proxyFd = header.proxyFd;
         ProxyToConnectionMap::iterator it = proxyToConnectionM.find(proxyFd);
         if (it == proxyToConnectionM.end()){
-            LOG_WARN("no proxy connection found. ignore");
+            LOG_WARN("no proxy connection found by " << proxyFd << ". ignore");
             continue;
         }
         else if (ConnectionClosed::ID == header.messageType) {

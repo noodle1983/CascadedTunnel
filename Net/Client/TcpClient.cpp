@@ -56,7 +56,6 @@ TcpClient::TcpClient(
 TcpClient::~TcpClient()
 {
     LOG_DEBUG("release client: " << std::hex << this << ". " << peerAddrM << ":" << std::dec << peerPortM);
-    close();
 }
 
 //-----------------------------------------------------------------------------
@@ -91,10 +90,11 @@ int TcpClient::close()
 
 void TcpClient::_close()
 {
-    if (connectionM.get())
+    auto connection = connectionM;
+    if (connection.get())
     {
-        connectionM->rmClient();
-        connectionM->setCloseAfterSent();
+        connection->rmClient();
+        connection->setCloseAfterSent();
         connectionM.reset();
     }
 }
