@@ -39,7 +39,6 @@ namespace nd
 
     template<> Logger& operator<<(Logger& theLogger, const Severity& severity);
     template<> Logger& operator<<(Logger& theLogger, const Condition& condition);
-    template<> Logger& operator<<(Logger& theLogger, const SrcLine& srcline);
     template<> Logger& operator<<(Logger& theLogger, const LogEnd& end);
     typedef DesignPattern::ParamSingleton<Logger, 0> CfgLoggerSingleton;
     typedef DesignPattern::ParamSingleton<Logger, 1> LoggerSingleton;

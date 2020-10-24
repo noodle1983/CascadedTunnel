@@ -113,12 +113,6 @@ template<> Logger& nd::operator<<(Logger& theLogger, const Condition& condition)
     return theLogger;
 }
 
-template<> Logger& nd::operator<<(Logger& theLogger, const SrcLine& srcline){
-    tl_logmeta.lineInfoM.filenameM = std::move(srcline.filenameM);
-    tl_logmeta.lineInfoM.linenoM = std::move(srcline.linenoM);
-    return theLogger;
-}
-
 template<>
 Logger& nd::operator<<(Logger& theLogger, const LogEnd& end) {
     if(tl_logmeta.ignoreM || !theLogger.willAccept()){

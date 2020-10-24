@@ -68,7 +68,6 @@ void FileSink::log(const LogMeta* theMeta)
 
     // log format: time severity (file:no) msg
     fileHandleM << logTimeStr << severityToStr((Severity)theMeta->severityM) 
-        << "(" << theMeta->lineInfoM.filenameM << ":" << theMeta->lineInfoM.linenoM << ")" 
         << theMeta->streamM.str() << endl << flush;
 
 }

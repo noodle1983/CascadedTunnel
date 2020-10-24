@@ -35,8 +35,7 @@ void TunnelServerProtocol::startProxyServers()
 {
     auto cfgPortVector = g_cfg->getIntVector("proxy.s.port");
     for(unsigned i = 0; i < cfgPortVector.size(); i++){
-        TcpServer* server = new TcpServer(proxyProtocolM, g_reactor, g_net_processor);
-        server->setProtocolParam(i);
+        TcpServer* server = new TcpServer(proxyProtocolM, g_reactor, g_net_processor, i);
         server->start();
         proxyServersM.push_back(server);
     }

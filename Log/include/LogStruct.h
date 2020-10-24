@@ -49,21 +49,6 @@ namespace nd
         bool isLogM;
     };
 
-    struct SrcLine
-    {
-        SrcLine() = default;
-        SrcLine(const char* filename, const int fileno)
-            : filenameM(filename)
-            , linenoM(fileno)
-        {}
-        SrcLine(SrcLine&& other)
-            : filenameM(std::move(other.filenameM))
-            , linenoM(other.linenoM)
-        {}
-        std::string filenameM;
-        int linenoM;
-    };
-
     struct LogEnd{};
 
     struct ThreadLocalLogMeta
@@ -71,14 +56,11 @@ namespace nd
         void clear(){
             severityM = Severity::Debug; 
             ignoreM = false; 
-            lineInfoM.filenameM.clear();
-            lineInfoM.linenoM = 0;
             streamM.str("");
             streamM.clear();
         }
         Severity severityM = Severity::Debug; 
         bool ignoreM = false; 
-        SrcLine lineInfoM;
         std::stringstream streamM;
     };
 
@@ -90,7 +72,6 @@ namespace nd
         LogMeta(ThreadLocalLogMeta&& other)
             : timepointM(std::chrono::system_clock::now())
             , severityM(other.severityM)
-            , lineInfoM(std::move(other.lineInfoM))
             , streamM(std::move(other.streamM))
         {
             assert(other.ignoreM == false);
@@ -103,7 +84,6 @@ namespace nd
         time_point_sys_clock timepointM;
         Severity severityM; 
         int logTypeM;
-        SrcLine lineInfoM;
         std::stringstream streamM;
     };
 }

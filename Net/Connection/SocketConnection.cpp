@@ -37,7 +37,8 @@ SocketConnection::SocketConnection(
             IProtocol* theProtocol,
             Reactor* theReactor,
             CppProcessor* theProcessor,
-            evutil_socket_t theFd)
+            evutil_socket_t theFd,
+            uint64_t theSessionId)
     : selfM(this)
     , heartbeatTimerEvtM(NULL)
     , clientTimerEvtM(NULL)
@@ -56,13 +57,15 @@ SocketConnection::SocketConnection(
     , readedBytesM(0)
     , uppperDataM(NULL)
     , protocolParamM(-1)
+    , sessionIdM(theSessionId)
 {
+    if (sessionIdM == (uint64_t)-1){sessionIdM = theFd;}
     readEvtM = reactorM->newEvent(fdM, EV_READ, on_read, this);
     writeEvtM = reactorM->newEvent(fdM, EV_WRITE, on_write, this);
     addReadEvent();
     protocolM->asynHandleConnected(fdM, selfM);
     processorM->PROCESS(fdM, &SocketConnection::startHeartbeatTimer, this);
-    LOG_DEBUG("new connection: " << std::hex << this << ". fd:" << std::dec << fdM);
+    SE_DEBUG("new connection: " << std::hex << this << ". fd:" << std::dec << fdM);
 }
 
 //-----------------------------------------------------------------------------
@@ -92,12 +95,13 @@ SocketConnection::SocketConnection(
     , readedBytesM(0)
     , uppperDataM(NULL)
     , protocolParamM(-1)
+    , sessionIdM(theClient->getSessionId())
 {
     readEvtM = reactorM->newEvent(fdM, EV_READ, on_read, this);
     writeEvtM = reactorM->newEvent(fdM, EV_WRITE, on_write, this);
     addWriteEvent();
     addReadEvent();
-    LOG_DEBUG("new connection: " << std::hex << this << ". fd:" << std::dec << fdM);
+    SE_DEBUG("new connection: " << std::hex << this << ". fd:" << std::dec << fdM);
 }
 //-----------------------------------------------------------------------------
 
@@ -107,9 +111,9 @@ SocketConnection::~SocketConnection()
     clearAllWatchers();
     if (uppperDataM != NULL)
     {
-        LOG_WARN("uppperDataM is not NULL and may leek, please free it and set to NULL in upper handling while connection is closed.");
+        SE_WARN("uppperDataM is not NULL and may leek, please free it and set to NULL in upper handling while connection is closed.");
     }
-    LOG_DEBUG("release connection: " << std::hex << this << ". fd:" << std::dec << fdM);
+    SE_DEBUG("release connection: " << std::hex << this << ". fd:" << std::dec << fdM);
 }
 
 //-----------------------------------------------------------------------------
@@ -172,7 +176,7 @@ void SocketConnection::onRead(int theFd, short theEvt)
     int len = read(theFd, buffer, readLen);
     if ((0 == len) ||(len < 0 && errno != EWOULDBLOCK))
     {
-        LOG_DEBUG("Client disconnected. fd:" << fdM);
+        SE_DEBUG("Client disconnected. fd:" << fdM);
         _close();
         return;
     }
@@ -288,7 +292,7 @@ unsigned SocketConnection::sendn(const char* const theBuffer, const unsigned the
     }
     if (0 == len)
     {
-        LOG_WARN("outage of the connection's write queue!");
+        SE_WARN("outage of the connection's write queue!");
     }
     processorM->PROCESS(fdM, &SocketConnection::addWriteEvent, selfM);
     writenBytesM += len;
@@ -389,7 +393,7 @@ void SocketConnection::onWrite(int theFd, short theEvt)
             }
             else
             {
-                LOG_DEBUG("Socket write failure.");
+                SE_DEBUG("Socket write failure.");
                 _close();
                 return;
             }
@@ -464,7 +468,7 @@ void SocketConnection::_addClientTimer(unsigned theSec)
 {
     if (NULL == clientM.get() || 0 == theSec)
     {
-        LOG_DEBUG("client is null or timeout = 0, ignore, fd:" << fdM);
+        SE_DEBUG("client is null or timeout = 0, ignore, fd:" << fdM);
         return;
     }
     if (clientTimerEvtM)

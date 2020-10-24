@@ -23,7 +23,8 @@ namespace nd
             IClientProtocol* theProtocol,
             Reactor* theReactor,
             CppProcessor* theProcessor,
-            size_t theProtocolParam = -1);
+            size_t theProtocolParam = -1,
+            uint64_t sessionId = -1);
         ~TcpClient();
         void deleteSelf();
         TcpClientPtr self(){return selfM;}
@@ -67,6 +68,7 @@ namespace nd
 
         void resetTimer(){reconnectTimerEvtM = NULL;}
 
+        uint64_t getSessionId() {return sessionIdM;}
     private:
         void _close();
         void _connect(void* theUpperData);
@@ -91,6 +93,7 @@ namespace nd
         uint64_t processorIdM;
 
         size_t protocolParamM;
+        uint64_t sessionIdM;
     };
 
     inline unsigned

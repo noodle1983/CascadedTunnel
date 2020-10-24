@@ -33,7 +33,8 @@ namespace nd{
             IProtocol* theProtocol,
             Reactor* theReactor,
             CppProcessor* theProcessor,
-            evutil_socket_t theFd);
+            evutil_socket_t theFd,
+            uint64_t theSessionId = -1);
         ~SocketConnection();
 
         /**
@@ -104,6 +105,8 @@ namespace nd{
             if (getWBufferSpace() < encodeIndex){return 0;}
             return sendn(buffer, encodeIndex);
         }
+
+        uint64_t getSessionId() {return sessionIdM;}
     private:
         friend class std::function<void ()>;
         void addReadEvent();
@@ -170,6 +173,7 @@ namespace nd{
         //upper data
         void* uppperDataM;
         size_t protocolParamM;
+        uint64_t sessionIdM;
     };
 }
 

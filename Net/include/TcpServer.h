@@ -15,7 +15,8 @@ namespace nd
         TcpServer(
             IProtocol* theProtocol,
             Reactor* theReactor,
-            CppProcessor* theProcessor);
+            CppProcessor* theProcessor,
+            size_t protocolParam = -1);
         virtual ~TcpServer();
 
         void addAcceptEvent();
@@ -25,7 +26,7 @@ namespace nd
         void asynAccept(int theFd, short theEvt);
         void onAccept(int theFd, short theEvt);
 
-        void setProtocolParam(size_t param){protocolParamM = param;}
+        uint64_t getSessionId() {return sessionIdM;}
 
     private:
         IProtocol* protocolM;
@@ -37,6 +38,7 @@ namespace nd
         evutil_socket_t fdM;
 
         size_t protocolParamM;
+        uint64_t sessionIdM;
     };
 }
 

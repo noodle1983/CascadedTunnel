@@ -41,7 +41,6 @@ void ConsoleSink::log(const LogMeta* theMeta)
 
     const char* logTypeStr = (theMeta->logTypeM == LOG_TYPE_CFG) ? " CFG " : "";
     cout << logTimeStr << logTypeStr << severityToStr((Severity)theMeta->severityM) 
-        << "(" << theMeta->lineInfoM.filenameM << ":" << theMeta->lineInfoM.linenoM << ")" 
         << theMeta->streamM.str() << endl << flush;
 
 }

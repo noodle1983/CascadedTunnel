@@ -32,16 +32,18 @@ void on_accept(int theFd, short theEvt, void *theArg)
 TcpServer::TcpServer(
         IProtocol* theProtocol,
         Reactor* theReactor,
-        CppProcessor* theProcessor)
+        CppProcessor* theProcessor,
+        size_t protocolParam)
     : protocolM(theProtocol)
     , reactorM(theReactor)
     , processorM(theProcessor)
     , acceptEvtM(NULL)
     , portM(0)
     , fdM(0)
-    , protocolParamM(-1)
+    , protocolParamM(protocolParam)
+    , sessionIdM(protocolM->getPort(protocolParam))
 {
-    LOG_DEBUG("new server: " << std::hex << this << "." << std::dec);
+    SE_DEBUG("new server: " << std::hex << this << "." << std::dec);
 }
 
 //-----------------------------------------------------------------------------
@@ -49,7 +51,7 @@ TcpServer::TcpServer(
 
 TcpServer::~TcpServer()
 {
-    LOG_DEBUG("release server: " << std::hex << this << ". listen port:" << std::dec << portM);
+    SE_DEBUG("release server: " << std::hex << this << ". listen port:" << std::dec << portM);
     stop();
 }
 
@@ -82,21 +84,21 @@ void TcpServer::onAccept(int theFd, short theEvt)
     clientFd = accept(theFd, (struct sockaddr *)&clientAddr, &clientLen);
     if (clientFd < 0)
     {
-        LOG_WARN("accept failed");
+        SE_WARN("accept failed");
         return;
     }
     while(clientFd >= 0)
     {
         if (evutil_make_socket_nonblocking(clientFd) < 0)
         {
-            LOG_WARN("failed to set client socket non-blocking");
+            SE_WARN("failed to set client socket non-blocking");
             return;
         }
-        SocketConnection* connection = new SocketConnection(protocolM, reactorM, processorM, clientFd);
+        SocketConnection* connection = new SocketConnection(protocolM, reactorM, processorM, clientFd, sessionIdM);
 		connection->setPeerAddr(&clientAddr);
         connection->setProtocolParam(protocolParamM);
         char addrBuffer[16] = {0};
-        LOG_DEBUG("Accepted connection on " << portM
+        SE_DEBUG("Accepted connection on " << portM
                 << " from "<< inet_ntop(AF_INET, &clientAddr.sin_addr, addrBuffer, sizeof(addrBuffer)) << ":" << clientAddr.sin_port
                 << ", fd:" << clientFd
                 << ", con addr:" << std::hex << (size_t)connection
@@ -117,18 +119,18 @@ int TcpServer::start()
     fdM = socket(AF_INET, SOCK_STREAM, 0);
     if (fdM < 0)
     {
-        LOG_FATAL("listen failed on " << portM);
+        SE_FATAL("listen failed on " << portM);
         exit(-1);
     }
     //set socket option
     if (evutil_make_listen_socket_reuseable(fdM) < 0)
     {
-        LOG_FATAL("failed to set server socket to reuseable");
+        SE_FATAL("failed to set server socket to reuseable");
         exit(-1);
     }
     if (evutil_make_socket_nonblocking(fdM) < 0)
     {
-        LOG_FATAL("failed to set server socket to non-blocking");
+        SE_FATAL("failed to set server socket to non-blocking");
         exit(-1);
     }
     int nRecvBuf=32*1024;
@@ -146,7 +148,7 @@ int TcpServer::start()
     if (bind(fdM, (struct sockaddr *)&listenAddr,
         sizeof(listenAddr)) < 0)
     {
-        LOG_FATAL("bind failed on " << protocolM->getAddr(protocolParamM) 
+        SE_FATAL("bind failed on " << protocolM->getAddr(protocolParamM) 
                 << ":" << protocolM->getPort(protocolParamM)
                 << ", errno:" << errno);
         g_app->fini();
@@ -156,14 +158,14 @@ int TcpServer::start()
     //listen
     if (listen(fdM, 5) < 0)
     {
-        LOG_FATAL("listen failed");
+        SE_FATAL("listen failed");
         exit(-1);
     }
 
     acceptEvtM = reactorM->newEvent(fdM, EV_READ, on_accept, this);
     addAcceptEvent();
 
-    LOG_DEBUG("Server has been listening at port " << portM);
+    SE_DEBUG("Server has been listening at port " << portM);
     return 0;
 }
 

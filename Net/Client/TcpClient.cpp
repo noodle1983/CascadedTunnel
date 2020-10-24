@@ -34,7 +34,8 @@ TcpClient::TcpClient(
             IClientProtocol* theProtocol,
             Reactor* theReactor,
             CppProcessor* theProcessor,
-            size_t theProtocolParam)
+            size_t theProtocolParam,
+            uint64_t sessionId)
     : protocolM(theProtocol)
     , reactorM(theReactor)
     , processorM(theProcessor)
@@ -46,16 +47,18 @@ TcpClient::TcpClient(
     , reconnectTimerEvtM(NULL)
     , connectTimesM(0)
     , protocolParamM(theProtocolParam)
+    , sessionIdM(sessionId)
 {
-    LOG_DEBUG("new client: " << std::hex << this << ". " << peerAddrM << ":" << std::dec << peerPortM);
     processorIdM = (uint64_t)this >> 3;
+    if (sessionIdM == (uint64_t)-1){sessionIdM = peerPortM;}
+    SE_DEBUG("new client: " << std::hex << this << ". " << peerAddrM << ":" << std::dec << peerPortM);
 }
 
 //-----------------------------------------------------------------------------
 
 TcpClient::~TcpClient()
 {
-    LOG_DEBUG("release client: " << std::hex << this << ". " << peerAddrM << ":" << std::dec << peerPortM);
+    SE_DEBUG("release client: " << std::hex << this << ". " << peerAddrM << ":" << std::dec << peerPortM);
 }
 
 //-----------------------------------------------------------------------------
@@ -105,7 +108,7 @@ int TcpClient::connect(void* theUpperData)
 {
     if (isClosedM)
     {
-        LOG_ERROR("TcpClient to[" << peerAddrM << ":" << peerPortM << "is already closed");
+        SE_ERROR("TcpClient to[" << peerAddrM << ":" << peerPortM << "is already closed");
         return -1;
     }
     //init attr
@@ -119,7 +122,7 @@ int TcpClient::connect(void* theUpperData)
 void TcpClient::_connect(void* theUpperData)
 {
     if (isClosedM) { return; }
-    LOG_DEBUG("connecting to " << peerAddrM << ":" << peerPortM);
+    SE_DEBUG("connecting to " << peerAddrM << ":" << peerPortM);
 
     _close();
 
@@ -135,13 +138,13 @@ void TcpClient::_connect(void* theUpperData)
     sin.sin_port = htons(peerPortM);
     if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0)
     {
-        LOG_ERROR("failed to do socket(AF_INET,...)!"
+        SE_ERROR("failed to do socket(AF_INET,...)!"
                     << ", errstr:" << evutil_socket_error_to_string(errno));
         return;
     }
     if (evutil_make_socket_nonblocking(sock) < 0)
     {
-        LOG_ERROR("failed to make socket monblocking!"
+        SE_ERROR("failed to make socket monblocking!"
                     << ", errstr:" << evutil_socket_error_to_string(errno));
         evutil_closesocket(sock);
         return;
@@ -152,7 +155,7 @@ void TcpClient::_connect(void* theUpperData)
         int e = errno;
         if (! ERR_CONNECT_RETRIABLE(e))
         {
-            LOG_WARN("failed to connect to " << peerAddrM
+            SE_WARN("failed to connect to " << peerAddrM
                     << ":" << peerPortM
                     << ", errstr:" << evutil_socket_error_to_string(e));
             evutil_closesocket(sock);
@@ -186,7 +189,7 @@ void TcpClient::onConnected(int theFd, SocketConnectionPtr theConnection)
     isConnectedM = true;
     protocolM->asynHandleConnected(theFd, theConnection);
 
-    LOG_DEBUG("connected to " << peerAddrM << ":" << peerPortM);
+    SE_DEBUG("connected to " << peerAddrM << ":" << peerPortM);
 }
 
 //-----------------------------------------------------------------------------
@@ -217,7 +220,7 @@ void TcpClient::_reconnectLater()
 void TcpClient::onError(SocketConnectionPtr theConnection)
 {
     if (connectionM.get() != theConnection.get()) { return; }
-    LOG_WARN("connection lost from " << peerAddrM << ":" << peerPortM);
+    SE_WARN("connection lost from " << peerAddrM << ":" << peerPortM);
 
     if (isClosedM) { return; }
 
