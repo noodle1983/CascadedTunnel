@@ -9,7 +9,7 @@
     },
     "inner.c.port" : {
         "desc" : "specify the port which the client will connect to",
-        "val" : 20023
+        "val" : 20021
     },
 
     "proxy.c.addr" : {
@@ -18,12 +18,12 @@
     },
     "proxy.c.port" : {
         "desc" : "specify the port which the client will connect to",
-        "val" : [19999, 80]
+        "val" : [22]
     },
 
     "prc.netTno" : {
         "desc" : "specify the thread number for Net Processor/ThreadPool",
-        "val" : 1
+        "val" : 1 
     },
     "prc.fsmTno" : {
         "desc" : "specify the thread number for Fsm Processor/ThreadPool",

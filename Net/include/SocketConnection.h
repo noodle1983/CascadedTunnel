@@ -57,7 +57,10 @@ namespace nd{
         void rmClient();
         SocketConnectionPtr self(){return selfM;}
         void close();
-        void setCloseAfterSent(){closeAfterSentM = true;}
+        void setCloseAfterSent(){
+            if (getWBufferSize() == 0){close();};
+            closeAfterSentM = true;
+        }
         inline bool isClose() {return statusM == CloseE;}
         inline bool isRBufferHealthy(){return inputQueueM.isHealthy();};
         inline bool isWBufferHealthy(){return outputQueueM.isHealthy();};
