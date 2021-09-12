@@ -1,13 +1,10 @@
-# framework-nd
+# What it is.
+![design](https://cdn.jsdelivr.net/gh/noodle1983/CascadedTunnel@1392c5eefbe4e56a3e19d403a0bb6c6c9a993e5e/doc/CascadedTunnel.png)
 
-一些比较有意思的部分
+# How to build
+```
+make all
+```
 
-/Processor -- [线程模型](https://noodle1983.github.io/2019/01/01/framework-nd_thread_model/)
-
-/Net -- [网络模型](https://noodle1983.github.io/2019/01/01/framework-nd_network_model/)
-
-/Utility/include/KfifoBuffer.h -- [读写线程隔离的FIFO队列](https://noodle1983.github.io/2019/01/02/framework-nd_fifo/)
-
-/DesignPattern/include/Singleton.hpp -- [singleton模板](https://noodle1983.github.io/2019/01/03/framework-nd_singleton/)
-
-/build -- [将临时文件集中存放的Makefile](https://noodle1983.github.io/2019/01/04/framework-nd_Makefile/)
+# License
+Except for extra permissions from Dong Lu(noodle1983@126.com), this software is released under version 3 of the GNU General Public License (GPLv3).
