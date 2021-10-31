@@ -1,0 +1,9 @@
+#########################################
+#      header and lib dependancy        #
+#########################################
+INC_DIR+=
+STATIC_LIB+= $(PROJBASE)/3PP/gperftools/lib/libtcmalloc_and_profiler.a \
+			 $(PROJBASE)/3PP/libunwind/lib/libunwind.a
+SHARED_LIB_DIR+=
+SHARED_LIB+=
+
