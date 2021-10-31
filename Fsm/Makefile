@@ -30,6 +30,7 @@ SHARED_LIB_DIR=
 SHARED_LIB=-pthread
 
 include $(PROJBASE)/build/makefile.staticlib.libevent.linux
+include $(PROJBASE)/build/makefile.staticlib.tc_malloc.linux
 #########################################
 #              compiler                 #
 #########################################

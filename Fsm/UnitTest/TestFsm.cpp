@@ -50,6 +50,7 @@ int main()
     cout << "fsm,initstate:" << fsm.getFirstStateId() << endl;
     cout << "fsm,endstate:" << fsm.getLastStateId() << endl;
 
+    int * i = new int;
     Fsm::Session session;
     session.init(&fsm, 0);
     session.asynHandleEvent(START_EVT);

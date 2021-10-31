@@ -8,10 +8,8 @@ make && make install && \
 cd - && \
 rm -rf libevent-2.1.12-stable
 
-# rm -rf libboost && \
-# tar -xf boost_1_73_0.tar.bz2 && \
-# cd boost_1_73_0 && \
-# ./bootstrap.sh --prefix=$PWD/../libboost
-# ./b2 install --prefix=$PWD/../libboost && \
-# cd - && \
-# rm -rf boost_1_73_0
+tar -xf libunwind-0.99-beta.tar.gz && tar -xf libunwind-0.99-beta.patch.tar.bz2 && cd libunwind-0.99-beta && CFLAGS="-g -fPIC" ./configure --prefix=$PROJ_BASE/3PP/libunwind && make install && cd -
+
+tar -xf gperftools-2.6.90.tar.gz && cd gperftools-gperftools-2.6.90 && ./autogen.sh && ./configure --prefix=$PROJ_BASE/3PP/gperftools CPPFLAGS="-I$PROJ_BASE/libunwind/include -fPIC" LDFLAGS=-L/$PROJ_BASE/libunwind/lib && make install && cd -
+
+

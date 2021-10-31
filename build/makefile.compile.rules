@@ -48,8 +48,25 @@ TESTTARGET=$(basename $(notdir $(TESTOBJECTS)))
 TEST_OUTDIR=$(OUTDIR_PREFIX)/test
 TEST_FILE=$(foreach DIR, $(TESTDIR), $(wildcard $(DIR)/*.lua) \
                                      $(wildcard $(DIR)/*.xml) \
+                                     $(wildcard $(DIR)/*.json) \
                                      $(wildcard $(DIR)/*.pcap))
 TEST_OUT_FILE=$(addprefix $(TEST_OUTDIR)/, $(notdir $(TEST_FILE)))
+
+#########################################
+#         Exe    Target                 #
+#########################################
+EXEDIR=Exe
+EXECPPFILES=$(foreach DIR, $(EXEDIR), $(wildcard $(DIR)/*.cpp))
+TMPEXEOBJECTS=$(patsubst %.cpp, %.o, $(EXECPPFILES))
+EXEOUTSUBDIR=$(addprefix $(OUTDIR)/, $(EXEDIR))
+EXEOBJECTS=$(addprefix $(OUTDIR)/, $(TMPEXEOBJECTS))
+EXETARGET=$(basename $(notdir $(EXEOBJECTS)))
+EXE_OUTDIR=$(OUTDIR_PREFIX)/exe
+EXE_FILE=$(foreach DIR, $(EXEDIR), $(wildcard $(DIR)/*.lua) \
+                                     $(wildcard $(DIR)/*.xml) \
+                                     $(wildcard $(DIR)/*.json) \
+                                     $(wildcard $(DIR)/*.pcap))
+EXE_OUT_FILE=$(addprefix $(EXE_OUTDIR)/, $(notdir $(EXE_FILE)))
 
 #########################################
 #          Crash Dump                   #
