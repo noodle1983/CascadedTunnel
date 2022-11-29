@@ -122,7 +122,7 @@ void App::setRunInBackground()
         }
         else if (pid > 0)
         {
-            CFG_FATAL("server start with pid:" << pid);
+            std::cout << "server start with pid:" << pid << std::endl;
             exit(0);
         }
         setsid();
